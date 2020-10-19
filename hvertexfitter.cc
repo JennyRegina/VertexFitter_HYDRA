@@ -41,8 +41,9 @@ HVertexFitter::HVertexFitter(const std::vector<HRefitCand>& cands) : fCands(cand
     fVtxConstraint = false;
 }
 
-TVector3 HVertexFitter::findVertex(const std::vector<HRefitCand> & cands){
-
+// One will need to pass the correct objects to the function once it is decided what to use
+//TVector3 HVertexFitter::findVertex(const std::vector<HRefitCand> & cands){
+TVector3 HVertexFitter::findVertex(){
     // try to find the decay vertex from the most basic information so that 
     // the code is as independent as possible from objects used in the analysis
     
