@@ -87,7 +87,7 @@ Bool_t selectHadrons(HParticleCand* pcand)
     return test;
 }
 
-Int_t analysis(TString infileList = "/lustre/hades/user/jrieger/pp_pKLambda/sim/pp_pKLambda_3500_hgeant1_dst_apr12.root", Int_t nEvents = 50000)
+Int_t analysis_4c(TString infileList = "pp_/lustre/hades/user/jrieger/pp_pKLambda/sim/pKLambda_3500_hgeant1_dst_apr12.root", Int_t nEvents = 50000)
 {
 
     TStopwatch timer;
@@ -97,7 +97,7 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jrieger/pp_pKLambda/sim/
     // define output file and some histograms
     // -----------------------------------------------------------------------
     // set ouput file
-    TFile* outfile = new TFile("vertexfit_test.root", "recreate");
+    TFile* outfile = new TFile("4Cfit_test.root", "recreate");
 
     TH1F* h01 = new TH1F("hLambdaMassPreFit", "", 100, 1070, 1170);
     h01->SetXTitle(" M_{p#pi^{-}} [MeV/c^{2}]");
@@ -115,9 +115,9 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jrieger/pp_pKLambda/sim/
     h04->SetXTitle(" M_{p#pi^{-}} [MeV/c^{2}]");
     h04->SetYTitle(" Events ");
     
-    TH1F* h17 = new TH1F("hLambdaMassPostFitCut", "", 100, 1070, 1170);
-    h17->SetXTitle(" M_{p#pi^{-}} [MeV/c^{2}]");
-    h17->SetYTitle(" Events ");
+    TH1F* h20 = new TH1F("hLambdaMassPostFitCut", "", 100, 1070, 1170);
+    h20->SetXTitle(" M_{p#pi^{-}} [MeV/c^{2}]");
+    h20->SetYTitle(" Events ");
     
     TH1F* h05 = new TH1F("hPullPInv", "", 100, -5, 5);
     h05->SetXTitle("Pull(1/P_{p})");
@@ -168,6 +168,20 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jrieger/pp_pKLambda/sim/
     TH1F* h16 = new TH1F("hPullZCut", "", 100, -5, 5);
     h16->SetXTitle("Pull(Z)");
     h16->SetYTitle(" Counts ");  
+
+    //Initial System, pre and post cut 
+
+    TH1F* h17 = new TH1F("hTot4MomPreFit", "", 100, 4000, 4700);
+    h17->SetXTitle(" P_{pK^{+}p#pi^{-}} [MeV/c]");
+    h17->SetYTitle(" events ");
+
+    TH1F* h18 = new TH1F("hTot4MomPostFit", "", 100, 4200, 4500);
+    h18->SetXTitle(" P_{pK^{+}p#pi^{-}} [MeV/c]");
+    h18->SetYTitle(" events ");
+
+    TH1F* h18 = new TH1F("hTot4MomPostFitCut", "", 100, 4200, 4500);
+    h19->SetXTitle(" P_{pK^{+}p#pi^{-}} [MeV/c]");
+    h19->SetYTitle(" events ");
     
     // -----------------------------------------------------------------------
 
@@ -221,7 +235,7 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jrieger/pp_pKLambda/sim/
         Int_t ntracks = catParticle->getEntries();
 	
 
-        std::vector<HRefitCand> protons, pions, kaons;
+        std::vector<HRefitCand> protons1, protons2, pions, kaons;
         for (Int_t j = 0; j < ntracks; j++)
         {
             HParticleCandSim* cand =
@@ -237,21 +251,28 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jrieger/pp_pKLambda/sim/
             // proton pdg==14, pion pdg==9, k+ pdg==11, lambda pdg==18
             // error values obtained from resoultion plots
 	    
-            if (cand->getGeantPID() == 14 && cand->getGeantParentPID() == 18) //Proton found
+            if (cand->getGeantPID() == 14 && cand->getGeantParentTrackNum() == 3) //Proton found
             {
                 double errors[] = {1.469 * 1e-5, 2.410 * 1e-3, 5.895 * 1e-3,
                                    1.188, 2.652};
                 FillData(cand, candidate, errors, 938.272);
-                protons.push_back(candidate);
+                protons2.push_back(candidate);
             }
-            else if (cand->getGeantPID() == 9 && cand->getGeantParentPID() == 18) // Pion found
+            else if (cand->getGeantPID() == 9 && cand->getGeantParentTrackNum() == 3) // Pion found
             {
                 double errors[] = {5.959 * 1e-5, 9.316 * 1e-3, 1.991 * 1e-2,
                                    4.006, 7.629};
                 FillData(cand, candidate, errors, 139.570);
                 pions.push_back(candidate);
-            }          
-	    else if (cand->getGeantPID() == 11) // Kaon found
+            }     
+            else if (cand->getGeantPID() == 14 && cand->getGeantTrack() == 1) //Proton found
+            {
+                double errors[] = {1.469 * 1e-5, 2.410 * 1e-3, 5.895 * 1e-3,
+                                   1.188, 2.652};
+                FillData(cand, candidate, errors, 938.272);
+                protons.push_back(candidate);
+            }     
+	        else if (cand->getGeantPID() == 11 && cand->getGeantTrack()) // Kaon found
             {
                 double errors[] = {1.947 * 1e-5, 2.296 * 1e-3, 6.312 * 1e-3,
                                    1.404, 2.723};
@@ -262,17 +283,25 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jrieger/pp_pKLambda/sim/
                 continue;
         } // end track loop
 
- /*       // -----------------------------------------------------------------------
-        // looking at Lambda invariant mass here
         // -----------------------------------------------------------------------
-        for (size_t n = 0; n < protons.size(); n++)
+        // Apply the 4C fit with vertex constraint to proton and kaon
+        // -----------------------------------------------------------------------
+        for (size_t a = 0; a < protons1.size(); a++)
         {
-            HRefitCand cand1 = protons[n];
+            for (size_t b = 0; b < kaons.size(); b++)
+        {
+        for (size_t n = 0; n < protons2.size(); n++)
+        {
+            HRefitCand cand1 = protons2[n];
             for (size_t m = 0; m < pions.size(); m++)
             {
-                HRefitCand cand2 = pions[m];
+                HRefitCand cand1 = protons1[a];
+                HRefitCand cand2 = kaons[b];
+                HRefitCand cand3 = protons2[n];
+                HRefitCand cand4 = pions[m];
                 // mass prefit
-                h01->Fill((cand1 + cand2).M());
+                h01->Fill((cand3 + cand4).M());
+                h17->Fill((cand1 + cand2 + cand3 + cand4).P());
 
                 // ---------------------------------------------------------------------------------
                 // begin kinfit here
@@ -280,101 +309,28 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jrieger/pp_pKLambda/sim/
                 std::vector<HRefitCand> cands;
                 cands.push_back(cand1);
                 cands.push_back(cand2);
-
-                HFitter fitter(cands);
-                fitter.addMassConstraint(1115.68);
-                double learningRate=1.0;
-		int numIter=1;
-		fitter.fit(learningRate, numIter);
-
-                // get fitted objects fittedcand1 and fittedcand2
-                HRefitCand fcand1 = fitter.getDaughter(0); // proton
-                HRefitCand fcand2 = fitter.getDaughter(1); // pion
-
-                h02->Fill(fitter.getChi2());
-                h03->Fill(fitter.getProb());
-                h04->Fill((fcand1 + fcand2).M());
-
-                 //get Pull example (1/P for the fitted proton)
-                h05->Fill(fitter.getPull(0));
-		
-		//get Pull example (theta for the fitted proton)
-		h06->Fill(fitter.getPull(1));
-		
-		//get Pull example (phi for the fitted proton)
-                h07->Fill(fitter.getPull(2));
-		
-		//get Pull example (R for the fitted proton)
-                h08->Fill(fitter.getPull(3));
-		
-		//get Pull example (Z for the fitted proton)
-                h09->Fill(fitter.getPull(4));
-		
-		if(fitter.isConverged()==true){
-		h10->Fill((fcand1 + fcand2).M());
-		}
-		
-		if(fitter.getProb()>0.01){
-		               
-		h17->Fill((fcand1 + fcand2).M());
-		
-		// get Pull example (1/P for the fitted proton)
-                h12->Fill(fitter.getPull(0));
-		
-		// get Pull example (theta for the fitted proton)
-		h13->Fill(fitter.getPull(1));
-		
-		// get Pull example (phi for the fitted proton)
-                h14->Fill(fitter.getPull(2));
-		
-		// get Pull example (R for the fitted proton)
-                h15->Fill(fitter.getPull(3));
-		
-		// get Pull example (Z for the fitted proton)
-                h16->Fill(fitter.getPull(4));
-		
-		}
-		h11->Fill(fitter.getIteration());
-		
-                // ---------------------------------------------------------------------------------
-            }
-        } */
-        // -----------------------------------------------------------------------
-        // -----------------------------------------------------------------------
-        // Apply the kinfit with vertex constraint to proton and kaon
-        // -----------------------------------------------------------------------
-        for (size_t n = 0; n < protons.size(); n++)
-        {
-            HRefitCand cand1 = protons[n];
-            for (size_t m = 0; m < kaons.size(); m++)
-            {
-                HRefitCand cand2 = kaons[m];
-                // mass prefit
-                h01->Fill((cand1 + cand2).M());
-
-                // ---------------------------------------------------------------------------------
-                // begin kinfit here
-                // ---------------------------------------------------------------------------------
-                std::vector<HRefitCand> cands;
-                cands.push_back(cand1);
-                cands.push_back(cand2);
+                cands.push_back(cand3);
+                cands.push_back(cand4);
 
                 HVertexFitter fitter(cands);
-		fitter.addVtxConstraint();
-                double learningRate=1;
-		int numIter=1;
+		        fitter.add4Constraint();
+                //double learningRate=1;
+		        //int numIter=1;
 		
 		// Using my modifications to KinFit
 		//fitter.fit(learningRate, numIter);
 		fitter.fit();
                 
 		// get fitted objects fittedcand1 and fittedcand2
-                HRefitCand fcand1 = fitter.getDaughter(0); // proton
+                HRefitCand fcand1 = fitter.getDaughter(0); // proton1
                 HRefitCand fcand2 = fitter.getDaughter(1); // kaon
+                HRefitCand fcand3 = fitter.getDaughter(2); // proton2
+                HRefitCand fcand4 = fitter.getDaughter(3); // pion
 
                 h02->Fill(fitter.getChi2());
                 h03->Fill(fitter.getProb());
-                h04->Fill((fcand1 + fcand2).M());
+                h04->Fill((fcand3 + fcand4).M());
+                h18->Fill((fcand1 + fcand2 + fcand3 + fcand4).P());
 
                 // get Pull example (1/P for the fitted proton)
                 h05->Fill(fitter.getPull(0));
@@ -392,24 +348,28 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jrieger/pp_pKLambda/sim/
                 h09->Fill(fitter.getPull(4));
 		
 		if(fitter.getProb()>0.01){
+
+            //Lambda mass and full 4mom after prob cut
+            h20->Fill((fcand3 + fcand4).M());
+            h19->Fill((fcand1 + fcand2 + fcand3 + fcand4).P());
 		
-		// get Pull example (1/P for the fitted proton)
-                h12->Fill(fitter.getPull(0));
+		    // get Pull example (1/P for the fitted proton)
+            h12->Fill(fitter.getPull(0));
 		
-		// get Pull example (theta for the fitted proton)
-		h13->Fill(fitter.getPull(1));
+		    // get Pull example (theta for the fitted proton)
+		    h13->Fill(fitter.getPull(1));
 		
-		// get Pull example (phi for the fitted proton)
-                h14->Fill(fitter.getPull(2));
+		    // get Pull example (phi for the fitted proton)
+            h14->Fill(fitter.getPull(2));
 		
-		// get Pull example (R for the fitted proton)
-                h15->Fill(fitter.getPull(3));
+		    // get Pull example (R for the fitted proton)
+            h15->Fill(fitter.getPull(3));
 		
-		// get Pull example (Z for the fitted proton)
-                h16->Fill(fitter.getPull(4));
+		    // get Pull example (Z for the fitted proton)
+            h16->Fill(fitter.getPull(4));
 		
 		}
-		
+		/*
 		if(fitter.isConverged()==true){
 		h10->Fill((fcand1 + fcand2).M());
 		}
@@ -417,8 +377,9 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jrieger/pp_pKLambda/sim/
 		h11->Fill(fitter.getIteration());
 		
                 // ---------------------------------------------------------------------------------
+        */
             }
-        } 
+        }}} //end cand loops
 	
     } // end of the events loop
 
@@ -441,6 +402,9 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jrieger/pp_pKLambda/sim/
     h15->Write();    
     h16->Write();    
     h17->Write();
+    h18->Write();    
+    h19->Write();    
+    h20->Write();
     outfile->Close();
 
     return 0;
