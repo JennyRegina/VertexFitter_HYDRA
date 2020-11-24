@@ -8,7 +8,7 @@
 ##############################################################################
 
 
-LIB_NAME := VertexFit
+LIB_NAME := VertexFit_4c
 
 USES_ORACLE= : no
 

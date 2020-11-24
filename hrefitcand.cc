@@ -1,6 +1,8 @@
 // ROOT includes
 #include "hrefitcand.h"
 
+//HRefitCand::HRefitCand()
+
 HRefitCand::HRefitCand(HVirtualCand* cand)
     : TLorentzVector(*cand), fR(cand->getR()), fZ(cand->getZ()), cand(cand)
 {

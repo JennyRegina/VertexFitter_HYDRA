@@ -15,6 +15,7 @@ private:
     HVirtualCand * cand;
 
 public:
+  //  HRefitCand();
     HRefitCand(HVirtualCand * cand);
     void setR(Double_t val) { fR = val; }
     void setZ(Double_t val) { fZ = val; }

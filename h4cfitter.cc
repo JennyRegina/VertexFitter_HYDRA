@@ -3,13 +3,13 @@
 const size_t cov_dim = 5;
 
 H4cFitter::H4cFitter(const std::vector<HRefitCand>& cands, HRefitCand& mother) : 
-    fCands(cands),
-    fMother(mother)
+    fCands(cands)
+   // fMother(mother)
 {
     // fNdau is the number of daughters e.g. (L->ppi-) n=2
     fNdau = cands.size();
     fNdau++;
-    fCands.push_back(fMother);
+    fCands.push_back(mother);
     fWiggleMoth = true;
 
     y.ResizeTo(fNdau * cov_dim, 1);
@@ -28,7 +28,7 @@ H4cFitter::H4cFitter(const std::vector<HRefitCand>& cands, HRefitCand& mother) :
     for (int ix = 0; ix < fNdau; ix++)
     {
         HRefitCand cand = cands[ix];
-        fM[ix]=cand.M();
+        //fM[ix]=cand.M();
 
         y(0 + ix * cov_dim, 0) = 1. / cand.P();
         if(ix==fNdau-1){
@@ -53,10 +53,12 @@ H4cFitter::H4cFitter(const std::vector<HRefitCand>& cands, HRefitCand& mother) :
     f4Constraint = false;
 }
 
-//H4cFitter::H4cFitter(const std::vector<HRefitCand>& cands, TLorentzVector& lv) : fCands(cands)
+//H4cFitter::H4cFitter(const std::vector<HRefitCand>& cands) : 
+//    fCands(cands)
 H4cFitter::H4cFitter(const std::vector<HRefitCand>& cands, TLorentzVector& lv) : 
     fCands(cands)
 {
+    //fLv4C = TLorentzVector(0,0,4337.96,2*938.272+3500) ;
     fLv4C = lv;
     
     // fNdau is the number of daughters e.g. (L->ppi-) n=2
@@ -78,7 +80,7 @@ H4cFitter::H4cFitter(const std::vector<HRefitCand>& cands, TLorentzVector& lv) :
     for (int ix = 0; ix < fNdau; ix++)
     {
         HRefitCand cand = cands[ix];
-        fM[ix]=cand.M();
+        //fM[ix]=cand.M();
         
         y(0 + ix * cov_dim, 0) = 1. / cand.P();
         y(1 + ix * cov_dim, 0) = cand.Theta();
@@ -112,27 +114,18 @@ TMatrixD H4cFitter::f_eval(const TMatrixD& m_iter)
     // 4 constraint
     if (f4Constraint)
     {
-        TMatrixD P;
-	P.ResizeTo(4, 1);
 	
 	d.ResizeTo(fNdf, 1); //(4,1)
-        for(int q=0; q<fNdau; q++){
-            P(0,0) = 1. / m_iter(0 + q * cov_dim, 0)*sin(m_iter(1 + q * cov_dim, 0))*cos(m_iter(2 + q * cov_dim, 0));
-            P(1,0) = 1. / m_iter(0 + q * cov_dim, 0)*sin(m_iter(1 + q * cov_dim, 0))*sin(m_iter(2 + q * cov_dim, 0));
-            P(2,0) = 1. / m_iter(0 + q * cov_dim, 0)*cos(m_iter(1 + q * cov_dim, 0));
-            P(3,0)  = sqrt(pow((1. / m_iter(0 + q * cov_dim, 0)), 2) + pow(fM[q], 2));
-        }
-        
         d(0, 0) = -fLv4C.Px();
         d(1, 0) = -fLv4C.Py();
         d(2, 0) = -fLv4C.Pz();
         d(3, 0) = -fLv4C.E();
-
-        for(int q=0; q<fNdau; q++){ //merge loops?
-            d(0, 0) += P(0,0); 
-            d(0, 1) += P(0,1);
-            d(0, 2) += P(0,2);
-            d(0, 3) += P(0,3);
+	
+        for(int q=0; q<fNdau; q++){
+            d(0,0) += 1. / m_iter(0 + q * cov_dim, 0)*sin(m_iter(1 + q * cov_dim, 0))*cos(m_iter(2 + q * cov_dim, 0));
+            d(1,0) += 1. / m_iter(0 + q * cov_dim, 0)*sin(m_iter(1 + q * cov_dim, 0))*sin(m_iter(2 + q * cov_dim, 0));
+            d(2,0) += 1. / m_iter(0 + q * cov_dim, 0)*cos(m_iter(1 + q * cov_dim, 0));
+            d(3,0) += sqrt(pow((1. / m_iter(0 + q * cov_dim, 0)), 2) + pow(fM[q], 2));
         }
 
     }
@@ -153,9 +146,9 @@ TMatrixD H4cFitter::Feta_eval(const TMatrixD& m_iter)
 
         for(int q=0; q<fNdau; q++){
             H(0, q * cov_dim) = -1./pow(m_iter(0 + q * cov_dim, 0),2) * sin(m_iter(1 + q * cov_dim, 0)) * cos(m_iter(2 + q * cov_dim, 0));
-            H(1, q * cov_dim) = -1./pow(m_iter(0 + q * cov_dim, 0),2) * sin(m_iter(1 + q * cov_dim, 0)) * sin(m_iter(2 + q * cov_dim, 0));
+            H(1, q * cov_dim) = -1./pow(m_iter(0 + q * cov_dim, 0),2) * sin(m_iter(1 + q * cov_dim, 0)) * cos(m_iter(2 + q * cov_dim, 0));
             H(2, q * cov_dim) = -1./pow(m_iter(0 + q * cov_dim, 0),2) * cos(m_iter(1 + q * cov_dim, 0));
-            H(3, q * cov_dim) = -1./pow(m_iter(0 + q * cov_dim, 0),3) * 1./ sqrt(pow(m_iter(0 + q * cov_dim, 0),2) + pow(fM[q], 2));
+            H(3, q * cov_dim) = -1./pow(m_iter(0 + q * cov_dim, 0),3) * 1./ sqrt(pow(1./(m_iter(0 + q * cov_dim, 0)),2) + pow(fM[q], 2));
 
             H(0, 1 + q * cov_dim) = 1./m_iter(0 + q * cov_dim, 0) * cos(m_iter(1 + q * cov_dim, 0)) * cos(m_iter(2 + q * cov_dim, 0));
             H(1, 1 + q * cov_dim) = 1./m_iter(0 + q * cov_dim, 0) * cos(m_iter(1 + q * cov_dim, 0)) * sin(m_iter(2 + q * cov_dim, 0));
@@ -171,23 +164,28 @@ TMatrixD H4cFitter::Feta_eval(const TMatrixD& m_iter)
 
 bool H4cFitter::fit()
 {
-    double lr = 1;
+    double lr = 0.5;
     TMatrixD alpha0(fNdau * cov_dim, 1), alpha(fNdau * cov_dim, 1);
     TMatrixD A0(y), V0(V);
     alpha0 = y;
     alpha = alpha0;
     double chi2 = 1e6;
+    cout << " calc Feta" << endl;
     TMatrixD D = Feta_eval(alpha);
+    cout << " calc f " << endl;
     TMatrixD d = f_eval(alpha);
+    cout << " start fitting " << endl;
 
     for (int q = 0; q < 5; q++)
     {
         TMatrixD DT(D.GetNcols(), D.GetNrows());
         DT.Transpose(D);
+	cout << " calc D " << endl;
         TMatrixD VD = D * V * DT;
         VD.Invert();
 
         TMatrixD delta_alpha = alpha - alpha0;
+	cout << " calc lambda " << endl;
         TMatrixD lambda = VD * D * delta_alpha + VD * d;
         TMatrixD lambdaT(lambda.GetNcols(), lambda.GetNrows());
         lambdaT.Transpose(lambda);

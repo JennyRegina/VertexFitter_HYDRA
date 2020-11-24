@@ -58,7 +58,7 @@ private:
     std::vector<double> fM;
     TLorentzVector fInit;
     TLorentzVector fLv4C;
-    HRefitCand fMother;
+    //HRefitCand fMother;
     bool fWiggleMoth;
     bool f4Constraint;  
     //double fVtxPos;
@@ -68,7 +68,7 @@ private:
 public:
     H4cFitter(const std::vector<HRefitCand> & cands, HRefitCand & mother);
     H4cFitter(const std::vector<HRefitCand> & cands, TLorentzVector & lv);
-    //H4cFitter(const std::vector<HRefitCand> & cands, TLorentzVector & lv);
+    //H4cFitter(const std::vector<HRefitCand> & cands);
     ~H4cFitter(){};
     TMatrixD f_eval(const TMatrixD &m_iter);
     TMatrixD Feta_eval(const TMatrixD &miter);
