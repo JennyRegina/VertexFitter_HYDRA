@@ -41,36 +41,43 @@ void rootlogon(TString additional_libs           = "",
    TString myhaddir = gSystem->GetFromPipe("echo $MYHADDIR");
    Bool_t useMYHADDIR =  (myhaddir == "") ? kFALSE : kTRUE;
 
-   if(!useHADDIR) cout<<"HADDIR is not set !"<<endl;
 
+   if(!useHADDIR) cout<<"HADDIR is not set !"<<endl;
 
    // space seperated list and order of common libraries to be loaded
    common_libs  = "Hydra ";
-    if((useHADDIR   && gSystem->AccessPathName(gSystem->ExpandPathName("${HADDIR}/lib/libRFIOtsm.so")) == 0 ) ||
+
+   if((useHADDIR   && gSystem->AccessPathName(gSystem->ExpandPathName("${HADDIR}/lib/libRFIOtsm.so")) == 0 ) ||
        (useMYHADDIR && gSystem->AccessPathName(gSystem->ExpandPathName("${MYHADDIR}/lib/libRFIOtsm.so")) == 0)
      ) {
        common_libs += "RFIOtsm ";
    }
    common_libs += "Start ";
+   common_libs += "Hodo ";
+   common_libs += "Trigger ";
    common_libs += "Rich ";
    common_libs += "Mdc ";
    common_libs += "Tof ";
+   common_libs += "Tofino ";
    common_libs += "Shower ";
-   common_libs += "Emc ";
+   common_libs += "ShowerTofino ";
    common_libs += "Rpc ";
    common_libs += "Wall ";
-   common_libs += "PionTracker ";
    common_libs += "MdcTrackD ";
+   common_libs += "MdcTrackS ";
    common_libs += "MdcTrackG ";
-   common_libs += "Kalman ";
-   common_libs += "ShowerUtil ";
-   common_libs += "Particle ";
+   common_libs += "Kick ";
+   //common_libs += "ShowerUtil ";
+   common_libs += "PidUtil ";   
+   common_libs += "Pid ";
+   common_libs += "Hyp ";
+   common_libs += "MdcPid ";
+   common_libs += "PhyAna ";
+   common_libs += "Pairs ";   
    common_libs += "QA ";
    common_libs += "Dst ";
    common_libs += "Tools ";
-   common_libs += "MdcUtil ";
-   common_libs += "Simulation ";
-   if((useHADDIR   && gSystem->AccessPathName(gSystem->ExpandPathName("${HADDIR}/lib/libOra.so")) == 0) ||
+   if((useHADDIR   && gSystem->AccessPathName(gSystem->ExpandPathName("${HADDIR}/lib/libOra.so")) == 0 ) ||
       (useMYHADDIR && gSystem->AccessPathName(gSystem->ExpandPathName("${MYHADDIR}/lib/libOra.so")) == 0)
      ) {
        common_libs += "Ora ";
@@ -78,14 +85,22 @@ void rootlogon(TString additional_libs           = "",
        common_libs += "OraSim ";
    }
 
+   common_libs += "TriggerUtil ";
+   common_libs += "RichUtil ";
+   common_libs += "MdcUtil ";
+   common_libs += "TofUtil ";
+   common_libs += "Simulation ";
    common_libs += "MdcGarfield ";
    common_libs += "Revt ";
-   common_libs += "Online ";
-   common_libs += "EventDisplay ";
+   common_libs += "Online ";  
+   common_libs += "HadesGo4 ";  
    common_libs += "Alignment ";
-   common_libs += "VertexFit";
+   common_libs += "Particle ";
+   common_libs += "4cFitter_oldHydra";
+
 
    ////// here we go ...
+
 
    TString full_path;
    TString truncated_path;
@@ -138,26 +153,6 @@ void rootlogon(TString additional_libs           = "",
    // case it is not already a part of it - this check does not work if one
    // uses explicit paths for a library
 
-   TString pluto_path = gSystem->Getenv( "PLUTODIR" );
-   if (!pluto_path.IsNull()) {
-
-       pluto_path = pluto_path + "/libPluto.so";
-
-#if ROOT_VERSION_CODE  > ROOT_VERSION(6,0,0)
-       pluto_path.ReplaceAll("//","/");
-#else
-       pluto_path.ReplaceAll("\/\/","\/");
-#endif
-       if(gSystem->AccessPathName(pluto_path.Data()) == 0) {
-
-	   if(additional_libs.CompareTo("") == 0 ){ additional_libs = pluto_path; }
-	   else                                   {
-               additional_libs.Append( " " );
-	       additional_libs += pluto_path;
-	   }
-       }
-   }
-
    TObjArray* aaddlibs = additional_libs.Tokenize(" ");
    if(aaddlibs){
        for(Int_t i = 0;i < aaddlibs->GetLast() + 1 ; i ++)
@@ -196,12 +191,12 @@ void rootlogon(TString additional_libs           = "",
    load_from_second_location.Append( " " );
    cout << "\nList and Order of loaded DLLs and their Locations:" << endl;
 
-   ProcessLibs:
+  ProcessLibs:
 
    //----------------------------------------------------------------
    // get first library name
 
-   acommonlibs = common_libs.Tokenize(" ");
+   TObjArray* acommonlibs = common_libs.Tokenize(" ");
    if(acommonlibs){
        for(Int_t i = 0;i < acommonlibs->GetLast() + 1 ; i ++)
        {
@@ -329,37 +324,14 @@ void rootlogon(TString additional_libs           = "",
       }
    }
 
-   full_path = gSystem->Getenv( "PLUTODIR" );
-   if (!full_path.IsNull())
-   {
-      full_path += "/include";
-      if (!gSystem->AccessPathName( full_path.Data() ))
-      {
-	 full_path.Prepend( ".include " );
-	 gROOT->ProcessLine( full_path.Data(), NULL );
-         // gSystem->AddIncludePath( full_path.Data() ); somehow does not work!
-      }
-   }
-
    gSystem->SetFlagsOpt( "-O2" );
 
-#if ROOT_VERSION_CODE  > ROOT_VERSION(6,0,0)
-   gSystem->SetMakeSharedLib(
-      "cd $BuildDir; "
-      "g++ -std=c++11 -c $Opt -pipe -Wall -fPIC -pthread $IncludePath $SourceFiles; "
-      "g++ $ObjectFiles -shared -Wl,-soname,$LibName.so "
-      "-O $LinkedLibs -o $SharedLib" );
-#else
    gSystem->SetMakeSharedLib(
       "cd $BuildDir; "
       "g++ -c $Opt -pipe -Wall -fPIC -pthread $IncludePath $SourceFiles; "
       "g++ $ObjectFiles -shared -Wl,-soname,$LibName.so "
       "-O $LinkedLibs -o $SharedLib" );
-#endif
-
-
-
-      //----------------------------------------------------------------
+   //----------------------------------------------------------------
 
 
    //----------------------------------------------------------------
@@ -369,4 +341,7 @@ void rootlogon(TString additional_libs           = "",
    // use spectral color palette for histograms
    gStyle->SetPalette( 1 );
    //----------------------------------------------------------------
+
+   // add KParticleCand lib
+   gSystem->Load("/lustre/hades/user/jrieger/pp35_data_4charged/forJana/myAnalysis/libKParticleCand.so");
 }
