@@ -8,12 +8,11 @@
 ##############################################################################
 
 
-LIB_NAME := VertexFit_4c
+LIB_NAME := 4cFitter_oldHydra
 
 USES_ORACLE= : no
 
 SOURCE_FILES := hrefitcand.cc \
-		hvertexfitter.cc\
 		h4cfitter.cc
 
 

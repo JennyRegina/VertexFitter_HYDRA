@@ -198,7 +198,7 @@ bool H4cFitter::fit()
         {
             chisqrd += lambdaT(0, p) * d(p, 0);
         }
-/*
+
         // for checking convergence
         // three parameters are checked
         // 1. difference between measurements (for successive iterations) y
@@ -210,14 +210,17 @@ bool H4cFitter::fit()
             sum0 += (neu_alpha(p,0)-alpha(p,0))*(neu_alpha(p,0)-alpha(p,0));
         }
 
-        double d_const = fabs(d(0,0));
-        if(fabs(chi2-chisqrd)<1e-3 && d_const<10 && sqrt(sum0)<1e-3){
+        double d_const = 0;
+        for(int p=0; p<4; p++){
+            d_const += pow(d(p,0),2);
+        }
+        if(fabs(chi2-chisqrd)<1 && d_const<1 && sqrt(sum0)<1){
             fIteration = q;
             fConverged = true;
-	    cout << q << endl;
+	    //cout << q << endl;
             break;
         }
-        */
+        
 	
         chi2 = chisqrd;
         alpha0 = alpha;
@@ -227,7 +230,7 @@ bool H4cFitter::fit()
         d = f_eval(alpha);
     }
 
-    y = alpha;
+    y = alpha; //neu_alpha? Calculate new V? Doesn't matter if converged?
     fChi2 = chi2;
     fProb = TMath::Prob(chi2, fNdf);
 
@@ -282,7 +285,7 @@ void H4cFitter::updateDaughters()
         cand.setZ(y(4 + val * cov_dim, 0));
 
         // ---------------------------------------------------------------------------
-        // set covariance
+        // set covariance -- Has it off-diagonal elements now?
         // ---------------------------------------------------------------------------
         TMatrixD cov(5, 5);
         cov(0, 0) = V(0 + val * cov_dim, 0 + val * cov_dim);

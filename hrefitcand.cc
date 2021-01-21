@@ -3,7 +3,7 @@
 
 //HRefitCand::HRefitCand()
 
-HRefitCand::HRefitCand(HVirtualCand* cand)
+HRefitCand::HRefitCand(KParticleCand* cand)
     : TLorentzVector(*cand), fR(cand->getR()), fZ(cand->getZ()), cand(cand)
 {
 }
