@@ -170,22 +170,22 @@ bool H4cFitter::fit()
     alpha0 = y;
     alpha = alpha0;
     double chi2 = 1e6;
-    cout << " calc Feta" << endl;
+    //cout << " calc Feta" << endl;
     TMatrixD D = Feta_eval(alpha);
-    cout << " calc f " << endl;
+    //cout << " calc f " << endl;
     TMatrixD d = f_eval(alpha);
-    cout << " start fitting " << endl;
+    //cout << " start fitting " << endl;
 
     for (int q = 0; q < 5; q++)
     {
         TMatrixD DT(D.GetNcols(), D.GetNrows());
         DT.Transpose(D);
-	cout << " calc D " << endl;
+	//cout << " calc D " << endl;
         TMatrixD VD = D * V * DT;
         VD.Invert();
 
         TMatrixD delta_alpha = alpha - alpha0;
-	cout << " calc lambda " << endl;
+	//cout << " calc lambda " << endl;
         TMatrixD lambda = VD * D * delta_alpha + VD * d;
         TMatrixD lambdaT(lambda.GetNcols(), lambda.GetNrows());
         lambdaT.Transpose(lambda);
@@ -196,17 +196,17 @@ bool H4cFitter::fit()
 
         for (int p = 0; p < lambda.GetNrows(); p++)
         {
-            chisqrd = lambdaT(0, p) * d(p, 0);
+            chisqrd += lambdaT(0, p) * d(p, 0);
         }
-
-        /* for checking convergence
+/*
+        // for checking convergence
         // three parameters are checked
         // 1. difference between measurements (for successive iterations) y
         // 2. difference between constraints (for successive iterations)  d
         // 3. difference between chi2 (for successive iterations)  chisqrd
         // check converge for 'y' measurements
         double sum0 = 0;
-        for(int p=0; p<(fNdau*5); p++){
+        for(uint p=0; p<(fNdau*cov_dim); p++){
             sum0 += (neu_alpha(p,0)-alpha(p,0))*(neu_alpha(p,0)-alpha(p,0));
         }
 
@@ -214,9 +214,11 @@ bool H4cFitter::fit()
         if(fabs(chi2-chisqrd)<1e-3 && d_const<10 && sqrt(sum0)<1e-3){
             fIteration = q;
             fConverged = true;
+	    cout << q << endl;
             break;
         }
         */
+	
         chi2 = chisqrd;
         alpha0 = alpha;
         alpha = neu_alpha;
@@ -248,7 +250,7 @@ bool H4cFitter::fit()
 
     updateDaughters();
 
-    // return fConverged; // for number of iterations greater than 1
+    //return fConverged; // for number of iterations greater than 1
     return true; // for number of iterations equal to 1
 }
 
