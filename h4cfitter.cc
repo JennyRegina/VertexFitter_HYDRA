@@ -198,26 +198,32 @@ bool H4cFitter::fit()
         {
             chisqrd += lambdaT(0, p) * d(p, 0);
         }
-/*
+
         // for checking convergence
         // three parameters are checked
         // 1. difference between measurements (for successive iterations) y
         // 2. difference between constraints (for successive iterations)  d
         // 3. difference between chi2 (for successive iterations)  chisqrd
         // check converge for 'y' measurements
+        /*
         double sum0 = 0;
         for(uint p=0; p<(fNdau*cov_dim); p++){
             sum0 += (neu_alpha(p,0)-alpha(p,0))*(neu_alpha(p,0)-alpha(p,0));
         }
 
         double d_const = fabs(d(0,0));
-        if(fabs(chi2-chisqrd)<1e-3 && d_const<10 && sqrt(sum0)<1e-3){
+        */
+        if(fabs(chi2-chisqrd)<1){
             fIteration = q;
             fConverged = true;
-	    cout << q << endl;
+            chi2 = chisqrd;
+            alpha0 = alpha;
+            alpha = neu_alpha;
+            V = V - lr * V * DT * VD * D * V;
+	    //cout << q << endl;
             break;
         }
-        */
+        
 	
         chi2 = chisqrd;
         alpha0 = alpha;
