@@ -214,9 +214,14 @@ bool H4cFitter::fit()
         for(int p=0; p<4; p++){
             d_const += pow(d(p,0),2);
         }
-        if(fabs(chi2-chisqrd)<1 && d_const<1 && sqrt(sum0)<1){
+        //if(fabs(chi2-chisqrd)<1 && d_const<1 && sqrt(sum0)<1){
+        if(fabs(chi2-chisqrd)<1){
             fIteration = q;
             fConverged = true;
+            chi2 = chisqrd;
+            alpha0 = alpha;
+            alpha = neu_alpha;
+            V = V - lr * V * DT * VD * D * V;
 	    //cout << q << endl;
             break;
         }
