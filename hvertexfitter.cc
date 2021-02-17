@@ -42,11 +42,69 @@ HVertexFitter::HVertexFitter(const std::vector<HRefitCand>& cands) : fCands(cand
 }
 
 // One will need to pass the correct objects to the function once it is decided what to use
-//TVector3 HVertexFitter::findVertex(const std::vector<HRefitCand> & cands){
-TVector3 HVertexFitter::findVertex(){
+TVector3 HVertexFitter::findVertex(const std::vector<HRefitCand> & cands){
+
+//TVector3 HVertexFitter::findVertex(){
+
     // try to find the decay vertex from the most basic information so that 
     // the code is as independent as possible from objects used in the analysis
+
+    double param_p_inv1, param_theta1, param_phi1, param_R1, param_Z1;
+    double param_p_inv2, param_theta2, param_phi2, param_R2, param_Z2;
+
+/*     for (int ix = 0; ix < fN; ix++)
+    {
+        HRefitCand cand = cands[ix];
+
+        param_p_inv = 1. / cand.P();
+        param_theta = cand.Theta();
+        param_phi = cand.Phi();
+        param_R = cand.getR();
+        param_Z = cand.getZ();
+    } */
+
+        HRefitCand cand1 = cands[0];
+
+        param_p_inv1 = 1. / cand.P();
+        param_theta1 = cand.Theta();
+        param_phi1 = cand.Phi();
+        param_R1 = cand.getR();
+        param_Z1 = cand.getZ();
+
+        HRefitCand cand2 = cands[0];
+
+        param_p_inv2 = 1. / cand.P();
+        param_theta2 = cand.Theta();
+        param_phi2 = cand.Phi();
+        param_R2 = cand.getR();
+        param_Z2 = cand.getZ();
     
+    // Calculate the base and direction vectors of the two candidates 
+    TVector3 vtx_base_1, vtx_base_2, vtx_dir_1, vtx_dir_2;
+
+    // Base vectors
+    vtx_base_1.SetXYZ(param_R1 * std::cos(param_phi1 + TMath::PiOver2(),
+    param_R1 * std::sin(param_phi1 + TMath::PiOver2(),
+    param_Z1);
+    
+    vtx_base_2.SetXYZ(param_R2 * std::cos(param_phi2 + TMath::PiOver2(),
+    param_R2 * std::sin(param_phi2 + TMath::PiOver2(),
+    param_Z2);
+
+    // Direction vectors
+    vtx_dir_1.SetXYZ(std::sin(param_theta1)*std::cos(param_theta1),
+    std::sin(param_theta1)*std::sin(param_phi1)
+    std::cos(param_theta1));
+
+    vtx_dir_2.SetXYZ(std::sin(param_theta2)*std::cos(param_theta2),
+    std::sin(param_theta2)*std::sin(param_phi2)
+    std::cos(param_theta2));
+
+    // Calculate the distance between the two tracks
+    doouble dist = std::fabs((vtx_dir_1.Cross(vtx_dir_2)).Dot((vtx_base_1 - vtx_base_2)));
+
+    
+
     return fVertex;
 }
 
