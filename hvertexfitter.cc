@@ -93,17 +93,39 @@ TVector3 HVertexFitter::findVertex(const std::vector<HRefitCand> & cands){
 
     // Direction vectors
     vtx_dir_1.SetXYZ(std::sin(param_theta1)*std::cos(param_theta1),
-    std::sin(param_theta1)*std::sin(param_phi1)
+    std::sin(param_theta1)*std::sin(param_phi1),
     std::cos(param_theta1));
 
     vtx_dir_2.SetXYZ(std::sin(param_theta2)*std::cos(param_theta2),
-    std::sin(param_theta2)*std::sin(param_phi2)
+    std::sin(param_theta2)*std::sin(param_phi2),
     std::cos(param_theta2));
 
     // Calculate the distance between the two tracks
     doouble dist = std::fabs((vtx_dir_1.Cross(vtx_dir_2)).Dot((vtx_base_1 - vtx_base_2)));
+    // Keep the possibility to use this distance as a rough cut
 
+    // Converting to HGeomVector in order to make use of built in funtions
+    // NOTE: Base vectors will need to change for secondary vertex
+    HGeomVector vtx_geom_dir_1, vtx_geom_dir_2, vtx_geom_base_1, vtx_geom_base_2;
     
+    vtx_geom_dir_1.setX(std::sin(param_theta1)*std::cos(param_theta1));
+    vtx_geom_dir_1.setY(std::sin(param_theta1)*std::sin(param_phi1));
+    vtx_geom_dir_1.setY(std::cos(param_theta1));
+    vtx_geom_dir_2.setX(std::sin(param_theta2)*std::cos(param_theta2));
+    vtx_geom_dir_2.setY(std::sin(param_theta2)*std::sin(param_phi2));
+    vtx_geom_dir_2.setY(std::cos(param_theta2));
+
+    vtx_geom_base_1.setX(param_R1 * std::cos(param_phi1 + TMath::PiOver2());
+    vtx_geom_base_1.setX(param_R1 * std::sin(param_phi1 + TMath::PiOver2());
+    vtx_geom_base_1.setX(param_Z1);
+
+    vtx_geom_base_2.setX(param_R2 * std::cos(param_phi2 + TMath::PiOver2());
+    vtx_geom_base_2.setX(param_R2 * std::sin(param_phi2 + TMath::PiOver2());
+    vtx_geom_base_2.setX(param_Z2);
+
+    HGeomVector vertex = HParticleTool::calculatePointOfClosestApproach(vtx_base_1, vtx_dir_1, vtx_dir_2, vtx_dir_2);
+
+    fVertex.SetXYZ(vertex.X(),vertex.Y(),vertex.Z());
 
     return fVertex;
 }

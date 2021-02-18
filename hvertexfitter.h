@@ -15,6 +15,8 @@
 
 // framework includes
 #include "hrefitcand.h"
+#include "hgeomvector.h" // J.R added for vertex calculation
+#include "hparticletool.h" // J.R added for vertex calculation
 
 using std::cout;
 using std::endl;
