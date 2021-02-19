@@ -72,8 +72,8 @@ public:
     // The addVtxConstraint function should work in two different ways:
     // 1. Take the fitted vertex and adjust track parameters to be coming from there
     // 2. Possibility: adjust the reconstructed vertex position  
-    void   addVtxConstraint();
     TVector3 findVertex();
+    
     //TVector3 findVertex(const std::vector<HRefitCand> & cands) {return fVertex;} // Function to calculate and return vertex
     double getChi2() const {return fChi2;}
     double getProb() const {return fProb;}

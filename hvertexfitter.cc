@@ -15,7 +15,6 @@ HVertexFitter::HVertexFitter(const std::vector<HRefitCand>& cands) : fCands(cand
 
     fConverged = false;
     fIteration = 0;
-    fNdf = 0;
 
     // set 'y=alpha' measurements
     // and the covariance
@@ -123,26 +122,29 @@ TVector3 HVertexFitter::findVertex(const std::vector<HRefitCand> & cands){
     vtx_geom_base_2.setX(param_R2 * std::sin(param_phi2 + TMath::PiOver2());
     vtx_geom_base_2.setX(param_Z2);
 
-    HGeomVector vertex = HParticleTool::calculatePointOfClosestApproach(vtx_base_1, vtx_dir_1, vtx_dir_2, vtx_dir_2);
+    // Calculate corrected base vector. 
 
+    HGeomVector vertex = HParticleTool::calculatePointOfClosestApproach(vtx_base_1, vtx_dir_1, vtx_dir_2, vtx_dir_2);
     fVertex.SetXYZ(vertex.X(),vertex.Y(),vertex.Z());
 
     return fVertex;
-}
-
-void HVertexFitter::addVtxConstraint()
-{
-    fNdf += 1;
-    fVtxConstraint = true;
 }
 
 TMatrixD HVertexFitter::f_eval(const TMatrixD& m_iter)
 {
     TMatrixD d;
 
+    // J.R need to modify the input vectors to come from the vertex found in the 
+    // funtion findVertex
+    fVertex=findVertex(cands);
+
+    // Calculate the new direction vectors from the new vertex
+    ///////////////////////////////////////////////////////////////////////
+
+
+    ///////////////////////////////////////////////////////////////////////
     // vertex constraint
-    if (fVtxConstraint)
-    {
+
         d.ResizeTo(1, 1);
         TVector3 base_1, base_2, dir_1, dir_2;
         base_1.SetXYZ(
@@ -170,7 +172,6 @@ TMatrixD HVertexFitter::f_eval(const TMatrixD& m_iter)
                      std::cos(m_iter(1 + 1 * cov_dim, 0)));
 
         d(0, 0) = std::fabs((dir_1.Cross(dir_2)).Dot((base_1 - base_2)));
-    }
 
     return d;
 }
@@ -180,9 +181,6 @@ TMatrixD HVertexFitter::Feta_eval(const TMatrixD& m_iter)
 
     TMatrixD H;
 
-    // vertex constraint
-    if (fVtxConstraint)
-    {
         H.ResizeTo(1, fN * cov_dim);
         H.Zero();
 
@@ -340,7 +338,6 @@ TMatrixD HVertexFitter::Feta_eval(const TMatrixD& m_iter)
                       std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)) +
                   std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
                       std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0));
-    }
 
     return H;
 }
@@ -405,6 +402,7 @@ bool HVertexFitter::fit()
 
     y = alpha;
     fChi2 = chi2;
+    fNdf=1; // The vertex constraint is a 1C fit
     fProb = TMath::Prob(chi2, fNdf);
 
     // -----------------------------------------
