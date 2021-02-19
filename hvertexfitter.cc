@@ -138,9 +138,25 @@ TMatrixD HVertexFitter::f_eval(const TMatrixD& m_iter)
     // funtion findVertex
     fVertex=findVertex(cands);
 
-    // Calculate the new direction vectors from the new vertex
+    // Calculate the new base and direction vectors from the new vertex
     ///////////////////////////////////////////////////////////////////////
 
+    // Step 1: calculate theta and phi from delta x, delta y and delta z
+
+    // All parameters with subscript secondary are parameters calculated not
+    // assuming that tracks originate from the IP
+
+    /*double theta_secondary1=;
+    double theta_secondary2=;
+
+    double phi_secondary1=;
+    double phi_secondary2=;
+
+    double R_secondary1=;
+    double R_secondary2=;
+
+    double Z_secondary1=;
+    double Z_secondary2=; */
 
     ///////////////////////////////////////////////////////////////////////
     // vertex constraint
