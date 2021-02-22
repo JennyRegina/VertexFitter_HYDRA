@@ -37,7 +37,6 @@ HVertexFitter::HVertexFitter(const std::vector<HRefitCand>& cands) : fCands(cand
         V(4 + ix * cov_dim, 4 + ix * cov_dim) = covariance(4, 4);
     }
 
-    fVtxConstraint = false;
 }
 
 // One will need to pass the correct objects to the function once it is decided what to use
@@ -64,30 +63,30 @@ TVector3 HVertexFitter::findVertex(const std::vector<HRefitCand> & cands){
 
         HRefitCand cand1 = cands[0];
 
-        param_p_inv1 = 1. / cand.P();
-        param_theta1 = cand.Theta();
-        param_phi1 = cand.Phi();
-        param_R1 = cand.getR();
-        param_Z1 = cand.getZ();
+        param_p_inv1 = 1. / cand1.P();
+        param_theta1 = cand1.Theta();
+        param_phi1 = cand1.Phi();
+        param_R1 = cand1.getR();
+        param_Z1 = cand1.getZ();
 
         HRefitCand cand2 = cands[0];
 
-        param_p_inv2 = 1. / cand.P();
-        param_theta2 = cand.Theta();
-        param_phi2 = cand.Phi();
-        param_R2 = cand.getR();
-        param_Z2 = cand.getZ();
+        param_p_inv2 = 1. / cand2.P();
+        param_theta2 = cand2.Theta();
+        param_phi2 = cand2.Phi();
+        param_R2 = cand2.getR();
+        param_Z2 = cand2.getZ();
     
     // Calculate the base and direction vectors of the two candidates 
     TVector3 vtx_base_1, vtx_base_2, vtx_dir_1, vtx_dir_2;
 
     // Base vectors
-    vtx_base_1.SetXYZ(param_R1 * std::cos(param_phi1 + TMath::PiOver2(),
-    param_R1 * std::sin(param_phi1 + TMath::PiOver2(),
+    vtx_base_1.SetXYZ(param_R1 * std::cos(param_phi1 + TMath::PiOver2()),
+    param_R1 * std::sin(param_phi1 + TMath::PiOver2()),
     param_Z1);
     
-    vtx_base_2.SetXYZ(param_R2 * std::cos(param_phi2 + TMath::PiOver2(),
-    param_R2 * std::sin(param_phi2 + TMath::PiOver2(),
+    vtx_base_2.SetXYZ(param_R2 * std::cos(param_phi2 + TMath::PiOver2()),
+    param_R2 * std::sin(param_phi2 + TMath::PiOver2()),
     param_Z2);
 
     // Direction vectors
@@ -100,7 +99,7 @@ TVector3 HVertexFitter::findVertex(const std::vector<HRefitCand> & cands){
     std::cos(param_theta2));
 
     // Calculate the distance between the two tracks
-    doouble dist = std::fabs((vtx_dir_1.Cross(vtx_dir_2)).Dot((vtx_base_1 - vtx_base_2)));
+    double dist = std::fabs((vtx_dir_1.Cross(vtx_dir_2)).Dot((vtx_base_1 - vtx_base_2)));
     // Keep the possibility to use this distance as a rough cut
 
     // Converting to HGeomVector in order to make use of built in funtions
@@ -109,22 +108,22 @@ TVector3 HVertexFitter::findVertex(const std::vector<HRefitCand> & cands){
     
     vtx_geom_dir_1.setX(std::sin(param_theta1)*std::cos(param_theta1));
     vtx_geom_dir_1.setY(std::sin(param_theta1)*std::sin(param_phi1));
-    vtx_geom_dir_1.setY(std::cos(param_theta1));
+    vtx_geom_dir_1.setZ(std::cos(param_theta1));
     vtx_geom_dir_2.setX(std::sin(param_theta2)*std::cos(param_theta2));
     vtx_geom_dir_2.setY(std::sin(param_theta2)*std::sin(param_phi2));
-    vtx_geom_dir_2.setY(std::cos(param_theta2));
+    vtx_geom_dir_2.setZ(std::cos(param_theta2));
 
-    vtx_geom_base_1.setX(param_R1 * std::cos(param_phi1 + TMath::PiOver2());
-    vtx_geom_base_1.setX(param_R1 * std::sin(param_phi1 + TMath::PiOver2());
-    vtx_geom_base_1.setX(param_Z1);
+    vtx_geom_base_1.setX(param_R1 * std::cos(param_phi1 + TMath::PiOver2()));
+    vtx_geom_base_1.setY(param_R1 * std::sin(param_phi1 + TMath::PiOver2()));
+    vtx_geom_base_1.setZ(param_Z1);
 
-    vtx_geom_base_2.setX(param_R2 * std::cos(param_phi2 + TMath::PiOver2());
-    vtx_geom_base_2.setX(param_R2 * std::sin(param_phi2 + TMath::PiOver2());
-    vtx_geom_base_2.setX(param_Z2);
+    vtx_geom_base_2.setX(param_R2 * std::cos(param_phi2 + TMath::PiOver2()));
+    vtx_geom_base_2.setY(param_R2 * std::sin(param_phi2 + TMath::PiOver2()));
+    vtx_geom_base_2.setZ(param_Z2);
 
     // Calculate corrected base vector. 
 
-    HGeomVector vertex = HParticleTool::calculatePointOfClosestApproach(vtx_base_1, vtx_dir_1, vtx_dir_2, vtx_dir_2);
+    static HGeomVector vertex = HParticleTool::calculatePointOfClosestApproach(vtx_geom_base_1, vtx_geom_dir_1, vtx_geom_dir_2, vtx_geom_dir_2);
     fVertex.SetXYZ(vertex.X(),vertex.Y(),vertex.Z());
 
     return fVertex;
@@ -136,7 +135,7 @@ TMatrixD HVertexFitter::f_eval(const TMatrixD& m_iter)
 
     // J.R need to modify the input vectors to come from the vertex found in the 
     // funtion findVertex
-    fVertex=findVertex(cands);
+    //fVertex=findVertex(cands);
 
     // Calculate the new base and direction vectors from the new vertex
     ///////////////////////////////////////////////////////////////////////
