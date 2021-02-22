@@ -87,7 +87,7 @@ Bool_t selectHadrons(HParticleCand* pcand)
     return test;
 }
 
-Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr12.root", Int_t nEvents = 100000)
+Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr12.root", Int_t nEvents = 100)
 {
 
     TStopwatch timer;
@@ -265,7 +265,8 @@ Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr
         // -----------------------------------------------------------------------
         // looking at Lambda invariant mass here
         // -----------------------------------------------------------------------
-
+	
+	std::cout << "Event number: "  << i << std::endl;
          for (size_t n = 0; n < protons.size(); n++)
         {
             HRefitCand cand1 = protons[n];
@@ -282,7 +283,11 @@ Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr
                 HVertexFitter vtxFitter(cands);
 
                 // Find the vertex
-                vtxFitter.findVertex(cands);
+                TVector3 vertex = vtxFitter.findVertex(cands);
+		
+		// Write out the components of the vertex vector
+		std::cout << "Vertex pos: x=" << vertex.X() << ", y=" << vertex.Y() << ", z=" << vertex.Z() << std::endl;
+		
 
             }
         }
@@ -368,7 +373,7 @@ Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr
         // -----------------------------------------------------------------------
         // Apply the kinfit with vertex constraint to proton and kaon
         // -----------------------------------------------------------------------
-        for (size_t n = 0; n < protons.size(); n++)
+	/*        for (size_t n = 0; n < protons.size(); n++)
         {
             HRefitCand cand1 = protons[n];
             for (size_t m = 0; m < kaons.size(); m++)
@@ -443,7 +448,7 @@ Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr
 		
                 // ---------------------------------------------------------------------------------
             }
-        } 
+        } */
 	
     } // end of the events loop
 

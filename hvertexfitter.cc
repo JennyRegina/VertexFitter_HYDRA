@@ -100,6 +100,10 @@ TVector3 HVertexFitter::findVertex(const std::vector<HRefitCand> & cands){
 
     // Calculate the distance between the two tracks
     double dist = std::fabs((vtx_dir_1.Cross(vtx_dir_2)).Dot((vtx_base_1 - vtx_base_2)));
+    
+    // For testing that everything works
+    std::cout << "Minimum distance between tracks: " << dist << std::endl;
+    std::cout << " " << std::endl;
     // Keep the possibility to use this distance as a rough cut
 
     // Converting to HGeomVector in order to make use of built in funtions
