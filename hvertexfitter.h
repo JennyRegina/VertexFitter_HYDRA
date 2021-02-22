@@ -78,6 +78,7 @@ public:
     double getChi2() const {return fChi2;}
     double getProb() const {return fProb;}
     double getPull(int val=0){return fPull(val,val);}
+    TVector3 getVertex() const {return fVertex;} // Function that the user should use in the analysis macro
     bool   isConverged() const {return fConverged;}
     int    getIteration() const {return fIteration;}
     void   setCovariance(TMatrixD &val){V=val;}
@@ -85,6 +86,9 @@ public:
 
     bool fit();
 
+    // J.R. The following line was present in the
+    // original code. It does not seen to work with the 
+    // HYDRA version needed to run this code
     //[[deprecated]]
     HRefitCand getDaughter(int val);
 
