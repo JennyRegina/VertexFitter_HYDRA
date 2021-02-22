@@ -87,7 +87,7 @@ Bool_t selectHadrons(HParticleCand* pcand)
     return test;
 }
 
-Int_t analysis(TString infileList = "pp_pKlambda_100000evts1_dst_apr12.root", Int_t nEvents = 100000)
+Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr12.root", Int_t nEvents = 100000)
 {
 
     TStopwatch timer;
@@ -168,10 +168,6 @@ Int_t analysis(TString infileList = "pp_pKlambda_100000evts1_dst_apr12.root", In
     TH1F* h16 = new TH1F("hPullZCut", "", 100, -5, 5);
     h16->SetXTitle("Pull(Z)");
     h16->SetYTitle(" Counts ");  
-
-    TH1F* hMinDistanceBetweenCands = new TH1F("hMinDistanceBetweenCands", "", 100,0,100);
-    hMinDistanceBetweenCands->SetXTitle("Minimum Distance Between Tracks / cm");
-    hMinDistanceBetweenCands->SetYTitle("Occurrence");
     
     // -----------------------------------------------------------------------
 
@@ -266,47 +262,27 @@ Int_t analysis(TString infileList = "pp_pKlambda_100000evts1_dst_apr12.root", In
                 continue;
         } // end track loop
 
+        // -----------------------------------------------------------------------
+        // looking at Lambda invariant mass here
+        // -----------------------------------------------------------------------
 
-        // Testing the minimum distance between the two tracks
-        for (size_t n = 0; n < protons.size(); n++)
+         for (size_t n = 0; n < protons.size(); n++)
         {
-            TVector3 base1, base2, dir1, dir2;
-
             HRefitCand cand1 = protons[n];
             
-            base1.SetXYZ(0,0,0); 
-            dir1.SetXYZ(0,0,0);
-            
-            base1.SetXYZ(cand1.getR() * std::cos(cand1.Phi() + TMath::PiOver2()),
-                          cand1.getR() * std::sin(cand1.Phi() + TMath::PiOver2()),
-                          cand1.getZ());
-
-            dir1.SetXYZ(std::sin(cand1.Theta()) * std::cos(cand1.Phi()),
-                        std::sin(cand1.Theta()) * std::sin(cand1.Phi()),
-                        std::sin(cand1.Theta()));
-
             for (size_t m = 0; m < pions.size(); m++)
             {
-
                 HRefitCand cand2 = pions[m];
+                
+                std::vector<HRefitCand> cands;
+                cands.push_back(cand1);
+                cands.push_back(cand2);
 
-                base2.SetXYZ(0,0,0);
-                dir2.SetXYZ(0,0,0);
+                // Initiate the vertex fitter
+                HVertexFitter vtxFitter(cands);
 
-                base2.SetXYZ(cand2.getR() * std::cos(cand2.Phi() + TMath::PiOver2()),
-                              cand2.getR() * std::sin(cand2.Phi() + TMath::PiOver2()),
-                              cand2.getZ());
-
-                dir2.SetXYZ(std::sin(cand2.Theta()) * std::cos(cand2.Phi()),
-                            std::sin(cand2.Theta()) * std::sin(cand2.Phi()),
-                            std::sin(cand2.Theta()));
-
-                            
-                            // Calculate minimum distance between the tracks
-
-                            double d = std::fabs((dir1.Cross(dir2)).Dot((base1 - base2)));
-
-                            hMinDistanceBetweenCands->Fill(d);
+                // Find the vertex
+                vtxFitter.findVertex(cands);
 
             }
         }
@@ -315,10 +291,7 @@ Int_t analysis(TString infileList = "pp_pKlambda_100000evts1_dst_apr12.root", In
         // looking at Lambda invariant mass here
         // -----------------------------------------------------------------------
         for (size_t n = 0; n < protons.size(); n++)
-        {for (size_t m = 0; m < pions.size(); m++)
-            {
-                HRefitCand cand2 = pions[m];
-
+        {
             HRefitCand cand1 = protons[n];
             for (size_t m = 0; m < pions.size(); m++)
             {
@@ -493,8 +466,6 @@ Int_t analysis(TString infileList = "pp_pKlambda_100000evts1_dst_apr12.root", In
     h15->Write();    
     h16->Write();    
     h17->Write();
-    hMinDistanceBetweenCands->Write();
-
     outfile->Close();
 
     return 0;
