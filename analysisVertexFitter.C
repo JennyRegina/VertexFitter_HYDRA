@@ -87,7 +87,7 @@ Bool_t selectHadrons(HParticleCand* pcand)
     return test;
 }
 
-Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr12.root", Int_t nEvents = 100)
+Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr12.root", Int_t nEvents = 1000)
 {
 
     TStopwatch timer;
@@ -171,6 +171,67 @@ Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr
     
     // -----------------------------------------------------------------------
 
+   // ------- Vertex histograms pre fit -----------------------
+   
+   TH1F* hVertexXPreFit = new TH1F("hVertexXPreFit", "", 1000, -100, 100);
+   hVertexXPreFit->SetXTitle("Vertex, X / cm");
+   hVertexXPreFit->SetYTitle(" Counts ");
+
+   TH1F* hVertexYPreFit = new TH1F("hVertexYPreFit", "", 1000, -100, 100);
+   hVertexYPreFit->SetXTitle("Vertex, Y / cm");
+   hVertexYPreFit->SetYTitle(" Counts ");
+
+   TH1F* hVertexZPreFit = new TH1F("hVertexZPreFit", "", 1000, -100, 100);
+   hVertexZPreFit->SetXTitle("Vertex, Z / cm");
+   hVertexZPreFit->SetYTitle(" Counts ");
+
+   TH2F* hVertexPreFit = new TH2F("hVertexPreFit", "", 1000, -100, 100, 1000, -100, 100);
+   hVertexPreFit->SetXTitle("Vertex, Z / cm");
+   hVertexPreFit->SetYTitle("Vertex, R / cm");
+
+   TH1F* hDistanceBetweenProtonAndPionPreFit = new TH1F("hDistanceBetweenProtonAndPionPreFit", "", 500, 0, 50);
+   hDistanceBetweenProtonAndPionPreFit->SetXTitle("Distance between particles / cm");
+   hDistanceBetweenProtonAndPionPreFit->SetYTitle(" Counts ");
+
+   TH1F* hDistanceToVertexProtonPreFit = new TH1F("hDistanceToVertexProtonPreFit", "", 500, 0, 50);
+   hDistanceToVertexProtonPreFit->SetXTitle("Distance to vertex / cm");
+   hDistanceToVertexProtonPreFit->SetYTitle(" Counts ");
+
+   TH1F* hDistanceToVertexPionPreFit = new TH1F("hDistanceToVertexPionPreFit", "", 500, 0, 50);
+   hDistanceToVertexPionPreFit->SetXTitle("Distance to vertex / cm");
+   hDistanceToVertexPionPreFit->SetYTitle(" Counts ");
+
+   // --------- Vertex histograms post fit --------------------
+
+   TH1F* hVertexXPostFit = new TH1F("hVertexXPostFit", "", 1000, -100, 100);
+   hVertexXPostFit->SetXTitle("Vertex, X / cm");
+   hVertexXPostFit->SetYTitle(" Counts ");
+
+   TH1F* hVertexYPostFit = new TH1F("hVertexYPostFit", "", 1000, -100, 100);
+   hVertexYPostFit->SetXTitle("Vertex, Y / cm");
+   hVertexYPostFit->SetYTitle(" Counts ");
+
+   TH1F* hVertexZPostFit = new TH1F("hVertexZPostFit", "", 1000, -100, 100);
+   hVertexZPostFit->SetXTitle("Vertex, Z / cm");
+   hVertexZPostFit->SetYTitle(" Counts ");
+
+   TH2F* hVertexPostFit = new TH2F("hVertexPostFit", "", 1000, -100, 100, 1000, -100, 100);
+   hVertexPostFit->SetXTitle("Vertex, Z / cm");
+   hVertexPostFit->SetYTitle("Vertex, R /cm");
+
+   TH1F* hDistanceBetweenProtonAndPionPostFit = new TH1F("hDistanceBetweenProtonAndPionPostFit", "", 500, 0, 50);
+   hDistanceBetweenProtonAndPionPostFit->SetXTitle("Distance between particles / cm");
+   hDistanceBetweenProtonAndPionPostFit->SetYTitle(" Counts ");
+
+   TH1F* hDistanceToVertexProtonPostFit = new TH1F("hDistanceToVertexProtonPostFit", "", 500, 0, 50);
+   hDistanceToVertexProtonPostFit->SetXTitle("Distance to vertex / cm");
+   hDistanceToVertexProtonPostFit->SetYTitle(" Counts ");
+
+   TH1F* hDistanceToVertexPionPostFit = new TH1F("hDistanceToVertexPionPostFit", "", 500, 0, 50);
+   hDistanceToVertexPionPostFit->SetXTitle("Distance to vertex / cm");
+   hDistanceToVertexPionPostFit->SetYTitle(" Counts ");
+
+
     HLoop loop(kTRUE);
     Bool_t ret = loop.addFiles(infileList);
     if (ret == 0)
@@ -237,20 +298,39 @@ Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr
             // proton pdg==14, pion pdg==9, k+ pdg==11, lambda pdg==18
             // error values obtained from resoultion plots
 	    
-            if (cand->getGeantPID() == 14 && cand->getGeantParentPID() == 18) //Proton found
+	// The code below makes sure that all protons and pions in the analysis come from the Lambda decay
+	// No combinatorial background
+           /* if (cand->getGeantPID() == 14 && cand->getGeantParentPID() == 18) //Proton found
             {
                 double errors[] = {1.469 * 1e-5, 2.410 * 1e-3, 5.895 * 1e-3,
                                    1.188, 2.652};
                 FillData(cand, candidate, errors, 938.272);
                 protons.push_back(candidate);
-            }
+
             else if (cand->getGeantPID() == 9 && cand->getGeantParentPID() == 18) // Pion found
             {
                 double errors[] = {5.959 * 1e-5, 9.316 * 1e-3, 1.991 * 1e-2,
                                    4.006, 7.629};
                 FillData(cand, candidate, errors, 139.570);
                 pions.push_back(candidate);
-            }          
+            }
+
+            }*/
+
+            if (cand->getGeantPID() == 14) //Proton found
+            {
+                double errors[] = {1.469 * 1e-5, 2.410 * 1e-3, 5.895 * 1e-3,
+                                   1.188, 2.652};
+                FillData(cand, candidate, errors, 938.272);
+                protons.push_back(candidate);
+            }
+            else if (cand->getGeantPID() == 9) // Pion found
+            {
+                double errors[] = {5.959 * 1e-5, 9.316 * 1e-3, 1.991 * 1e-2,
+                                   4.006, 7.629};
+                FillData(cand, candidate, errors, 139.570);
+                pions.push_back(candidate);
+            }
 	    else if (cand->getGeantPID() == 11) // Kaon found
             {
                 double errors[] = {1.947 * 1e-5, 2.296 * 1e-3, 6.312 * 1e-3,
@@ -267,7 +347,12 @@ Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr
         // -----------------------------------------------------------------------
 	
 	std::cout << "Event number: "  << i << std::endl;
-         for (size_t n = 0; n < protons.size(); n++)
+	std::cout << " " << std::endl;
+        std::cout << "Number of Kaons: " << kaons.size() << std::endl;
+	std::cout << "Number of protons: " << protons.size() << std::endl;
+	std::cout << "Number of Pions: " << pions.size() << std::endl;  
+	
+	for (size_t n = 0; n < protons.size(); n++)
         {
             HRefitCand cand1 = protons[n];
             
@@ -276,19 +361,33 @@ Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr
                 HRefitCand cand2 = pions[m];
                 
                 std::vector<HRefitCand> cands;
+		cands.clear();
                 cands.push_back(cand1);
                 cands.push_back(cand2);
 
                 // Initiate the vertex fitter
                 HVertexFitter vtxFitter(cands);
 
+		vtxFitter.setVerbosity(1);
                 // Find the vertex
                 TVector3 vertex = vtxFitter.findVertex(cands);
-		
+		double distProtonPion = vtxFitter.getDistanceBetweenFittedParticles();
+
 		// Write out the components of the vertex vector
 		std::cout << "Vertex pos: x=" << vertex.X() << ", y=" << vertex.Y() << ", z=" << vertex.Z() << std::endl;
 		
+		hVertexXPreFit->Fill(vertex.X());
+		hVertexYPreFit->Fill(vertex.Y());
+		hVertexZPreFit->Fill(vertex.Z());
 
+		double R = std::sqrt(vertex.X()*vertex.X()+vertex.Y()*vertex.Y());
+		hVertexPreFit->Fill(R,vertex.Z());
+
+		hDistanceBetweenProtonAndPionPreFit->Fill(distProtonPion);
+		//hDistanceToVertexProtonPreFit->Fill();
+		//hDistanceToVertexPionPreFit->Fill();
+
+		std::vector<HRefitCand> newCands = vtxFitter.UpdateTrackParameters(cands, vertex);
             }
         }
 
@@ -471,6 +570,25 @@ Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr
     h15->Write();    
     h16->Write();    
     h17->Write();
+
+hVertexXPreFit->Write();
+hVertexYPreFit->Write();
+hVertexZPreFit->Write();
+hVertexPreFit->Write();
+hDistanceBetweenProtonAndPionPreFit->Write();
+hDistanceToVertexProtonPreFit->Write();
+hDistanceToVertexPionPreFit->Write();
+
+hVertexXPostFit->Write();
+hVertexYPostFit->Write();
+hVertexZPostFit->Write();
+hVertexPostFit->Write();
+hDistanceBetweenProtonAndPionPostFit->Write();
+hDistanceToVertexProtonPostFit->Write();
+hDistanceToVertexPionPostFit->Write();
+
+
+
     outfile->Close();
 
     return 0;

@@ -2,7 +2,7 @@
 
 const size_t cov_dim = 5;
 
-HVertexFitter::HVertexFitter(const std::vector<HRefitCand>& cands) : fCands(cands)
+HVertexFitter::HVertexFitter(const std::vector<HRefitCand>& cands) : fCands(cands), fVerbose(0)
 {
     // fN is the number of daughters e.g. (L->ppi-) n=2
     fN = cands.size();
@@ -69,7 +69,7 @@ TVector3 HVertexFitter::findVertex(const std::vector<HRefitCand> & cands){
         param_R1 = cand1.getR();
         param_Z1 = cand1.getZ();
 
-        HRefitCand cand2 = cands[0];
+        HRefitCand cand2 = cands[1];
 
         param_p_inv2 = 1. / cand2.P();
         param_theta2 = cand2.Theta();
@@ -100,16 +100,23 @@ TVector3 HVertexFitter::findVertex(const std::vector<HRefitCand> & cands){
 
     // Calculate the distance between the two tracks
     double dist = std::fabs((vtx_dir_1.Cross(vtx_dir_2)).Dot((vtx_base_1 - vtx_base_2)));
-    
+    fDistanceParticleToParticle=dist;
+
     // For testing that everything works
+    // Keep the possibility to use this distance as a rough cut
+    if(fVerbose>0){
     std::cout << "Minimum distance between tracks: " << dist << std::endl;
     std::cout << " " << std::endl;
-    // Keep the possibility to use this distance as a rough cut
+    }
+    // Create new base and direction vectors that are not pointing from the origin
+    // New base vectors, first subscript is for coordinate 1 or two and second subscript is for particle 1 or 2 
+    //double x_1_1=; 
 
     // Converting to HGeomVector in order to make use of built in funtions
     // NOTE: Base vectors will need to change for secondary vertex
     HGeomVector vtx_geom_dir_1, vtx_geom_dir_2, vtx_geom_base_1, vtx_geom_base_2;
     
+    // Direction vectors
     vtx_geom_dir_1.setX(std::sin(param_theta1)*std::cos(param_theta1));
     vtx_geom_dir_1.setY(std::sin(param_theta1)*std::sin(param_phi1));
     vtx_geom_dir_1.setZ(std::cos(param_theta1));
@@ -117,52 +124,177 @@ TVector3 HVertexFitter::findVertex(const std::vector<HRefitCand> & cands){
     vtx_geom_dir_2.setY(std::sin(param_theta2)*std::sin(param_phi2));
     vtx_geom_dir_2.setZ(std::cos(param_theta2));
 
+    // Base vectors
     vtx_geom_base_1.setX(param_R1 * std::cos(param_phi1 + TMath::PiOver2()));
     vtx_geom_base_1.setY(param_R1 * std::sin(param_phi1 + TMath::PiOver2()));
     vtx_geom_base_1.setZ(param_Z1);
-
     vtx_geom_base_2.setX(param_R2 * std::cos(param_phi2 + TMath::PiOver2()));
     vtx_geom_base_2.setY(param_R2 * std::sin(param_phi2 + TMath::PiOver2()));
     vtx_geom_base_2.setZ(param_Z2);
 
-    // Calculate corrected base vector. 
+    if(fVerbose>0){
+    std::cout << " ---------------------------------------" << std::endl;
+    std::cout << " " << std::endl;
+    std::cout << "Printing base vector 1: " << std::endl;
+    vtx_geom_base_1.print();
 
-    static HGeomVector vertex = HParticleTool::calculatePointOfClosestApproach(vtx_geom_base_1, vtx_geom_dir_1, vtx_geom_dir_2, vtx_geom_dir_2);
+    std::cout << " " << std::endl;
+    std::cout << "Printing direction vector 1: " << std::endl;
+    vtx_geom_dir_1.print();
+    std::cout << " " << std::endl;
+
+    std::cout << " " << std::endl;
+    std::cout << "Printing base vector 2: " << std::endl;
+    vtx_geom_base_2.print();
+
+    std::cout << " " << std::endl;
+    std::cout << "Printing direction vector 2: " << std::endl;
+    vtx_geom_dir_2.print();
+    std::cout << " " << std::endl;
+    std::cout << " ---------------------------------------" << std::endl;
+    }
+
+    // Calculate corrected base vector 
+
+    HGeomVector vertex = HParticleTool::calculatePointOfClosestApproach(vtx_geom_base_1, vtx_geom_dir_1, vtx_geom_dir_2, vtx_geom_dir_2);
+
     fVertex.SetXYZ(vertex.X(),vertex.Y(),vertex.Z());
+
+    double distanceFromParticleToVertex_1 = HParticleTool::calculateMinimumDistanceStraightToPoint(vtx_geom_base_1, vtx_geom_dir_1, vertex);
+    double distanceFromParticleToVertex_2 = HParticleTool::calculateMinimumDistanceStraightToPoint(vtx_geom_base_2, vtx_geom_dir_2, vertex);
 
     return fVertex;
 }
 
-TMatrixD HVertexFitter::f_eval(const TMatrixD& m_iter)
+std::vector<HRefitCand> HVertexFitter::UpdateTrackParameters(std::vector<HRefitCand> & cands, TVector3 & vertexPos)
 {
-    TMatrixD d;
+    double param_p_inv1, param_theta1, param_phi1, param_R1, param_Z1;
+    double param_p_inv2, param_theta2, param_phi2, param_R2, param_Z2;
 
-    // J.R need to modify the input vectors to come from the vertex found in the 
-    // funtion findVertex
-    //fVertex=findVertex(cands);
+        HRefitCand cand1 = cands[0];
 
-    // Calculate the new base and direction vectors from the new vertex
-    ///////////////////////////////////////////////////////////////////////
+        param_p_inv1 = 1. / cand1.P();
+        param_theta1 = cand1.Theta();
+        param_phi1 = cand1.Phi();
+        param_R1 = cand1.getR();
+        param_Z1 = cand1.getZ();
+
+        HRefitCand cand2 = cands[1];
+
+        param_p_inv2 = 1. / cand2.P();
+        param_theta2 = cand2.Theta();
+        param_phi2 = cand2.Phi();
+        param_R2 = cand2.getR();
+        param_Z2 = cand2.getZ();
+
+
+    // Calculate the base and direction vectors of the two candidates 
+    TVector3 vtx_base_1, vtx_base_2, vtx_dir_1, vtx_dir_2;
+
+    // Base vectors
+    vtx_base_1.SetXYZ(param_R1 * std::cos(param_phi1 + TMath::PiOver2()),
+    param_R1 * std::sin(param_phi1 + TMath::PiOver2()),
+    param_Z1);
+    
+    vtx_base_2.SetXYZ(param_R2 * std::cos(param_phi2 + TMath::PiOver2()),
+    param_R2 * std::sin(param_phi2 + TMath::PiOver2()),
+    param_Z2);
+
+    // Direction vectors
+    vtx_dir_1.SetXYZ(std::sin(param_theta1)*std::cos(param_theta1),
+    std::sin(param_theta1)*std::sin(param_phi1),
+    std::cos(param_theta1));
+
+    vtx_dir_2.SetXYZ(std::sin(param_theta2)*std::cos(param_theta2),
+    std::sin(param_theta2)*std::sin(param_phi2),
+    std::cos(param_theta2));
+
+    //Vectors pointing from vertex to POCA to Beam axis
+    TVector3 vtx_base_1_updated, vtx_base_2_updated;
+    vtx_base_1_updated=vertexPos-vtx_base_1;
+    vtx_base_2_updated=vertexPos-vtx_base_2;
+
+if(fVerbose>0){
+std::cout << " " << std::endl;
+std::cout << "Position of base vector 1: x=" << vtx_base_1.X() << ", y=" << vtx_base_1.Y() << ", z=" << vtx_base_1.Z() << std::endl;
+std::cout << "Position of updated base vector 1: x=" << vtx_base_1_updated.X() << ", y=" << vtx_base_1_updated.Y() << ", z=" << vtx_base_1_updated.Z() << std::endl;
+std::cout << "Theta, original base vector 1: " << vtx_base_1.Theta() << ", Phi, original base vector: " <<vtx_base_1.Phi() << std::endl;
+std::cout << "Theta, updated base vector 1: " << vtx_base_1_updated.Theta() << ", Phi, updated base vector: " <<vtx_base_1_updated.Phi() << std::endl;
+std::cout << " " << std::endl;
+
+std::cout << " " << std::endl;
+std::cout << "Position of base vector 2: x=" << vtx_base_2.X() << ", y=" << vtx_base_2.Y() << ", z=" << vtx_base_2.Z() << std::endl;
+std::cout << "Position of updated base vector 2: x=" << vtx_base_2_updated.X() << ", y=" << vtx_base_2_updated.Y() << ", z=" << vtx_base_2_updated.Z() << std::endl;
+std::cout << "Theta, original base vector 2: " << vtx_base_2.Theta() << ", Phi, original base vector: " <<vtx_base_2.Phi() << std::endl;
+std::cout << "Theta, updated base vector 2: " << vtx_base_2_updated.Theta() << ", Phi, updated base vector: " <<vtx_base_2_updated.Phi() << std::endl;
+std::cout << " " << std::endl;
+
+}
+
+///////////////////////////////////////////////////////////////////////
 
     // Step 1: calculate theta and phi from delta x, delta y and delta z
 
     // All parameters with subscript secondary are parameters calculated not
     // assuming that tracks originate from the IP
 
-    /*double theta_secondary1=;
-    double theta_secondary2=;
+    double theta_secondary1=vtx_base_1_updated.Theta();
+    double theta_secondary2=vtx_base_2_updated.Theta();
 
-    double phi_secondary1=;
-    double phi_secondary2=;
+    double phi_secondary1=vtx_base_1_updated.Phi();
+    double phi_secondary2=vtx_base_2_updated.Phi();
 
-    double R_secondary1=;
+    /*double R_secondary1=;
     double R_secondary2=;
 
     double Z_secondary1=;
     double Z_secondary2=; */
 
     ///////////////////////////////////////////////////////////////////////
-    // vertex constraint
+// Calculate the new base and direction vectors from the new vertex
+    TVector3 vtx_dir_1_updated, vtx_dir_2_updated;
+
+    vtx_dir_1_updated.SetXYZ(std::sin(theta_secondary1)*std::cos(phi_secondary1),
+	std::sin(theta_secondary1)*std::sin(phi_secondary1),
+    std::cos(theta_secondary1));
+vtx_dir_2_updated.SetXYZ(std::sin(theta_secondary2)*std::cos(phi_secondary2),
+        std::sin(theta_secondary2)*std::sin(phi_secondary2),
+    std::cos(theta_secondary2));
+
+    // Calculate the distance between the two tracks
+    double dist_new = std::fabs((vtx_dir_1_updated.Cross(vtx_dir_2_updated)).Dot((vtx_base_1_updated - vtx_base_2_updated)));
+
+    // For testing that everything works
+    // Keep the possibility to use this distance as a rough cut
+    if(fVerbose>0){
+    std::cout << "Minimum NEW distance between tracks: " << dist_new << std::endl;
+    std::cout << " " << std::endl;
+    }
+
+
+// TODO set the new angles of the candidates
+// These candidates can then be passed to the fit procedure for an evaluation of the probabilities and re-evaluation of the track parameters
+
+
+//cand1.setTheta(theta_secondary1);
+//cand1.setPhi(phi_secondary1);
+
+//cand2.setTheta(theta_secondary2);
+//cand2.setPhi(phi_secondary2);
+
+std::vector<HRefitCand> newCands;
+newCands.clear();
+//newCands.push_back(cand1);
+//newCands.push_back(cand2);
+
+return newCands;
+
+}
+
+
+TMatrixD HVertexFitter::f_eval(const TMatrixD& m_iter)
+{
+    TMatrixD d;
 
         d.ResizeTo(1, 1);
         TVector3 base_1, base_2, dir_1, dir_2;

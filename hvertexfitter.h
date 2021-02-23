@@ -59,10 +59,14 @@ private:
     int fNdf;
     std::vector<double> fM;
     TLorentzVector fInit;
-    bool fVtxConstraint;  
+    bool fVtxConstraint;
     double fVtxPos;
     TVector3 fVertex;
-    
+    int fVerbose;
+
+double fDistanceParticleToParticle;
+double fDistanceParticleToVertex;
+
 
 public:
     HVertexFitter(const std::vector<HRefitCand> & cands);
@@ -71,23 +75,27 @@ public:
     TMatrixD Feta_eval(const TMatrixD &miter);
     // The addVtxConstraint function should work in two different ways:
     // 1. Take the fitted vertex and adjust track parameters to be coming from there
-    // 2. Possibility: adjust the reconstructed vertex position  
+    // 2. Possibility: adjust the reconstructed vertex position
     TVector3 findVertex(const std::vector<HRefitCand> & cands);
-    
+    std::vector<HRefitCand> UpdateTrackParameters(std::vector<HRefitCand> & cands, TVector3 & VertexPos);
+
     //TVector3 findVertex(const std::vector<HRefitCand> & cands) {return fVertex;} // Function to calculate and return vertex
     double getChi2() const {return fChi2;}
     double getProb() const {return fProb;}
     double getPull(int val=0){return fPull(val,val);}
     TVector3 getVertex() const {return fVertex;} // Function that the user should use in the analysis macro
+    double getDistanceBetweenFittedParticles() const {return fDistanceParticleToParticle;}
+    // The input to the function below is the index of the particle in the cands vector
+    double getDistanceBetweenParticleAndVertex(int val) const {return fDistanceParticleToVertex;}
     bool   isConverged() const {return fConverged;}
     int    getIteration() const {return fIteration;}
     void   setCovariance(TMatrixD &val){V=val;}
     void   setMeasurement(TMatrixD &val){y=val;}
-
     bool fit();
+    void setVerbosity(int val){fVerbose=val;}
 
     // J.R. The following line was present in the
-    // original code. It does not seen to work with the 
+    // original code. It does not seen to work with the
     // HYDRA version needed to run this code
     //[[deprecated]]
     HRefitCand getDaughter(int val);
