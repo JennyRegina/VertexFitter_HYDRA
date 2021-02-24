@@ -388,6 +388,10 @@ Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr
 		//hDistanceToVertexPionPreFit->Fill();
 
 		std::vector<HRefitCand> newCands = vtxFitter.UpdateTrackParameters(cands, vertex);
+
+		HVertexFitter vtxFitterNew(newCands);
+		vtxFitterNew.fit();
+
             }
         }
 

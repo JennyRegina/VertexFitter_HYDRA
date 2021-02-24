@@ -276,16 +276,16 @@ vtx_dir_2_updated.SetXYZ(std::sin(theta_secondary2)*std::cos(phi_secondary2),
 // These candidates can then be passed to the fit procedure for an evaluation of the probabilities and re-evaluation of the track parameters
 
 
-//cand1.setTheta(theta_secondary1);
-//cand1.setPhi(phi_secondary1);
+cand1.setTheta(theta_secondary1);
+cand1.setPhi(phi_secondary1);
 
-//cand2.setTheta(theta_secondary2);
-//cand2.setPhi(phi_secondary2);
+cand2.setTheta(theta_secondary2);
+cand2.setPhi(phi_secondary2);
 
 std::vector<HRefitCand> newCands;
 newCands.clear();
-//newCands.push_back(cand1);
-//newCands.push_back(cand2);
+newCands.push_back(cand1);
+newCands.push_back(cand2);
 
 return newCands;
 
