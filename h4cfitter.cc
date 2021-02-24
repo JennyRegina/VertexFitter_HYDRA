@@ -162,9 +162,9 @@ TMatrixD H4cFitter::Feta_eval(const TMatrixD& m_iter)
     return H;
 }
 
-bool H4cFitter::fit()
+bool H4cFitter::fit(double lr, Int_t maxItr)
 {
-    double lr = 0.5;
+   // double lr = 0.5;
     TMatrixD alpha0(fNdau * cov_dim, 1), alpha(fNdau * cov_dim, 1);
     TMatrixD A0(y), V0(V);
     alpha0 = y;
@@ -176,7 +176,7 @@ bool H4cFitter::fit()
     TMatrixD d = f_eval(alpha);
     //cout << " start fitting " << endl;
 
-    for (int q = 0; q < 5; q++)
+    for (int q = 0; q < maxItr; q++)
     {
         TMatrixD DT(D.GetNcols(), D.GetNrows());
         DT.Transpose(D);
@@ -184,9 +184,10 @@ bool H4cFitter::fit()
         TMatrixD VD = D * V * DT;
         VD.Invert();
 
-        TMatrixD delta_alpha = alpha - alpha0;
+        //TMatrixD delta_alpha = alpha - alpha0;
+        TMatrixD delta_alpha = y - alpha;
 	//cout << " calc lambda " << endl;
-        TMatrixD lambda = VD * D * delta_alpha + VD * d;
+        TMatrixD lambda = VD * D * delta_alpha + VD * d; 
         TMatrixD lambdaT(lambda.GetNcols(), lambda.GetNrows());
         lambdaT.Transpose(lambda);
         TMatrixD neu_alpha(fNdau * cov_dim, 1);

@@ -82,7 +82,7 @@ public:
     void   setMeasurement(TMatrixD &val){y=val;}
     //void   appendCand(HRefitCand cand){fCands.push_back(cand);}
 
-    bool fit();
+    bool fit(double lr, Int_t maxItr);
 
     //[[deprecated]]
     HRefitCand getDaughter(int val);
