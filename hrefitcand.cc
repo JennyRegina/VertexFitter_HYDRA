@@ -2,7 +2,7 @@
 #include "hrefitcand.h"
 
 HRefitCand::HRefitCand(HVirtualCand* cand)
-    : TLorentzVector(*cand), fR(cand->getR()), fZ(cand->getZ()), cand(cand)
+    : TLorentzVector(*cand), fR(cand->getR()), fZ(cand->getZ()), fTheta(cand->Theta()), fPhi(cand->Phi()), cand(cand)
 {
 }
 

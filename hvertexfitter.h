@@ -57,6 +57,10 @@ private:
     // data members for constraints
     double fMass;
     int fNdf;
+
+    double fLearningRate;
+    int fNumIterations;
+    
     std::vector<double> fM;
     TLorentzVector fInit;
     bool fVtxConstraint;
@@ -79,6 +83,8 @@ public:
     TVector3 findVertex(const std::vector<HRefitCand> & cands);
     std::vector<HRefitCand> UpdateTrackParameters(std::vector<HRefitCand> & cands, TVector3 & VertexPos);
 
+    void setLearningRate(double val){fLearningRate=val;}
+    void setNumberOfIterations(int val){fNumIterations=val;}
     //TVector3 findVertex(const std::vector<HRefitCand> & cands) {return fVertex;} // Function to calculate and return vertex
     double getChi2() const {return fChi2;}
     double getProb() const {return fProb;}
@@ -86,13 +92,25 @@ public:
     TVector3 getVertex() const {return fVertex;} // Function that the user should use in the analysis macro
     double getDistanceBetweenFittedParticles() const {return fDistanceParticleToParticle;}
     // The input to the function below is the index of the particle in the cands vector
-    double getDistanceBetweenParticleAndVertex(int val) const {return fDistanceParticleToVertex;}
+    //double getDistanceBetweenParticleAndVertex(int val) const {return fDistanceParticleToVertex;}
+
+    double getDistanceFirstParticleVertex() const {return fDistParticle1Vertex;}
+    double getDistanceSecondParticleVertex() const {return fDistParticle2Vertex;}
+    double getDistanceFirstParticleOrigin() const {return fDistParticle1Origin;}
+    double getDistanceSecondParticleOrigin() const {return fDistParticle2Origin;}
+
     bool   isConverged() const {return fConverged;}
     int    getIteration() const {return fIteration;}
     void   setCovariance(TMatrixD &val){V=val;}
     void   setMeasurement(TMatrixD &val){y=val;}
     bool fit();
     void setVerbosity(int val){fVerbose=val;}
+
+    double fDistParticle1Vertex;
+    double fDistParticle2Vertex;
+    double fDistParticle1Origin;
+    double fDistParticle2Origin;
+
 
     // J.R. The following line was present in the
     // original code. It does not seen to work with the
@@ -103,6 +121,7 @@ public:
     void update();
 
 protected:
+
     void updateDaughters();
 };
 

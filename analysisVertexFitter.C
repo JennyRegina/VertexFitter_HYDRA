@@ -87,7 +87,7 @@ Bool_t selectHadrons(HParticleCand* pcand)
     return test;
 }
 
-Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr12.root", Int_t nEvents = 1000)
+Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr12.root", Int_t nEvents = 100000)
 {
 
     TStopwatch timer;
@@ -193,13 +193,25 @@ Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr
    hDistanceBetweenProtonAndPionPreFit->SetXTitle("Distance between particles / cm");
    hDistanceBetweenProtonAndPionPreFit->SetYTitle(" Counts ");
 
-   TH1F* hDistanceToVertexProtonPreFit = new TH1F("hDistanceToVertexProtonPreFit", "", 500, 0, 50);
+   TH1F* hDistanceToVertexProtonPreFit = new TH1F("hDistanceToVertexProtonPreFit", "", 1000, 0, 100);
    hDistanceToVertexProtonPreFit->SetXTitle("Distance to vertex / cm");
    hDistanceToVertexProtonPreFit->SetYTitle(" Counts ");
 
-   TH1F* hDistanceToVertexPionPreFit = new TH1F("hDistanceToVertexPionPreFit", "", 500, 0, 50);
+   TH1F* hDistanceToVertexPionPreFit = new TH1F("hDistanceToVertexPionPreFit", "", 1000, 0, 100);
    hDistanceToVertexPionPreFit->SetXTitle("Distance to vertex / cm");
    hDistanceToVertexPionPreFit->SetYTitle(" Counts ");
+
+   TH1F* hDistanceToOriginProtonPreFit = new TH1F("hDistanceToOriginProtonPreFit", "", 1000, 0, 100);
+   hDistanceToOriginProtonPreFit->SetXTitle("Distance to origin / cm");
+   hDistanceToOriginProtonPreFit->SetYTitle(" Counts ");
+
+   TH1F* hDistanceToOriginPionPreFit = new TH1F("hDistanceToOriginPionPreFit", "", 1000, 0, 100);
+   hDistanceToOriginPionPreFit->SetXTitle("Distance to Origin / cm");
+   hDistanceToOriginPionPreFit->SetYTitle(" Counts ");
+
+   TH1F* hDistanceToOriginSumPreFit = new TH1F("hDistanceToOriginSumPreFit", "", 1000, 0, 100);
+   hDistanceToOriginSumPreFit->SetXTitle("Distance to Origin Sum / cm");
+   hDistanceToOriginSumPreFit->SetYTitle(" Counts ");
 
    // --------- Vertex histograms post fit --------------------
 
@@ -219,15 +231,15 @@ Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr
    hVertexPostFit->SetXTitle("Vertex, Z / cm");
    hVertexPostFit->SetYTitle("Vertex, R /cm");
 
-   TH1F* hDistanceBetweenProtonAndPionPostFit = new TH1F("hDistanceBetweenProtonAndPionPostFit", "", 500, 0, 50);
+   TH1F* hDistanceBetweenProtonAndPionPostFit = new TH1F("hDistanceBetweenProtonAndPionPostFit", "", 1000, 0, 100);
    hDistanceBetweenProtonAndPionPostFit->SetXTitle("Distance between particles / cm");
    hDistanceBetweenProtonAndPionPostFit->SetYTitle(" Counts ");
 
-   TH1F* hDistanceToVertexProtonPostFit = new TH1F("hDistanceToVertexProtonPostFit", "", 500, 0, 50);
+   TH1F* hDistanceToVertexProtonPostFit = new TH1F("hDistanceToVertexProtonPostFit", "", 1000, 0, 100);
    hDistanceToVertexProtonPostFit->SetXTitle("Distance to vertex / cm");
    hDistanceToVertexProtonPostFit->SetYTitle(" Counts ");
 
-   TH1F* hDistanceToVertexPionPostFit = new TH1F("hDistanceToVertexPionPostFit", "", 500, 0, 50);
+   TH1F* hDistanceToVertexPionPostFit = new TH1F("hDistanceToVertexPionPostFit", "", 1000, 0, 100);
    hDistanceToVertexPionPostFit->SetXTitle("Distance to vertex / cm");
    hDistanceToVertexPionPostFit->SetYTitle(" Counts ");
 
@@ -346,11 +358,11 @@ Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr
         // looking at Lambda invariant mass here
         // -----------------------------------------------------------------------
 	
-	std::cout << "Event number: "  << i << std::endl;
-	std::cout << " " << std::endl;
-        std::cout << "Number of Kaons: " << kaons.size() << std::endl;
-	std::cout << "Number of protons: " << protons.size() << std::endl;
-	std::cout << "Number of Pions: " << pions.size() << std::endl;  
+	//std::cout << "Event number: "  << i << std::endl;
+	//std::cout << " " << std::endl;
+        //std::cout << "Number of Kaons: " << kaons.size() << std::endl;
+	//std::cout << "Number of protons: " << protons.size() << std::endl;
+	//std::cout << "Number of Pions: " << pions.size() << std::endl;  
 	
 	for (size_t n = 0; n < protons.size(); n++)
         {
@@ -368,20 +380,29 @@ Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr
                 // Initiate the vertex fitter
                 HVertexFitter vtxFitter(cands);
 
-		vtxFitter.setVerbosity(1);
+	        //vtxFitter.setVerbosity(0);
                 // Find the vertex
                 TVector3 vertex = vtxFitter.findVertex(cands);
 		double distProtonPion = vtxFitter.getDistanceBetweenFittedParticles();
 
+		hDistanceToVertexProtonPreFit->Fill(vtxFitter.getDistanceFirstParticleVertex());
+		hDistanceToVertexPionPreFit->Fill(vtxFitter.getDistanceSecondParticleVertex());
+		
+
+		hDistanceToOriginProtonPreFit->Fill(vtxFitter.getDistanceFirstParticleOrigin());
+                hDistanceToOriginPionPreFit->Fill(vtxFitter.getDistanceSecondParticleOrigin());
+
+		hDistanceToOriginSumPreFit->Fill(vtxFitter.getDistanceFirstParticleOrigin()+vtxFitter.getDistanceSecondParticleOrigin());
+
 		// Write out the components of the vertex vector
-		std::cout << "Vertex pos: x=" << vertex.X() << ", y=" << vertex.Y() << ", z=" << vertex.Z() << std::endl;
+		//std::cout << "Vertex pos: x=" << vertex.X() << ", y=" << vertex.Y() << ", z=" << vertex.Z() << std::endl;
 		
 		hVertexXPreFit->Fill(vertex.X());
 		hVertexYPreFit->Fill(vertex.Y());
 		hVertexZPreFit->Fill(vertex.Z());
 
-		double R = std::sqrt(vertex.X()*vertex.X()+vertex.Y()*vertex.Y());
-		hVertexPreFit->Fill(R,vertex.Z());
+		double R = sqrt((vertex.X()*vertex.X())+(vertex.Y()*vertex.Y()));
+		hVertexPreFit->Fill(vertex.Z(),R);
 
 		hDistanceBetweenProtonAndPionPreFit->Fill(distProtonPion);
 		//hDistanceToVertexProtonPreFit->Fill();
@@ -389,8 +410,30 @@ Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr
 
 		std::vector<HRefitCand> newCands = vtxFitter.UpdateTrackParameters(cands, vertex);
 
+		// Fit to secondary vertex
+		//HVertexFitter vtxFitterNew(newCands);
+		// Fit to primary vertex
 		HVertexFitter vtxFitterNew(newCands);
+
 		vtxFitterNew.fit();
+
+	        h02->Fill(vtxFitterNew.getChi2());
+                h03->Fill(vtxFitterNew.getProb());
+
+                //get Pull example (1/P for the fitted proton)
+                h05->Fill(vtxFitterNew.getPull(0));
+
+                //get Pull example (theta for the fitted proton)
+                h06->Fill(vtxFitterNew.getPull(1));
+
+                //get Pull example (phi for the fitted proton)
+                h07->Fill(vtxFitterNew.getPull(2));
+
+                //get Pull example (R for the fitted proton)
+                h08->Fill(vtxFitterNew.getPull(3));
+
+                //get Pull example (Z for the fitted proton)
+                h09->Fill(vtxFitterNew.getPull(4));
 
             }
         }
@@ -582,6 +625,11 @@ hVertexPreFit->Write();
 hDistanceBetweenProtonAndPionPreFit->Write();
 hDistanceToVertexProtonPreFit->Write();
 hDistanceToVertexPionPreFit->Write();
+hDistanceToOriginProtonPreFit->Write();
+hDistanceToOriginPionPreFit->Write();
+hDistanceToOriginSumPreFit->Write();
+
+
 
 hVertexXPostFit->Write();
 hVertexYPostFit->Write();

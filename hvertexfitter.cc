@@ -2,7 +2,7 @@
 
 const size_t cov_dim = 5;
 
-HVertexFitter::HVertexFitter(const std::vector<HRefitCand>& cands) : fCands(cands), fVerbose(0)
+HVertexFitter::HVertexFitter(const std::vector<HRefitCand>& cands) : fCands(cands), fVerbose(0), fLearningRate(0.5), fNumIterations(5)
 {
     // fN is the number of daughters e.g. (L->ppi-) n=2
     fN = cands.size();
@@ -39,27 +39,13 @@ HVertexFitter::HVertexFitter(const std::vector<HRefitCand>& cands) : fCands(cand
 
 }
 
-// One will need to pass the correct objects to the function once it is decided what to use
 TVector3 HVertexFitter::findVertex(const std::vector<HRefitCand> & cands){
-
-//TVector3 HVertexFitter::findVertex(){
 
     // try to find the decay vertex from the most basic information so that 
     // the code is as independent as possible from objects used in the analysis
 
     double param_p_inv1, param_theta1, param_phi1, param_R1, param_Z1;
     double param_p_inv2, param_theta2, param_phi2, param_R2, param_Z2;
-
-/*     for (int ix = 0; ix < fN; ix++)
-    {
-        HRefitCand cand = cands[ix];
-
-        param_p_inv = 1. / cand.P();
-        param_theta = cand.Theta();
-        param_phi = cand.Phi();
-        param_R = cand.getR();
-        param_Z = cand.getZ();
-    } */
 
         HRefitCand cand1 = cands[0];
 
@@ -162,6 +148,19 @@ TVector3 HVertexFitter::findVertex(const std::vector<HRefitCand> & cands){
 
     double distanceFromParticleToVertex_1 = HParticleTool::calculateMinimumDistanceStraightToPoint(vtx_geom_base_1, vtx_geom_dir_1, vertex);
     double distanceFromParticleToVertex_2 = HParticleTool::calculateMinimumDistanceStraightToPoint(vtx_geom_base_2, vtx_geom_dir_2, vertex);
+
+HGeomVector originVertex;
+originVertex.setX(0.0);
+originVertex.setY(0.0);
+originVertex.setZ(0.0);
+
+    double distanceFromParticleToOrigin_1 = HParticleTool::calculateMinimumDistanceStraightToPoint(vtx_geom_base_1, vtx_geom_dir_1, originVertex);
+    double distanceFromParticleToOrigin_2 = HParticleTool::calculateMinimumDistanceStraightToPoint(vtx_geom_base_2, vtx_geom_dir_2, originVertex);
+
+fDistParticle1Vertex=distanceFromParticleToVertex_1;
+fDistParticle2Vertex=distanceFromParticleToVertex_2;
+fDistParticle1Origin=distanceFromParticleToOrigin_1;
+fDistParticle2Origin=distanceFromParticleToOrigin_2;
 
     return fVertex;
 }
@@ -275,12 +274,29 @@ vtx_dir_2_updated.SetXYZ(std::sin(theta_secondary2)*std::cos(phi_secondary2),
 // TODO set the new angles of the candidates
 // These candidates can then be passed to the fit procedure for an evaluation of the probabilities and re-evaluation of the track parameters
 
+if(fVerbose>0){
+std::cout << "Before update " << std::endl;
 
-cand1.setTheta(theta_secondary1);
-cand1.setPhi(phi_secondary1);
+std::cout << "Cand1, theta: " << cand1.Theta() << std::endl;
+std::cout << "Cand1, phi: " << cand1.Phi() << std::endl;
+std::cout << "Cand2, theta: " << cand2.Theta() << std::endl;
+std::cout << "Cand2, phi: " << cand2.Phi() << std::endl;
+}
 
-cand2.setTheta(theta_secondary2);
-cand2.setPhi(phi_secondary2);
+cand1.SetTheta(theta_secondary1);
+cand1.SetPhi(phi_secondary1);
+
+cand2.SetTheta(theta_secondary2);
+cand2.SetPhi(phi_secondary2);
+
+if(fVerbose){
+std::cout << "After update " << std::endl;
+
+std::cout << "Cand1, theta: " << cand1.Theta() << std::endl;
+std::cout << "Cand1, phi: " << cand1.Phi() << std::endl;
+std::cout << "Cand2, theta: " << cand2.Theta() << std::endl;
+std::cout << "Cand2, phi: " << cand2.Phi() << std::endl;
+}
 
 std::vector<HRefitCand> newCands;
 newCands.clear();
@@ -495,7 +511,7 @@ TMatrixD HVertexFitter::Feta_eval(const TMatrixD& m_iter)
 
 bool HVertexFitter::fit()
 {
-    double lr = 1;
+    double lr = fLearningRate;
     TMatrixD alpha0(fN * cov_dim, 1), alpha(fN * cov_dim, 1);
     TMatrixD A0(y), V0(V);
     alpha0 = y;
@@ -504,7 +520,7 @@ bool HVertexFitter::fit()
     TMatrixD D = Feta_eval(alpha);
     TMatrixD d = f_eval(alpha);
 
-    for (int q = 0; q < 5; q++)
+    for (int q = 0; q < fNumIterations; q++)
     {
         TMatrixD DT(D.GetNcols(), D.GetNrows());
         DT.Transpose(D);

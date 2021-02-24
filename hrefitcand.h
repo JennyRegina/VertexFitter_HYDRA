@@ -24,6 +24,8 @@ public:
     void setCovariance(const TMatrixD & cov);
     Double_t getR() const { return fR; }
     Double_t getZ() const { return fZ; }
+    Double_t getTheta() const { return fTheta; }
+    Double_t getPhi() const { return fPhi; }
     TMatrixD getCovariance() const {return fCov; }
 
     void reset();
