@@ -1,3 +1,4 @@
+
 # VertexFitter_HYDRA
 
 Workspace for the development of the vertex fitter
@@ -24,3 +25,11 @@ common_libs +="VertexFit";
 You might need to remove other external libraries from rootlogon.C.
 
 Now the macro analysis.C should work.
+
+The macro needs to be run pre-compiled. To run the macro on virgo, type
+
+root -b
+
+and in root session
+
+.X analysis.C+
