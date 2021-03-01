@@ -13,7 +13,7 @@ LIB_NAME := VertexFit
 USES_ORACLE= : no
 
 SOURCE_FILES := hrefitcand.cc \
-		hvertexfitter.cc
+		hmisspartfitter.cc
 
 
 include $(HADDIR)/hades.def.mk

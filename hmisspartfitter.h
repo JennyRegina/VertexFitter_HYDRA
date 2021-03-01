@@ -1,11 +1,11 @@
 /**
- * H3CFitter.h
+ * H4MOMFitter.h
  *
  *
  */
 
-#ifndef H3CFITTER_H
-#define H3CFITTER_H
+#ifndef H4MOMFITTER_H
+#define H4MOMFITTER_H
 
 // system includes
 #include <iostream>
@@ -45,7 +45,7 @@ void Print(T const &matrix)
     cout << endl;
 }
 
-class H3cFitter {
+class H4cFitter {
 private:
     TMatrixD y, V, fPull;
     double fChi2, fProb;
@@ -58,22 +58,20 @@ private:
     std::vector<double> fM;
     TLorentzVector fInit;
     TLorentzVector fLv4C;
-    HRefitCand fMother;
+    //HRefitCand fMother;
     bool fWiggleMoth;
-    bool f3Constraint;  
+    bool f4MomConstraint;  
     //double fVtxPos;
     //TVector3 fVertex;
     
 
 public:
-    H3cFitter(const std::vector<HRefitCand> & cands, HRefitCand & mother);
-    //H3cFitter(const std::vector<HRefitCand> & cands);
-    ~H3cFitter(){};
-    TMatrixD f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter);
-    TMatrixD Feta_eval(const TMatrixD &miter, const TMatrixD &xi_iter);
-    TMatrixD Fxi_eval(const TMatrixD &miter, const TMatrixD &xi_iter);
-    TMatrixD calcMotherMom(const TMatrixD& m_iter);
-    void   add3Constraint();
+    H4momFitter(const std::vector<HRefitCand> & cands, TLorentzVector & lv);
+    //H4cFitter(const std::vector<HRefitCand> & cands);
+    ~H4cFitter(){};
+    TMatrixD f_eval(const TMatrixD &m_iter);
+    TMatrixD Feta_eval(const TMatrixD &miter);
+    void   add4MomConstraint();
     double getChi2() const {return fChi2;}
     double getProb() const {return fProb;}
     double getPull(int val=0){return fPull(val,val);}
@@ -94,4 +92,4 @@ protected:
     void updateDaughters();
 };
 
-#endif /* H3CFITTER_H */
+#endif /* H4MOMFITTER_H */

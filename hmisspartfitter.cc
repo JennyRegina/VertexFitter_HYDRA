@@ -1,20 +1,20 @@
-#include "h3cfitter.h"
+#include "h4momfitter.h"
 
 const size_t cov_dim = 5;
 
-H3cFitter::H3cFitter(const std::vector<HRefitCand>& cands, HRefitCand& mother) : 
-    fCands(cands),
-    fMother(mother)
+
+H4momFitter::H4momFitter(const std::vector<HRefitCand>& cands, TLorentzVector& lv, Double_t mass) : 
+    fCands(cands)
 {
+    //fLv4C = TLorentzVector(0,0,4337.96,2*938.272+3500) ;
+    fLv4C = lv;
+    
     // fNdau is the number of daughters e.g. (L->ppi-) n=2
     fNdau = cands.size();
-    fNdau;
-    //fCands.push_back(mother);
-    //fWiggleMoth = true;
-    Int_t dimension = (fNdau+1) * cov_dim -1;       //Mother momentum is not measured
+    fWiggleMoth = false;
 
-    y.ResizeTo(dimension, 1); 
-    V.ResizeTo(dimension, dimension);
+    y.ResizeTo(fNdau * cov_dim, 1);
+    V.ResizeTo(fNdau * cov_dim, fNdau * cov_dim);
 
     y.Zero();
     V.Zero();
@@ -29,7 +29,7 @@ H3cFitter::H3cFitter(const std::vector<HRefitCand>& cands, HRefitCand& mother) :
     {
         HRefitCand cand = cands[ix];
         //fM[ix]=cand.M();
-
+        
         y(0 + ix * cov_dim, 0) = 1. / cand.P();
         y(1 + ix * cov_dim, 0) = cand.Theta();
         y(2 + ix * cov_dim, 0) = cand.Phi();
@@ -46,40 +46,46 @@ H3cFitter::H3cFitter(const std::vector<HRefitCand>& cands, HRefitCand& mother) :
         V(4 + ix * cov_dim, 4 + ix * cov_dim) = covariance(4, 4);
     }
 
-    y(fNdau * cov_dim, 0) = cand.Theta();
-    y(1 + fNdau * cov_dim, 0) = cand.Phi();
-    y(2 + fNdau * cov_dim, 0) = cand.getR();
-    y(3 + fNdau * cov_dim, 0) = cand.getZ();
-    fM.push_back(mother.M());
-
-    TMatrixD covariance = mother.getCovariance();
-    V(0 + fNdau * cov_dim, 1 + ix * cov_dim) = covariance(1, 1);
-    V(1 + fNdau * cov_dim, 2 + ix * cov_dim) = covariance(2, 2);
-    V(2 + fNdau * cov_dim, 3 + ix * cov_dim) = covariance(3, 3);
-    V(3 + fNdau * cov_dim, 4 + ix * cov_dim) = covariance(4, 4);
-
-    f3Constraint = false;
+    f4MomConstraint = false;
 }
 
-void H3cFitter::add3Constraint()
+void H4momFitter::add4MomConstraint()
 {
-    fNdf += 3;
-    f3Constraint = true;
+    fM.push_back(mass);
+    fNdf += 1;
+    f4Constraint = true;
 }
 
-TMatrixD H3cFitter::f_eval(const TMatrixD& m_iter, const TMatrixD& xi_iter)
+TMatrixD H4momFitter::calcMissingMom(const TMatrixD& m_iter)
+{
+    TMatrix xi(3,1);
+
+    xi(0, 0) = fLv4C.Px();
+    xi(1, 0) = fLv4C.Py();
+    xi(2, 0) = fLv4C.Pz();
+
+    for(int q=0; q<fNdau; q++){
+        xi(0, 0) -= 1. / m_iter(0 + q * cov_dim, 0)*sin(m_iter(1 + q * cov_dim, 0))*cos(m_iter(2 + q * cov_dim, 0));
+        xi(1,0) -= 1. / m_iter(0 + q * cov_dim, 0)*sin(m_iter(1 + q * cov_dim, 0))*sin(m_iter(2 + q * cov_dim, 0));
+        xi(2,0) -= 1. / m_iter(0 + q * cov_dim, 0)*cos(m_iter(1 + q * cov_dim, 0));
+    }
+
+    return xi;
+}
+
+TMatrixD H4momFitter::f_eval(const TMatrixD& m_iter, const TMatrixD& xi_iter)
 {
     TMatrixD d;
 
-    // 4 constraints
-    if (f3Constraint)
+    // 4 mom constraint
+    if (f4MomConstraint)
     {
 	
-	d.ResizeTo(4, 1); //(4,1)
-        d(0,0) -= 1. / xi_iter(0, 0)*sin(m_iter(0 + fNdau, 0))*cos(m_iter(1 + fNdau, 0));
-        d(1,0) -= 1. / xi_iter(0, 0)*sin(m_iter(0 + fNdau, 0))*sin(m_iter(1 + fNdau, 0));
-        d(2,0) -= 1. / xi_iter(0, 0)*cos(m_iter(0 + fNdau, 0));
-        d(3,0) -= sqrt(pow((1. / xi_iter(0, 0)), 2) + pow(fM[fNdau], 2));
+	d.ResizeTo(fNdf, 1); //(4,1)
+        d(0, 0) = -fLv4C.Px() + xi_iter(0,0);
+        d(1, 0) = -fLv4C.Py() + xi_iter(1,0);
+        d(2, 0) = -fLv4C.Pz() + xi_iter(2,0);
+        d(3, 0) = -fLv4C.E() + sqrt(pow(xi_iter(0,0),2)+pow(xi_iter(1,0),2)+pow(xi_iter(2,0),2)+pow(fM[fNdau],2));
 	
         for(int q=0; q<fNdau; q++){
             d(0,0) += 1. / m_iter(0 + q * cov_dim, 0)*sin(m_iter(1 + q * cov_dim, 0))*cos(m_iter(2 + q * cov_dim, 0));
@@ -93,15 +99,38 @@ TMatrixD H3cFitter::f_eval(const TMatrixD& m_iter, const TMatrixD& xi_iter)
     return d;
 }
 
-TMatrixD H3cFitter::Feta_eval(const TMatrixD& m_iter, const TMatrixD& xi_iter)
+TMatrixD H4momFitter::Fxi_eval(const TMatrixD& xi_iter)
 {
 
     TMatrixD H;
 
     // 4constraint
-    if (f3Constraint)
+    if (f4MomConstraint)
     {
-        H.ResizeTo(4, dimension);
+        H.ResizeTo(4, 3);
+        H.Zero();
+
+        H(0, 0) = 1;
+        H(1, 1) = 1;
+        H(2, 2) = 1;
+
+        H(3, 0) = xi_iter(0,0)/sqrt(pow(xi_iter(0,0),2)+pow(xi_iter(1,0),2)+pow(xi_iter(2,0),2)+pow(fM[fNdau],2));
+        H(3, 1) = xi_iter(1,0)/sqrt(pow(xi_iter(0,0),2)+pow(xi_iter(1,0),2)+pow(xi_iter(2,0),2)+pow(fM[fNdau],2));
+        H(3, 2) = xi_iter(2,0)/sqrt(pow(xi_iter(0,0),2)+pow(xi_iter(1,0),2)+pow(xi_iter(2,0),2)+pow(fM[fNdau],2));
+    }
+
+    return H;
+}
+
+TMatrixD H4momFitter::Feta_eval(const TMatrixD& m_iter)
+{
+
+    TMatrixD H;
+
+    // 4Momconstraint
+    if (f4MomConstraint)
+    {
+        H.ResizeTo(4, fNdau * cov_dim);
         H.Zero();
 
         for(int q=0; q<fNdau; q++){
@@ -117,71 +146,33 @@ TMatrixD H3cFitter::Feta_eval(const TMatrixD& m_iter, const TMatrixD& xi_iter)
             H(0, 2 + q * cov_dim) = -1./m_iter(0 + q * cov_dim, 0) * sin(m_iter(1 + q * cov_dim, 0)) * sin(m_iter(2 + q * cov_dim, 0));
             H(1, 2 + q * cov_dim) = 1./m_iter(0 + q * cov_dim, 0) * sin(m_iter(1 + q * cov_dim, 0)) * cos(m_iter(2 + q * cov_dim, 0));
         }
-
-        H(0, fNdau * cov_dim) = -1./xi_iter(0, 0) * cos(m_iter(0 + fNdau * cov_dim, 0)) * cos(m_iter(1 + fNdau * cov_dim, 0));
-        H(1, fNdau * cov_dim) = -1./xi_iter(0, 0) * cos(m_iter(0 + fNdau * cov_dim, 0)) * sin(m_iter(1 + fNdau * cov_dim, 0));
-        H(2, fNdau * cov_dim) = 1./xi_iter(0, 0) * sin(m_iter(0 + fNdau * cov_dim, 0));
-        H(0, 1 + fNdau * cov_dim) = 1./xi_iter(0, 0) * sin(m_iter(0 + fNdau * cov_dim, 0)) * sin(m_iter(1 + fNdau * cov_dim, 0));
-        H(1, 1 + fNdau * cov_dim) = -1./xi_iter(0, 0) * sin(m_iter(0 + fNdau * cov_dim, 0)) * cos(m_iter(1 + fNdau * cov_dim, 0));
-
     }
 
     return H;
 }
 
-TMatrixD VertexFitter::Fxi_eval(const TMatrixD& m_iter, const TMatrixD& xi_iter)
-{
-
-    TMatrixD H;
-
-    if (f3Constraint)
-    {
-        H.ResizeTo(4, 1);
-        H.Zero();
-
-        H(0, 0) = 1./pow(xi_iter(0, 0),2) * sin(m_iter(0 + fNdau * cov_dim, 0)) * cos(m_iter(1 + fNdau * cov_dim, 0));
-        H(1, 0) = 1./pow(xi_iter(0, 0),2) * sin(m_iter(0 + fNdau * cov_dim, 0)) * sin(m_iter(1 + fNdau * cov_dim, 0));
-        H(2, 0) = 1./pow(xi_iter(0, 0),2) * cos(m_iter(0 + fNdau * cov_dim, 0));
-        H(3, 0) = 1./pow(xi_iter(0, 0),3) * 1./ sqrt(pow(m_iter(0, 0),2) + pow(fM[fNdau], 2));
-    }
-
-    return H;
-}
-
-TMatrixD H3cFitter::calcMotherMom(const TMatrixD& m_iter)
-{
-    TMatrix xi(1,1);
-
-    xi(0, 0) = -pow(fM[fNdau],2);
-
-    for(int q=0; q<fNdau; q++){
-        xi(0, 0) += sqrt(pow((1. / m_iter(0 + q * cov_dim, 0)), 2) + pow(fM[q], 2));
-    }
-
-    xi(0,0) = sqrt(x(0,0));
-
-    return xi;
-}
-
-bool H3cFitter::fit(double lr, Int_t maxItr)
+bool H4momFitter::fit(double lr, Int_t maxItr)
 {
    // double lr = 0.5;
-    TMatrixD alpha0(dimension, 1), alpha(dimension, 1);
-    TMatrixD xi0(1, 1), xi(1, 1);
+    TMatrixD alpha0(fNdau * cov_dim, 1), alpha(fNdau * cov_dim, 1);
+    TMatrixD xi0(3,1), xi(3,1);
     TMatrixD A0(y), V0(V);
     alpha0 = y;
     alpha = alpha0;
-    xi0 = calcMotherMom(alpha0);
+
+    //calculate starting values of missing particle from constraints
+    xi0 = calcMissingMom(alpha0);
     xi = xi0;
     double chi2 = 1e6;
+    //cout << " calc Feta" << endl;
+    TMatrixD D = Feta_eval(alpha);
+    TMatrixD D_xi = Fxi_eval(xi);
     //cout << " calc f " << endl;
     TMatrixD d = f_eval(alpha, xi);
-    //cout << " calc Feta" << endl;
-    TMatrixD D = Feta_eval(alpha, xi);
-    //cout << " calc Fxi" << endl;
-    TMatrixD D_xi = Fxi_eval(alpha, xi);
     //cout << " start fitting " << endl;
 
+
+//Do iterations
     for (int q = 0; q < maxItr; q++)
     {   
         //calc r
@@ -190,22 +181,20 @@ bool H3cFitter::fit(double lr, Int_t maxItr)
         DT.Transpose(D);
         TMatrixD DT_xi(D_xi.GetNcols(), D_xi.GetNrows());
         DT_xi.Transpose(D_xi);
-	    //calc S
+        //calc S
         TMatrixD VD = D * V * DT;
         VD.Invert();
-        TMatrixD VDD = DT_xi * VD * D_xi;
+        TMatrixD VDD = DT_xi * V * D_xi;
         VDD.Invert();
 
-        //TMatrixD delta_alpha = alpha - alpha0;
-        TMatrixD delta_alpha = y - alpha;
+        //calculate values for next iteration
         TMatrixD neu_xi = xi - lr * VDD * DT_xi * VD * r;
         TMatrixD delta_xi = neu_xi - xi;
-	//cout << " calc lambda " << endl;
         TMatrixD lambda = VD * (r + D_xi * delta_xi);
         TMatrixD lambdaT(lambda.GetNcols(), lambda.GetNrows());
         lambdaT.Transpose(lambda);
-        TMatrixD neu_alpha(dimension, 1);
-        neu_alpha = y - lr * V * DT * lambda; //oder alpha?
+        TMatrixD neu_alpha(fNdau * cov_dim, 1);
+        neu_alpha = y - lr * V * DT * lambda;
 
         //Update covariance
         TMatrixD delta_alpha = y - neu_alpha;
@@ -216,7 +205,7 @@ bool H3cFitter::fit(double lr, Int_t maxItr)
         V = V - lr * V * (DT * VD * D - (matrix*invertedMatrix*matrixT)) * V;
         TMatrixD V_inv(V);
         V_inv.Invert();
-
+       
         //Calculate new chi2
         TMatrixD chisqrd(1,1);
         TMatrixD delta_alphaT(delta_alpha.GetNcols(), delta_alpha.GetNrows());
@@ -225,7 +214,14 @@ bool H3cFitter::fit(double lr, Int_t maxItr)
         two(0,0) = 2;
         chisqrd = delta_alphaT * V_inv * delta_alpha + two * lambdaT * f_eval(neu_alpha, neu_xi);
 
+/*
+        double chisqrd = 0.;
 
+        for (int p = 0; p < lambda.GetNrows(); p++)
+        {
+            chisqrd += lambdaT(0, p) * d(p, 0);
+        }
+*/
         // for checking convergence
         // three parameters are checked
         // 1. difference between measurements (for successive iterations) y
@@ -267,13 +263,13 @@ bool H3cFitter::fit(double lr, Int_t maxItr)
     // -----------------------------------------
     // Pull
     // -----------------------------------------
-    fPull.ResizeTo(dimension, dimension);
-    for (uint b = 0; b < (dimension); b++)
+    fPull.ResizeTo(fNdau * cov_dim, fNdau * cov_dim);
+    for (uint b = 0; b < (fNdau * cov_dim); b++)
         fPull(b, b) = -10000;
 
     if (true)
     {
-        for (uint b = 0; b < (dimension); b++)
+        for (uint b = 0; b < (fNdau * cov_dim); b++)
         {
             double num = A0(b, 0) - alpha(b, 0);
             double dem = V0(b, b) - V(b, b);
@@ -287,12 +283,12 @@ bool H3cFitter::fit(double lr, Int_t maxItr)
     return true; // for number of iterations equal to 1
 }
 
-HRefitCand H3cFitter::getDaughter(int val)
+HRefitCand H4momFitter::getDaughter(int val)
 {
     return fCands[val];
 }
 
-void H3cFitter::updateDaughters()
+void H4momFitter::updateDaughters()
 {
     for (int val = 0; val < fNdau; ++val)
     {
@@ -328,36 +324,7 @@ void H3cFitter::updateDaughters()
     }
 }
 
-void H3cFitter::updateMother()
-{
-    double Px = (1. / xi(0, 0)) *
-                std::sin(y(0 + fNdau * cov_dim, 0)) *
-                std::cos(y(1 + fNdau * cov_dim, 0));
-    double Py = (1. / xi(0, 0)) *
-                std::sin(y(0 + fNdau * cov_dim, 0)) *
-                std::sin(y(1 + fNdau * cov_dim, 0));
-    double Pz =
-        (1. / xi(0, 0)) * std::cos(y(0 + fNdau * cov_dim, 0));
-    double M = fM[fNdau];
-    mother.SetXYZM(Px, Py, Pz, M);
-    mother.setR(y(2 + fNdau * cov_dim));
-    mother.setZ(y(3 + fNdau * cov_dim));
-
-    // ---------------------------------------------------------------------------
-    // set covariance
-    // ---------------------------------------------------------------------------
-    TMatrixD cov(5, 5);
-    cov(0, 0) = 0.;
-    cov(1, 1) = V(1 + fNdau * cov_dim, 1 + fNdau * cov_dim);
-    cov(2, 2) = V(2 + fNdau * cov_dim, 2 + fNdau * cov_dim);
-    cov(3, 3) = V(3 + fNdau * cov_dim, 3 + fNdau * cov_dim);
-    cov(4, 4) = V(4 + fNdau * cov_dim, 4 + fNdau * cov_dim);
-    mother.setCovariance(cov);
-    // ---------------------------------------------------------------------------
-
-}
-
-void H3cFitter::update()
+void H4momFitter::update()
 {
     for (int val = 0; val < fNdau; ++val)
     {
