@@ -212,8 +212,8 @@ std::vector<HRefitCand> HVertexFitter::UpdateTrackParameters(std::vector<HRefitC
 
     //Vectors pointing from vertex to POCA to Beam axis
     TVector3 vtx_base_1_updated, vtx_base_2_updated;
-    vtx_base_1_updated = vertexPos - vtx_base_1;
-    vtx_base_2_updated = vertexPos - vtx_base_2;
+    vtx_base_1_updated = vtx_base_1-vertexPos;
+    vtx_base_2_updated = vtx_base_2-vertexPos;
 
     if (fVerbose > 0)
     {
@@ -510,6 +510,8 @@ bool HVertexFitter::fit()
     TMatrixD A0(y), V0(V);
     alpha0 = y;
     alpha = alpha0;
+    TMatrixD alpha_original=alpha0;
+
     double chi2 = 1e6;
     TMatrixD D = Feta_eval(alpha);
     TMatrixD d = f_eval(alpha);
@@ -526,7 +528,7 @@ bool HVertexFitter::fit()
         TMatrixD lambdaT(lambda.GetNcols(), lambda.GetNrows());
         lambdaT.Transpose(lambda);
         TMatrixD neu_alpha(fN * cov_dim, 1);
-        neu_alpha = alpha - lr * V * DT * lambda;
+        neu_alpha = alpha_original - lr * V * DT * lambda;
 
         double chisqrd = 0.;
 
