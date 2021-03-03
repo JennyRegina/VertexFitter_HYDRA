@@ -58,7 +58,6 @@ H4cFitter::H4cFitter(const std::vector<HRefitCand>& cands, HRefitCand& mother) :
 H4cFitter::H4cFitter(const std::vector<HRefitCand>& cands, TLorentzVector& lv) : 
     fCands(cands)
 {
-    //fLv4C = TLorentzVector(0,0,4337.96,2*938.272+3500) ;
     fLv4C = lv;
     
     // fNdau is the number of daughters e.g. (L->ppi-) n=2
