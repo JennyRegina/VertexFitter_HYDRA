@@ -157,6 +157,10 @@ bool H4momFitter::fit(double lr, Int_t maxItr)
     TMatrixD alpha0(fNdau * cov_dim, 1), alpha(fNdau * cov_dim, 1);
     TMatrixD xi0(3,1), xi(3,1);
     TMatrixD A0(y), V0(V);
+    
+    TMatrixD V0_inv(V);
+    V0_inv.Invert();
+
     alpha0 = y;
     alpha = alpha0;
 
@@ -176,15 +180,15 @@ bool H4momFitter::fit(double lr, Int_t maxItr)
     for (int q = 0; q < maxItr; q++)
     {   
         //calc r
-        TMatrixD r = d + D * (y - alpha);
+        TMatrixD r = d + D * (alpha0 - alpha);
         TMatrixD DT(D.GetNcols(), D.GetNrows());
         DT.Transpose(D);
         TMatrixD DT_xi(D_xi.GetNcols(), D_xi.GetNrows());
         DT_xi.Transpose(D_xi);
         //calc S
-        TMatrixD VD = D * V * DT;
+        TMatrixD VD = D * V0 * DT;
         VD.Invert();
-        TMatrixD VDD = DT_xi * V * D_xi;
+        TMatrixD VDD = DT_xi * V0 * D_xi;
         VDD.Invert();
 
         //calculate values for next iteration
@@ -194,10 +198,11 @@ bool H4momFitter::fit(double lr, Int_t maxItr)
         TMatrixD lambdaT(lambda.GetNcols(), lambda.GetNrows());
         lambdaT.Transpose(lambda);
         TMatrixD neu_alpha(fNdau * cov_dim, 1);
-        neu_alpha = y - lr * V * DT * lambda;
+        neu_alpha = alpha0 - lr * V0 * DT * lambda;
 
-        //Update covariance
-        TMatrixD delta_alpha = y - neu_alpha;
+        //Update covariance -- can be done after fitting
+        //TMatrixD delta_alpha = alpha0 - neu_alpha; 
+        TMatrixD delta_alpha = alpha - alpha0;
         TMatrixD matrix = DT*VD*D_xi;
         TMatrixD matrixT = matrix.Transpose();
         TMatrixD invertedMatrix = DT_xi*VD*D_xi;
@@ -212,7 +217,7 @@ bool H4momFitter::fit(double lr, Int_t maxItr)
         delta_alphaT.Transpose(delta_alpha);
         TMatrixD two(1,1);
         two(0,0) = 2;
-        chisqrd = delta_alphaT * V_inv * delta_alpha + two * lambdaT * f_eval(neu_alpha, neu_xi);
+        chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * d;      //f_eval(alpha, xi);
 
 /*
         double chisqrd = 0.;
