@@ -1,10 +1,11 @@
-#include "h4momfitter.h"
+#include "hmisspartfitter.h"
 
 const size_t cov_dim = 5;
 
 
-H4momFitter::H4momFitter(const std::vector<HRefitCand>& cands, TLorentzVector& lv, Double_t mass) : 
-    fCands(cands)
+HMissPartFitter::HMissPartFitter(const std::vector<HRefitCand>& cands, TLorentzVector& lv, Double_t mass) : 
+    fCands(cands),
+    fMass(mass)
 {
     //fLv4C = TLorentzVector(0,0,4337.96,2*938.272+3500) ;
     fLv4C = lv;
@@ -49,14 +50,14 @@ H4momFitter::H4momFitter(const std::vector<HRefitCand>& cands, TLorentzVector& l
     f4MomConstraint = false;
 }
 
-void H4momFitter::add4MomConstraint()
+void HMissPartFitter::add4MomConstraint()
 {
-    fM.push_back(mass);
+    fM.push_back(fMass);
     fNdf += 1;
-    f4Constraint = true;
+    f4MomConstraint = true;
 }
 
-TMatrixD H4momFitter::calcMissingMom(const TMatrixD& m_iter)
+TMatrixD HMissPartFitter::calcMissingMom(const TMatrixD& m_iter)
 {
     TMatrix xi(3,1);
 
@@ -66,14 +67,14 @@ TMatrixD H4momFitter::calcMissingMom(const TMatrixD& m_iter)
 
     for(int q=0; q<fNdau; q++){
         xi(0, 0) -= 1. / m_iter(0 + q * cov_dim, 0)*sin(m_iter(1 + q * cov_dim, 0))*cos(m_iter(2 + q * cov_dim, 0));
-        xi(1,0) -= 1. / m_iter(0 + q * cov_dim, 0)*sin(m_iter(1 + q * cov_dim, 0))*sin(m_iter(2 + q * cov_dim, 0));
-        xi(2,0) -= 1. / m_iter(0 + q * cov_dim, 0)*cos(m_iter(1 + q * cov_dim, 0));
+        xi(1, 0) -= 1. / m_iter(0 + q * cov_dim, 0)*sin(m_iter(1 + q * cov_dim, 0))*sin(m_iter(2 + q * cov_dim, 0));
+        xi(2, 0) -= 1. / m_iter(0 + q * cov_dim, 0)*cos(m_iter(1 + q * cov_dim, 0));
     }
 
     return xi;
 }
 
-TMatrixD H4momFitter::f_eval(const TMatrixD& m_iter, const TMatrixD& xi_iter)
+TMatrixD HMissPartFitter::f_eval(const TMatrixD& m_iter, const TMatrixD& xi_iter)
 {
     TMatrixD d;
 
@@ -81,7 +82,7 @@ TMatrixD H4momFitter::f_eval(const TMatrixD& m_iter, const TMatrixD& xi_iter)
     if (f4MomConstraint)
     {
 	
-	d.ResizeTo(fNdf, 1); //(4,1)
+	d.ResizeTo(4, 1); //(4,1)
         d(0, 0) = -fLv4C.Px() + xi_iter(0,0);
         d(1, 0) = -fLv4C.Py() + xi_iter(1,0);
         d(2, 0) = -fLv4C.Pz() + xi_iter(2,0);
@@ -99,7 +100,7 @@ TMatrixD H4momFitter::f_eval(const TMatrixD& m_iter, const TMatrixD& xi_iter)
     return d;
 }
 
-TMatrixD H4momFitter::Fxi_eval(const TMatrixD& xi_iter)
+TMatrixD HMissPartFitter::Fxi_eval(const TMatrixD& xi_iter)
 {
 
     TMatrixD H;
@@ -122,7 +123,7 @@ TMatrixD H4momFitter::Fxi_eval(const TMatrixD& xi_iter)
     return H;
 }
 
-TMatrixD H4momFitter::Feta_eval(const TMatrixD& m_iter)
+TMatrixD HMissPartFitter::Feta_eval(const TMatrixD& m_iter)
 {
 
     TMatrixD H;
@@ -151,7 +152,7 @@ TMatrixD H4momFitter::Feta_eval(const TMatrixD& m_iter)
     return H;
 }
 
-bool H4momFitter::fit(double lr, Int_t maxItr)
+bool HMissPartFitter::fit(double lr, Int_t maxItr)
 {
    // double lr = 0.5;
     TMatrixD alpha0(fNdau * cov_dim, 1), alpha(fNdau * cov_dim, 1);
@@ -168,7 +169,7 @@ bool H4momFitter::fit(double lr, Int_t maxItr)
     xi0 = calcMissingMom(alpha0);
     xi = xi0;
     double chi2 = 1e6;
-    //cout << " calc Feta" << endl;
+   // cout << " calc Feta" << endl;
     TMatrixD D = Feta_eval(alpha);
     TMatrixD D_xi = Fxi_eval(xi);
     //cout << " calc f " << endl;
@@ -180,38 +181,45 @@ bool H4momFitter::fit(double lr, Int_t maxItr)
     for (int q = 0; q < maxItr; q++)
     {   
         //calc r
-        TMatrixD r = d + D * (alpha0 - alpha);
+    //cout << " calc r " << endl;
+        TMatrixD delta_alpha = alpha0 - alpha;
+        TMatrixD r = d + D * delta_alpha;
         TMatrixD DT(D.GetNcols(), D.GetNrows());
         DT.Transpose(D);
         TMatrixD DT_xi(D_xi.GetNcols(), D_xi.GetNrows());
         DT_xi.Transpose(D_xi);
         //calc S
+    //cout << " calc S " << endl;
         TMatrixD VD = D * V0 * DT;
         VD.Invert();
-        TMatrixD VDD = DT_xi * V0 * D_xi;
+        TMatrixD VDD = DT_xi * VD * D_xi;
         VDD.Invert();
 
         //calculate values for next iteration
+   // cout << " calc new xi" << endl;
         TMatrixD neu_xi = xi - lr * VDD * DT_xi * VD * r;
         TMatrixD delta_xi = neu_xi - xi;
+
+    //cout << " calc lambda " << endl;
         TMatrixD lambda = VD * (r + D_xi * delta_xi);
         TMatrixD lambdaT(lambda.GetNcols(), lambda.GetNrows());
         lambdaT.Transpose(lambda);
         TMatrixD neu_alpha(fNdau * cov_dim, 1);
         neu_alpha = alpha0 - lr * V0 * DT * lambda;
 
+
         //Update covariance -- can be done after fitting
+    //cout << " new cov " << endl;
         //TMatrixD delta_alpha = alpha0 - neu_alpha; 
-        TMatrixD delta_alpha = alpha - alpha0;
         TMatrixD matrix = DT*VD*D_xi;
-        TMatrixD matrixT = matrix.Transpose();
+        TMatrixD matrixT(matrix.GetNcols(), matrix.GetNrows());
+        matrixT.Transpose(matrix);
         TMatrixD invertedMatrix = DT_xi*VD*D_xi;
         invertedMatrix.Invert();
         V = V - lr * V * (DT * VD * D - (matrix*invertedMatrix*matrixT)) * V;
-        TMatrixD V_inv(V);
-        V_inv.Invert();
        
         //Calculate new chi2
+    //cout << " calc chi2" << endl;
         TMatrixD chisqrd(1,1);
         TMatrixD delta_alphaT(delta_alpha.GetNcols(), delta_alpha.GetNrows());
         delta_alphaT.Transpose(delta_alpha);
@@ -241,10 +249,10 @@ bool H4momFitter::fit(double lr, Int_t maxItr)
 
         double d_const = fabs(d(0,0));
         */
-        if(fabs(chi2-chisqrd)<1){
+        if(fabs(chi2-chisqrd(0,0))<1){
             fIteration = q;
             fConverged = true;
-            chi2 = chisqrd;
+            chi2 = chisqrd(0,0);
             alpha0 = alpha;
             alpha = neu_alpha;
             //V = V - lr * V * DT * VD * D * V;
@@ -253,12 +261,12 @@ bool H4momFitter::fit(double lr, Int_t maxItr)
         }
         
 	
-        chi2 = chisqrd;
+        chi2 = chisqrd(0,0);
         alpha0 = alpha;
         alpha = neu_alpha; 
         D = Feta_eval(alpha);
-        D_xi = Fxi_eval(alpha, xi);
-        d = f_eval(alpha);
+        D_xi = Fxi_eval(xi);
+        d = f_eval(alpha, xi);
     }
 
     y = alpha;
@@ -288,12 +296,12 @@ bool H4momFitter::fit(double lr, Int_t maxItr)
     return true; // for number of iterations equal to 1
 }
 
-HRefitCand H4momFitter::getDaughter(int val)
+HRefitCand HMissPartFitter::getDaughter(int val)
 {
     return fCands[val];
 }
 
-void H4momFitter::updateDaughters()
+void HMissPartFitter::updateDaughters()
 {
     for (int val = 0; val < fNdau; ++val)
     {
@@ -329,7 +337,7 @@ void H4momFitter::updateDaughters()
     }
 }
 
-void H4momFitter::update()
+void HMissPartFitter::update()
 {
     for (int val = 0; val < fNdau; ++val)
     {

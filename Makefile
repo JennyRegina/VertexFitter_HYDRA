@@ -8,7 +8,7 @@
 ##############################################################################
 
 
-LIB_NAME := VertexFit
+LIB_NAME := MissPartFit
 
 USES_ORACLE= : no
 

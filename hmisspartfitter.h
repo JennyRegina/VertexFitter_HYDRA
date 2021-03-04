@@ -4,8 +4,8 @@
  *
  */
 
-#ifndef H4MOMFITTER_H
-#define H4MOMFITTER_H
+#ifndef HMISSPARTFITTER_H
+#define HMISSPARTFITTER_H
 
 // system includes
 #include <iostream>
@@ -45,7 +45,7 @@ void Print(T const &matrix)
     cout << endl;
 }
 
-class H4cFitter {
+class HMissPartFitter {
 private:
     TMatrixD y, V, fPull;
     double fChi2, fProb;
@@ -58,6 +58,7 @@ private:
     std::vector<double> fM;
     TLorentzVector fInit;
     TLorentzVector fLv4C;
+    Double_t fMass;
     //HRefitCand fMother;
     bool fWiggleMoth;
     bool f4MomConstraint;  
@@ -66,11 +67,12 @@ private:
     
 
 public:
-    H4momFitter(const std::vector<HRefitCand> & cands, TLorentzVector & lv);
-    //H4cFitter(const std::vector<HRefitCand> & cands);
-    ~H4cFitter(){};
-    TMatrixD f_eval(const TMatrixD &m_iter);
+    HMissPartFitter(const std::vector<HRefitCand> & cands, TLorentzVector & lv, Double_t mass);
+    ~HMissPartFitter(){};
+    TMatrixD f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter);
+    TMatrixD Fxi_eval(const TMatrixD &xi_iter);
     TMatrixD Feta_eval(const TMatrixD &miter);
+    TMatrixD calcMissingMom(const TMatrixD &m_iter);
     void   add4MomConstraint();
     double getChi2() const {return fChi2;}
     double getProb() const {return fProb;}
@@ -92,4 +94,4 @@ protected:
     void updateDaughters();
 };
 
-#endif /* H4MOMFITTER_H */
+#endif /* HMISSPARTFITTER_H */
