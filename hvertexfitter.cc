@@ -512,6 +512,10 @@ bool HVertexFitter::fit()
     alpha = alpha0;
     TMatrixD alpha_original=alpha0;
 
+    // Calculating the original covariance matrix that is not changed in the iterations
+    TMatrixD V0_inv(V); // J.R New
+    V0_inv.Invert(); // J.R New
+
     double chi2 = 1e6;
     TMatrixD D = Feta_eval(alpha);
     TMatrixD d = f_eval(alpha);
@@ -522,20 +526,35 @@ bool HVertexFitter::fit()
         DT.Transpose(D);
         TMatrixD VD = D * V * DT;
         VD.Invert();
+        
+        // TMatrixD delta_alpha = alpha - alpha0; 
+        TMatrixD delta_alpha = alpha_original - alpha;
 
-        TMatrixD delta_alpha = alpha - alpha0;
         TMatrixD lambda = VD * D * delta_alpha + VD * d;
         TMatrixD lambdaT(lambda.GetNcols(), lambda.GetNrows());
         lambdaT.Transpose(lambda);
         TMatrixD neu_alpha(fN * cov_dim, 1);
-        neu_alpha = alpha_original - lr * V * DT * lambda;
+        // neu_alpha = alpha_original - lr * V * DT * lambda;
+        neu_alpha = alpha0 - lr * V0 * DT * lambda; // J.R. New
 
         double chisqrd = 0.;
 
-        for (int p = 0; p < lambda.GetNrows(); p++)
-        {
-            chisqrd = lambdaT(0, p) * d(p, 0);
-        }
+        //Calculate new chi2
+        TMatrixD chisqrd(1,1);
+        TMatrixD delta_alphaT(delta_alpha.GetNcols(), delta_alpha.GetNrows());
+        delta_alphaT.Transpose(delta_alpha);
+        TMatrixD two(1,1);
+        two(0,0) = 2;
+        chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * f_eval(neu_alpha);
+        
+        std::cout << "chisqrd = " << chisqrd << ", and chi2 = " << chi2 << std::endl;
+        
+        //chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * d;
+
+        //for (int p = 0; p < lambda.GetNrows(); p++)
+        //{
+        //    chisqrd = lambdaT(0, p) * d(p, 0);
+        //}
 
         /* for checking convergence
         // three parameters are checked
@@ -558,7 +577,8 @@ bool HVertexFitter::fit()
         chi2 = chisqrd;
         alpha0 = alpha;
         alpha = neu_alpha;
-        V = V - lr * V * DT * VD * D * V;
+        //V = V - lr * V * DT * VD * D * V;
+        V = V0 - lr * V0 * DT * VD * D * V0; 
         D = Feta_eval(alpha);
         d = f_eval(alpha);
     }
