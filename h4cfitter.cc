@@ -162,11 +162,15 @@ TMatrixD H4cFitter::Feta_eval(const TMatrixD& m_iter)
     return H;
 }
 
-bool H4cFitter::fit()
+bool H4cFitter::fit(double lr, Int_t maxItr)
 {
-    double lr = 0.5;
+   // double lr = 0.5;
     TMatrixD alpha0(fNdau * cov_dim, 1), alpha(fNdau * cov_dim, 1);
     TMatrixD A0(y), V0(V);
+    
+    TMatrixD V0_inv(V);
+    V0_inv.Invert();
+    
     alpha0 = y;
     alpha = alpha0;
     double chi2 = 1e6;
@@ -176,28 +180,45 @@ bool H4cFitter::fit()
     TMatrixD d = f_eval(alpha);
     //cout << " start fitting " << endl;
 
-    for (int q = 0; q < 5; q++)
+    for (int q = 0; q < maxItr; q++)
     {
         TMatrixD DT(D.GetNcols(), D.GetNrows());
         DT.Transpose(D);
 	//cout << " calc D " << endl;
-        TMatrixD VD = D * V * DT;
+        TMatrixD VD = D * V0 * DT;
         VD.Invert();
 
-        TMatrixD delta_alpha = alpha - alpha0;
+        //TMatrixD delta_alpha = alpha - alpha0;
+        TMatrixD delta_alpha = alpha0 - alpha;
 	//cout << " calc lambda " << endl;
         TMatrixD lambda = VD * D * delta_alpha + VD * d;
         TMatrixD lambdaT(lambda.GetNcols(), lambda.GetNrows());
         lambdaT.Transpose(lambda);
         TMatrixD neu_alpha(fNdau * cov_dim, 1);
-        neu_alpha = alpha - lr * V * DT * lambda;
+        //neu_alpha = alpha - lr * V * DT * lambda; //old
+        neu_alpha = alpha0 - lr * V0 * DT * lambda;
+        /*
+        V = V0 - lr * V0 * DT * VD * D * V0;
+        TMatrixD V_inv(V);
+        V_inv.Invert();
+        */
 
-        double chisqrd = 0.;
-
+        //Calculate new chi2
+        TMatrixD chisqrd(1,1);
+        TMatrixD delta_alphaT(delta_alpha.GetNcols(), delta_alpha.GetNrows());
+        delta_alphaT.Transpose(delta_alpha);
+        TMatrixD two(1,1);
+        two(0,0) = 2;
+        //chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * f_eval(neu_alpha);
+        chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * d;
+        //chisqrd = lambdaT * f_eval(neu_alpha); //old
+        //chisqrd = lambdaT * (D * delta_alpha + d); //Avery
+        /*
+        //double chisqrd = 0.;
         for (int p = 0; p < lambda.GetNrows(); p++)
         {
-            chisqrd += lambdaT(0, p) * d(p, 0);
-        }
+            chisqrd(0,0) += lambdaT(0, p) * d(p, 0);
+        }*/
 
         // for checking convergence
         // three parameters are checked
@@ -205,37 +226,34 @@ bool H4cFitter::fit()
         // 2. difference between constraints (for successive iterations)  d
         // 3. difference between chi2 (for successive iterations)  chisqrd
         // check converge for 'y' measurements
+        /*
         double sum0 = 0;
         for(uint p=0; p<(fNdau*cov_dim); p++){
             sum0 += (neu_alpha(p,0)-alpha(p,0))*(neu_alpha(p,0)-alpha(p,0));
         }
-
-        double d_const = 0;
-        for(int p=0; p<4; p++){
-            d_const += pow(d(p,0),2);
-        }
-        //if(fabs(chi2-chisqrd)<1 && d_const<1 && sqrt(sum0)<1){
-        if(fabs(chi2-chisqrd)<1){
+        double d_const = fabs(d(0,0));
+        */
+        if(fabs(chi2-chisqrd(0,0))<1){
             fIteration = q;
             fConverged = true;
-            chi2 = chisqrd;
-            alpha0 = alpha;
+            chi2 = chisqrd(0,0);
+            //alpha0 = alpha;
             alpha = neu_alpha;
-            V = V - lr * V * DT * VD * D * V;
+            V = V0 - lr * V0 * DT * VD * D * V0;
 	    //cout << q << endl;
             break;
         }
         
 	
-        chi2 = chisqrd;
-        alpha0 = alpha;
+        chi2 = chisqrd(0,0);
+        //alpha0 = alpha;
         alpha = neu_alpha;
-        V = V - lr * V * DT * VD * D * V;
+        V = V0 - lr * V0 * DT * VD * D * V0;
         D = Feta_eval(alpha);
         d = f_eval(alpha);
     }
 
-    y = alpha; //neu_alpha? Calculate new V? Doesn't matter if converged?
+    y = alpha;
     fChi2 = chi2;
     fProb = TMath::Prob(chi2, fNdf);
 
@@ -252,7 +270,7 @@ bool H4cFitter::fit()
         {
             double num = A0(b, 0) - alpha(b, 0);
             double dem = V0(b, b) - V(b, b);
-            if (dem > 0) { fPull(b, b) = num / std::sqrt(dem); }
+            if (dem > 0) { fPull(b, b) = num / std::sqrt(dem); } //uncertainty should become smaller?
         }
     }
 
