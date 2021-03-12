@@ -65,6 +65,10 @@ TVector3 HVertexFitter::findVertex(const std::vector<HRefitCand> &cands)
     param_R2 = cand2.getR();
     param_Z2 = cand2.getZ();
 
+    // Set the original phi angles
+    //fPhi1Original=param_phi1;
+    //fPhi2Original=param_phi2;
+
     // Calculate the base and direction vectors of the two candidates
     TVector3 vtx_base_1, vtx_base_2, vtx_dir_1, vtx_dir_2;
 
@@ -159,6 +163,13 @@ TVector3 HVertexFitter::findVertex(const std::vector<HRefitCand> &cands)
     fDistParticle1Origin = distanceFromParticleToOrigin_1;
     fDistParticle2Origin = distanceFromParticleToOrigin_2;
 
+    // Create a Lambda candidate object.
+    // As a first approximation it originates from x,y,z = 0,0,0
+
+   std::cout << "Vertex: theta: " << fVertex.Theta() << " and phi: " << fVertex.Phi() << std::endl;
+
+    setLambdaCandidate(fVertex.Theta(), fVertex.Phi(), 0.0, 0.0);
+
     return fVertex;
 }
 
@@ -212,8 +223,8 @@ std::vector<HRefitCand> HVertexFitter::UpdateTrackParameters(std::vector<HRefitC
 
     //Vectors pointing from vertex to POCA to Beam axis
     TVector3 vtx_base_1_updated, vtx_base_2_updated;
-    vtx_base_1_updated = vtx_base_1-vertexPos;
-    vtx_base_2_updated = vtx_base_2-vertexPos;
+    vtx_base_1_updated = vtx_base_1 - vertexPos;
+    vtx_base_2_updated = vtx_base_2 - vertexPos;
 
     if (fVerbose > 0)
     {
@@ -302,6 +313,8 @@ TMatrixD HVertexFitter::f_eval(const TMatrixD &m_iter)
 
     d.ResizeTo(1, 1);
     TVector3 base_1, base_2, dir_1, dir_2;
+
+    // J.R The cobe block below is the original base vectors where they are calculated from the track parameters
     base_1.SetXYZ(
         m_iter(3 + 0 * cov_dim, 0) *
             std::cos(m_iter(2 + 0 * cov_dim, 0) + TMath::PiOver2()),
@@ -314,6 +327,23 @@ TMatrixD HVertexFitter::f_eval(const TMatrixD &m_iter)
         m_iter(3 + 1 * cov_dim, 0) *
             std::sin(m_iter(2 + 1 * cov_dim, 0) + TMath::PiOver2()),
         m_iter(4 + 1 * cov_dim, 0));
+
+    // The base vectors below are calculated from two constant phi,
+    // These are the ones for the original base vector pointing from the origin
+    // to the point along the track closest to the beam line
+
+    /*     base_1.SetXYZ(
+        m_iter(3 + 0 * cov_dim, 0) *
+            std::cos(fPhi1Original + TMath::PiOver2()),
+        m_iter(3 + 0 * cov_dim, 0) *
+            std::sin(fPhi1Original + TMath::PiOver2()),
+        m_iter(4 + 0 * cov_dim, 0));
+    base_2.SetXYZ(
+        m_iter(3 + 1 * cov_dim, 0) *
+            std::cos(fPhi2Original + TMath::PiOver2()),
+        m_iter(3 + 1 * cov_dim, 0) *
+            std::sin(fPhi2Original + TMath::PiOver2()),
+        m_iter(4 + 1 * cov_dim, 0)); */
 
     dir_1.SetXYZ(std::sin(m_iter(1 + 0 * cov_dim, 0)) *
                      std::cos(m_iter(2 + 0 * cov_dim, 0)),
@@ -329,6 +359,21 @@ TMatrixD HVertexFitter::f_eval(const TMatrixD &m_iter)
     d(0, 0) = std::fabs((dir_1.Cross(dir_2)).Dot((base_1 - base_2)));
 
     return d;
+}
+
+void HVertexFitter::setLambdaCandidate(double valTheta, double valPhi, double valR, double valZ){
+
+//TODO make sure that all properties of the virtual can is set properly
+
+fLambdaCandidate.setTheta(TMath::RadToDeg() * valTheta);
+fLambdaCandidate.setPhi(TMath::RadToDeg() * valPhi);
+fLambdaCandidate.SetTheta(valTheta);
+fLambdaCandidate.SetPhi(valPhi);
+fLambdaCandidate.setR(valR);
+fLambdaCandidate.setZ(valZ);
+
+std::cout << "setLambdaCandidate, fLambdaCandidate: theta= " << fLambdaCandidate.getTheta() << " and phi = " << fLambdaCandidate.getPhi() << std::endl; 
+
 }
 
 TMatrixD HVertexFitter::Feta_eval(const TMatrixD &m_iter)
@@ -510,11 +555,11 @@ bool HVertexFitter::fit()
     TMatrixD A0(y), V0(V);
     alpha0 = y;
     alpha = alpha0;
-    TMatrixD alpha_original=alpha0;
+    TMatrixD alpha_original = alpha0;
 
     // Calculating the original covariance matrix that is not changed in the iterations
     TMatrixD V0_inv(V); // J.R New
-    V0_inv.Invert(); // J.R New
+    V0_inv.Invert();    // J.R New
 
     double chi2 = 1e6;
     TMatrixD D = Feta_eval(alpha);
@@ -524,10 +569,11 @@ bool HVertexFitter::fit()
     {
         TMatrixD DT(D.GetNcols(), D.GetNrows());
         DT.Transpose(D);
-        TMatrixD VD = D * V * DT;
+        //TMatrixD VD = D * V * DT; Old
+        TMatrixD VD = D * V0 * DT;
         VD.Invert();
-        
-        // TMatrixD delta_alpha = alpha - alpha0; 
+
+        // TMatrixD delta_alpha = alpha - alpha0;
         TMatrixD delta_alpha = alpha_original - alpha;
 
         TMatrixD lambda = VD * D * delta_alpha + VD * d;
@@ -535,20 +581,20 @@ bool HVertexFitter::fit()
         lambdaT.Transpose(lambda);
         TMatrixD neu_alpha(fN * cov_dim, 1);
         // neu_alpha = alpha_original - lr * V * DT * lambda;
-        neu_alpha = alpha0 - lr * V0 * DT * lambda; // J.R. New
+        neu_alpha = alpha_original - lr * V0 * DT * lambda; // J.R. New
 
-        double chisqrd = 0.;
+        //double chisqrd = 0.;
 
         //Calculate new chi2
-        TMatrixD chisqrd(1,1);
+        TMatrixD chisqrd(1, 1);
         TMatrixD delta_alphaT(delta_alpha.GetNcols(), delta_alpha.GetNrows());
         delta_alphaT.Transpose(delta_alpha);
-        TMatrixD two(1,1);
-        two(0,0) = 2;
+        TMatrixD two(1, 1);
+        two(0, 0) = 2;
         chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * f_eval(neu_alpha);
-        
-        std::cout << "chisqrd = " << chisqrd << ", and chi2 = " << chi2 << std::endl;
-        
+        //chisqrd = f_eval(neu_alpha);
+        //std::cout << "chisqrd = " << chisqrd << ", and chi2 = " << chi2 << std::endl;
+
         //chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * d;
 
         //for (int p = 0; p < lambda.GetNrows(); p++)
@@ -574,13 +620,41 @@ bool HVertexFitter::fit()
             break;
         }
         */
-        chi2 = chisqrd;
+        //chi2 = chisqrd;
+
+        /* if (fabs(chi2 - chisqrd(0, 0)) < 1)
+        {
+
+            fIteration = q;
+            if (fVerbose > 0)
+            {
+                std::cout << "Iteration: " << q << ", Condition fullfilled!" << std::endl;
+            }
+            fConverged = true;
+            chi2 = chisqrd(0, 0);
+            alpha = neu_alpha;
+            V = V0 - lr * V0 * DT * VD * D * V0;
+            break;
+
+        } */
+
+        if (fVerbose > 0)
+        {
+            std::cout << "Iteration: " << q << std::endl;
+            std::cout << "Printing d: " << std::endl; 
+            d.Print();
+        }
+
+        fIteration = q;
+        chi2 = chisqrd(0, 0);
         alpha0 = alpha;
         alpha = neu_alpha;
         //V = V - lr * V * DT * VD * D * V;
-        V = V0 - lr * V0 * DT * VD * D * V0; 
+        V = V0 - lr * V0 * DT * VD * D * V0;
         D = Feta_eval(alpha);
         d = f_eval(alpha);
+
+
     }
 
     y = alpha;

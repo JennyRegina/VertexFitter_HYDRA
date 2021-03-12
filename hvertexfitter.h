@@ -75,6 +75,9 @@ private:
     double fDistanceParticleToParticle;
     double fDistanceParticleToVertex;
 
+    double fPhi1Original;
+    double fPhi2Original;
+    HVirtualCand fLambdaCandidate;
 public:
     HVertexFitter(const std::vector<HRefitCand> &cands);
     ~HVertexFitter(){};
@@ -99,12 +102,20 @@ public:
     double getDistanceFirstParticleOrigin() const { return fDistParticle1Origin; }
     double getDistanceSecondParticleOrigin() const { return fDistParticle2Origin; }
 
+    void setLambdaCandidate(double valTheta, double valPhi, double valR, double ValZ);
+    HVirtualCand getLambdaCandidate() { return fLambdaCandidate; }
+
     bool isConverged() const { return fConverged; }
     int getIteration() const { return fIteration; }
     void setCovariance(TMatrixD &val) { V = val; }
     void setMeasurement(TMatrixD &val) { y = val; }
     bool fit();
     void setVerbosity(int val) { fVerbose = val; }
+
+    void setPhiOriginal(double val1, double val2){
+        fPhi1Original=val1;
+        fPhi2Original=val2;
+        }
 
     double fDistParticle1Vertex;
     double fDistParticle2Vertex;
