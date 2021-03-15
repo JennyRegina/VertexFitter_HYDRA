@@ -216,7 +216,7 @@ bool HMissPartFitter::fit(double lr, Int_t maxItr)
         matrixT.Transpose(matrix);
         TMatrixD invertedMatrix = DT_xi*VD*D_xi;
         invertedMatrix.Invert();
-        V = V - lr * V * (DT * VD * D - (matrix*invertedMatrix*matrixT)) * V;
+        V = V0 - lr * V0 * (DT * VD * D - (matrix*invertedMatrix*matrixT)) * V0;
        
         //Calculate new chi2
     //cout << " calc chi2" << endl;
@@ -253,8 +253,9 @@ bool HMissPartFitter::fit(double lr, Int_t maxItr)
             fIteration = q;
             fConverged = true;
             chi2 = chisqrd(0,0);
-            alpha0 = alpha;
             alpha = neu_alpha;
+            xi = neu_xi;
+            xi_fin.SetXYZM(xi(0,0), xi(1,0), xi(2,0), fM[fNdau]);
             //V = V - lr * V * DT * VD * D * V;
 	    //cout << q << endl;
             break;
@@ -262,8 +263,9 @@ bool HMissPartFitter::fit(double lr, Int_t maxItr)
         
 	
         chi2 = chisqrd(0,0);
-        alpha0 = alpha;
         alpha = neu_alpha; 
+        xi = neu_xi;
+        xi_fin.SetXYZM(xi(0,0), xi(1,0), xi(2,0), fM[fNdau]);
         D = Feta_eval(alpha);
         D_xi = Fxi_eval(xi);
         d = f_eval(alpha, xi);
@@ -299,6 +301,11 @@ bool HMissPartFitter::fit(double lr, Int_t maxItr)
 HRefitCand HMissPartFitter::getDaughter(int val)
 {
     return fCands[val];
+}
+
+TLorentzVector HMissPartFitter::getMissingDaughter()
+{
+    return xi_fin;
 }
 
 void HMissPartFitter::updateDaughters()

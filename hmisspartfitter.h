@@ -48,6 +48,7 @@ void Print(T const &matrix)
 class HMissPartFitter {
 private:
     TMatrixD y, V, fPull;
+    TLorentzVector xi_fin;
     double fChi2, fProb;
     bool   fConverged;
     int    fIteration, fNdau;
@@ -87,6 +88,7 @@ public:
 
     //[[deprecated]]
     HRefitCand getDaughter(int val);
+    TLorentzVector getMissingDaughter();
 
     void update();
 
