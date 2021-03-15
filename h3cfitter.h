@@ -1,11 +1,11 @@
 /**
- * H4MOMFitter.h
+ * H3CFitter.h
  *
  *
  */
 
-#ifndef HMISSPARTFITTER_H
-#define HMISSPARTFITTER_H
+#ifndef H3CFITTER_H
+#define H3CFITTER_H
 
 // system includes
 #include <iostream>
@@ -45,10 +45,9 @@ void Print(T const &matrix)
     cout << endl;
 }
 
-class HMissPartFitter {
+class H3cFitter {
 private:
     TMatrixD y, V, fPull;
-    TLorentzVector xi_fin;
     double fChi2, fProb;
     bool   fConverged;
     int    fIteration, fNdau;
@@ -59,22 +58,22 @@ private:
     std::vector<double> fM;
     TLorentzVector fInit;
     TLorentzVector fLv4C;
-    Double_t fMass;
-    //HRefitCand fMother;
+    HRefitCand fMother;
     bool fWiggleMoth;
-    bool f4MomConstraint;  
+    bool f3Constraint;  
     //double fVtxPos;
     //TVector3 fVertex;
     
 
 public:
-    HMissPartFitter(const std::vector<HRefitCand> & cands, TLorentzVector & lv, Double_t mass);
-    ~HMissPartFitter(){};
+    H3cFitter(const std::vector<HRefitCand> & cands, HRefitCand & mother);
+    //H3cFitter(const std::vector<HRefitCand> & cands);
+    ~H3cFitter(){};
     TMatrixD f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter);
-    TMatrixD Fxi_eval(const TMatrixD &xi_iter);
-    TMatrixD Feta_eval(const TMatrixD &miter);
-    TMatrixD calcMissingMom(const TMatrixD &m_iter);
-    void   add4MomConstraint();
+    TMatrixD Feta_eval(const TMatrixD &miter, const TMatrixD &xi_iter);
+    TMatrixD Fxi_eval(const TMatrixD &miter, const TMatrixD &xi_iter);
+    TMatrixD calcMotherMom(const TMatrixD& m_iter);
+    void   add3Constraint();
     double getChi2() const {return fChi2;}
     double getProb() const {return fProb;}
     double getPull(int val=0){return fPull(val,val);}
@@ -86,14 +85,13 @@ public:
 
     bool fit(double lr, Int_t maxItr);
 
-    //[[deprecated]]
     HRefitCand getDaughter(int val);
-    TLorentzVector getMissingDaughter();
 
     void update();
 
 protected:
     void updateDaughters();
+    void updateMother();
 };
 
-#endif /* HMISSPARTFITTER_H */
+#endif /* H3CFITTER_H */

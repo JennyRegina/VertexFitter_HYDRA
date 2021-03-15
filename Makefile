@@ -8,12 +8,12 @@
 ##############################################################################
 
 
-LIB_NAME := MissPartFit
+LIB_NAME := VertexFit_3C
 
 USES_ORACLE= : no
 
 SOURCE_FILES := hrefitcand.cc \
-		hmisspartfitter.cc
+		3cfitter.cc
 
 
 include $(HADDIR)/hades.def.mk
