@@ -47,10 +47,10 @@ void Print(T const &matrix)
 
 class H3cFitter {
 private:
-    TMatrixD y, V, fPull;
+    TMatrixD y, p, V, Vp, fPull;
     double fChi2, fProb;
     bool   fConverged;
-    int    fIteration, fNdau;
+    int    fIteration, fNdau, fyDim;
     std::vector<HRefitCand> fCands;
 
     // data members for constraints
