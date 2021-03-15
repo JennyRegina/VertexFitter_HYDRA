@@ -459,6 +459,56 @@ Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr
     hRecoBetaPions->SetXTitle("#beta");
     hRecoBetaPions->SetYTitle(" Counts ");
 
+// ---------------- LAMBDA PLOTS --------------------
+    TH1F *hMomLambda = new TH1F("hMomLambda", "", 1000, 0, 3000);
+    hMomLambda->SetXTitle("Momentum / MeV/c");
+    hMomLambda->SetYTitle(" Counts ");
+    TH1F *hRecoThetaLambda = new TH1F("hRecoThetaLambda", "", 500, 0, 3);
+    hRecoThetaLambda->SetXTitle("#theta / rad");
+    hRecoThetaLambda->SetYTitle(" Counts ");
+    TH1F *hRecoPhiLambda = new TH1F("hRecoPhiLambda", "", 500, -4, 4);
+    hRecoPhiLambda->SetXTitle("#phi / rad");
+    hRecoPhiLambda->SetYTitle(" Counts ");
+
+    TH1F *hErrorRLambda = new TH1F("hErrorRLambda", "", 1000, -100, 100);
+    hErrorRLambda->SetXTitle("R / mm");
+    hErrorRLambda->SetYTitle(" Counts ");
+    TH1F *hErrorZLambda = new TH1F("hErrorZLambda", "", 1000, -100, 100);
+    hErrorZLambda->SetXTitle("Z / mm");
+    hErrorZLambda->SetYTitle(" Counts ");
+    TH1F *hErrorThetaLambda = new TH1F("hErrorThetaLambda", "", 500, 0, 3);
+    hErrorThetaLambda->SetXTitle("#theta / rad");
+    hErrorThetaLambda->SetYTitle(" Counts ");
+    TH1F *hErrorPhiLambda = new TH1F("hErrorPhiLambda", "", 500, -4, 4);
+    hErrorPhiLambda->SetXTitle("#phi / rad");
+    hErrorPhiLambda->SetYTitle(" Counts ");
+
+
+// ---------------- LAMBDA PLOTS CUT --------------------
+    TH1F *hMomLambdaCut = new TH1F("hMomLambdaCut", "", 1000, 0, 3000);
+    hMomLambdaCut->SetXTitle("Momentum / MeV/c");
+    hMomLambdaCut->SetYTitle(" Counts ");
+    TH1F *hRecoThetaLambdaCut = new TH1F("hRecoThetaLambdaCut", "", 500, 0, 3);
+    hRecoThetaLambdaCut->SetXTitle("#theta / rad");
+    hRecoThetaLambdaCut->SetYTitle(" Counts ");
+    TH1F *hRecoPhiLambdaCut = new TH1F("hRecoPhiLambdaCut", "", 500, -4, 4);
+    hRecoPhiLambdaCut->SetXTitle("#phi / rad");
+    hRecoPhiLambdaCut->SetYTitle(" Counts ");
+
+    TH1F *hErrorRLambdaCut = new TH1F("hErrorRLambdaCut", "", 1000, -100, 100);
+    hErrorRLambdaCut->SetXTitle("R / mm");
+    hErrorRLambdaCut->SetYTitle(" Counts ");
+    TH1F *hErrorZLambdaCut = new TH1F("hErrorZLambdaCut", "", 1000, -100, 100);
+    hErrorZLambdaCut->SetXTitle("Z / mm");
+    hErrorZLambdaCut->SetYTitle(" Counts ");
+    TH1F *hErrorThetaLambdaCut = new TH1F("hErrorThetaLambdaCut", "", 500, 0, 3);
+    hErrorThetaLambdaCut->SetXTitle("#theta / rad");
+    hErrorThetaLambdaCut->SetYTitle(" Counts ");
+    TH1F *hErrorPhiLambdaCut = new TH1F("hErrorPhiLambdaCut", "", 500, -4, 4);
+    hErrorPhiLambdaCut->SetXTitle("#phi / rad");
+    hErrorPhiLambdaCut->SetYTitle(" Counts ");
+
+
     HLoop loop(kTRUE);
     Bool_t ret = loop.addFiles(infileList);
     if (ret == 0)
@@ -677,6 +727,10 @@ Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr
     		lambdaCandRefit.setZ(lambdaCand.getZ());
     		lambdaCandRefit.setCovariance(lambdaCov);
 
+		hMomLambda->Fill(lambdaCandRefit.P());
+		hRecoThetaLambda->Fill(lambdaCandRefit.Theta());
+                hRecoPhiLambda->Fill(lambdaCandRefit.Phi());
+
 		std::cout << "--------------------" << std::endl;
                 std::cout << "Lambda candidate Refit: " << std::endl;
                 std::cout << "Estimated Momentum: " << lambdaCandRefit.P()  << std::endl;
@@ -690,6 +744,11 @@ Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr
                 lambdaRefitCov=lambdaCandRefit.getCovariance();
 		lambdaRefitCov.Print();
 		
+    		hErrorRLambda->Fill(sqrt(lambdaRefitCov(3,3)));
+    		hErrorZLambda->Fill(sqrt(lambdaRefitCov(4,4)));
+    		hErrorThetaLambda->Fill(sqrt(lambdaRefitCov(1,1)));
+    		hErrorPhiLambda->Fill(sqrt(lambdaRefitCov(2,2)));
+
 		double distProtonPion = vtxFitter.getDistanceBetweenFittedParticles();
 
                 hDistanceToVertexProtonPreFit->Fill(vtxFitter.getDistanceFirstParticleVertex());
@@ -820,6 +879,14 @@ Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr
 
                 if (vtxFitterNew.getProb() > 0.01)
                 {
+		
+		hMomLambdaCut->Fill(lambdaCandRefit.P());
+                hRecoThetaLambdaCut->Fill(lambdaCandRefit.Theta());
+                hRecoPhiLambdaCut->Fill(lambdaCandRefit.Phi());
+                hErrorRLambdaCut->Fill(sqrt(lambdaRefitCov(3,3)));
+                hErrorZLambdaCut->Fill(sqrt(lambdaRefitCov(4,4)));
+                hErrorThetaLambdaCut->Fill(sqrt(lambdaRefitCov(1,1)));
+                hErrorPhiLambdaCut->Fill(sqrt(lambdaRefitCov(2,2)));
 
                     // get Pull example (1/P for the fitted proton)
                     h12->Fill(vtxFitterNew.getPull(0));
@@ -1106,6 +1173,25 @@ Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr
     h31->Write();
     h32->Write();
     h33->Write();
+
+	hMomLambda->Write();
+        hRecoThetaLambda->Write();
+        hRecoPhiLambda->Write();
+
+        hErrorRLambda->Write();
+        hErrorZLambda->Write();
+        hErrorThetaLambda->Write();
+        hErrorPhiLambda->Write();
+
+
+        hMomLambdaCut->Write();
+        hRecoThetaLambdaCut->Write();
+        hRecoPhiLambdaCut->Write();
+
+        hErrorRLambdaCut->Write();
+        hErrorZLambdaCut->Write();
+        hErrorThetaLambdaCut->Write();
+        hErrorPhiLambdaCut->Write();
 
     outfile->Close();
 
