@@ -23,6 +23,7 @@ HMissPartFitter::HMissPartFitter(const std::vector<HRefitCand>& cands, TLorentzV
     fConverged = false;
     fIteration = 0;
     fNdf = 0;
+    f4MomConstraint = false;
 
     // set 'y=alpha' measurements
     // and the covariance
