@@ -67,6 +67,7 @@ private:
     bool fVtxConstraint;
     double fVtxPos;
     TVector3 fVertex;
+    TVector3 fPrimaryVertex;
     int fVerbose;
 
     double fLearningRate;
@@ -78,6 +79,7 @@ private:
     double fPhi1Original;
     double fPhi2Original;
     HVirtualCand fLambdaCandidate;
+
 public:
     HVertexFitter(const std::vector<HRefitCand> &cands);
     ~HVertexFitter(){};
@@ -102,8 +104,13 @@ public:
     double getDistanceFirstParticleOrigin() const { return fDistParticle1Origin; }
     double getDistanceSecondParticleOrigin() const { return fDistParticle2Origin; }
 
-    void setLambdaCandidate(double valTheta, double valPhi, double valR, double ValZ);
+    // The first function is for creating a Lambda candidate if only information of the decay vertex is available
+    // The second function is for creating the Lambda candidate if information about the primary vertex is also available
+
+    void setLambdaCandidate(double valMomentum, double valTheta, double valPhi, double valR, double ValZ, TVector3 decayVertex);
+    void  setLambdaCandidateFromPrimaryVtxInfo(double valMomentum, double valTheta, double valPhi, double valR, double ValZ, TVector3 primVtx);
     HVirtualCand getLambdaCandidate() { return fLambdaCandidate; }
+    TMatrixD getCovarianceMatrixLambda() { return fCovarianceLambda; }
 
     bool isConverged() const { return fConverged; }
     int getIteration() const { return fIteration; }
@@ -122,12 +129,17 @@ public:
     double fDistParticle1Origin;
     double fDistParticle2Origin;
 
+    //TMatrixD fCovarianceLambda(5, 5);
+    TMatrixD fCovarianceLambda;
+
     // J.R. The following line was present in the
     // original code. It does not seen to work with the
     // HYDRA version needed to run this code
     //[[deprecated]]
 
     HRefitCand getDaughter(int val);
+
+    bool fPrimaryVertexFound;
 
     void update();
 

@@ -2,7 +2,7 @@
 
 const size_t cov_dim = 5;
 
-HVertexFitter::HVertexFitter(const std::vector<HRefitCand> &cands) : fCands(cands), fVerbose(0), fLearningRate(0.5), fNumIterations(5)
+HVertexFitter::HVertexFitter(const std::vector<HRefitCand> &cands) : fCands(cands), fVerbose(0), fLearningRate(0.5), fNumIterations(5), fPrimaryVertexFound(false)
 {
     // fN is the number of daughters e.g. (L->ppi-) n=2
     fN = cands.size();
@@ -46,12 +46,12 @@ TVector3 HVertexFitter::findVertex(const std::vector<HRefitCand> &cands)
         std::cout << "" << std::endl;
     }
 
-    double param_theta1, param_phi1, param_R1, param_Z1;
-    double param_theta2, param_phi2, param_R2, param_Z2;
+    double param_p1, param_theta1, param_phi1, param_R1, param_Z1;
+    double param_p2, param_theta2, param_phi2, param_R2, param_Z2;
 
     HRefitCand cand1 = cands[0];
 
-    //param_p_inv1 = 1. / cand1.P();
+    param_p1 = cand1.P(); // Not the inverse, this momentum is used for estimating the momentum of the Lambda Candidate
     param_theta1 = cand1.Theta();
     param_phi1 = cand1.Phi();
     param_R1 = cand1.getR();
@@ -59,11 +59,19 @@ TVector3 HVertexFitter::findVertex(const std::vector<HRefitCand> &cands)
 
     HRefitCand cand2 = cands[1];
 
-    //param_p_inv2 = 1. / cand2.P();
+    param_p2 = cand2.P(); // Not the inverse, this momentum is used for estimating the momentum of the Lambda Candidate
     param_theta2 = cand2.Theta();
     param_phi2 = cand2.Phi();
     param_R2 = cand2.getR();
     param_Z2 = cand2.getZ();
+
+    double energy_cand1, energy_cand2;
+    energy_cand1 = sqrt(param_p1*param_p1+983.272*983.272);
+    energy_cand2 = sqrt(param_p2*param_p2+139.570*139.570);
+
+    double momentumAfterDecay = sqrt(energy_cand1*energy_cand1+2*energy_cand1*energy_cand2+energy_cand2*energy_cand2-1115.683*1115.683);
+
+    //double momentumAfterDecay= param_p1 + param_p2;
 
     // Set the original phi angles
     //fPhi1Original=param_phi1;
@@ -168,7 +176,12 @@ TVector3 HVertexFitter::findVertex(const std::vector<HRefitCand> &cands)
 
    std::cout << "Vertex: theta: " << fVertex.Theta() << " and phi: " << fVertex.Phi() << std::endl;
 
-    setLambdaCandidate(fVertex.Theta(), fVertex.Phi(), 0.0, 0.0);
+   if(fPrimaryVertexFound==false){
+   	setLambdaCandidate(momentumAfterDecay, fVertex.Theta(), fVertex.Phi(), 0.0, 0.0, fVertex);
+   }
+   if(fPrimaryVertexFound==true){
+	setLambdaCandidateFromPrimaryVtxInfo(momentumAfterDecay, fVertex.Theta(), fVertex.Phi(), 0.0, 0.0, fPrimaryVertex);
+   }
 
     return fVertex;
 }
@@ -361,10 +374,11 @@ TMatrixD HVertexFitter::f_eval(const TMatrixD &m_iter)
     return d;
 }
 
-void HVertexFitter::setLambdaCandidate(double valTheta, double valPhi, double valR, double valZ){
+void HVertexFitter::setLambdaCandidate(double valMomentum, double valTheta, double valPhi, double valR, double valZ, TVector3 decayVertex){
 
 //TODO make sure that all properties of the virtual can is set properly
 
+fLambdaCandidate.setMomentum(valMomentum);
 fLambdaCandidate.setTheta(TMath::RadToDeg() * valTheta);
 fLambdaCandidate.setPhi(TMath::RadToDeg() * valPhi);
 fLambdaCandidate.SetTheta(valTheta);
@@ -373,6 +387,50 @@ fLambdaCandidate.setR(valR);
 fLambdaCandidate.setZ(valZ);
 
 std::cout << "setLambdaCandidate, fLambdaCandidate: theta= " << fLambdaCandidate.getTheta() << " and phi = " << fLambdaCandidate.getPhi() << std::endl; 
+
+// Calculate the covariance matrix for the Lambda Candidate
+
+double x_vertex=decayVertex.X();
+double y_vertex=decayVertex.Y();
+double z_vertex=decayVertex.Z();
+
+
+double sigma_x=33.39; // In mm
+double sigma_y=26.70; // In mm
+double sigma_z=44.92; // In mm
+
+// Use coordinate transformation cartesian->polar to estimate error in theta and phi
+
+// Calculate the error in theta
+double r=sqrt(x_vertex*x_vertex+y_vertex*y_vertex+z_vertex*z_vertex);
+
+double dtheta_dx=x_vertex*z_vertex/(r*r*r*sqrt(1-z_vertex/(r*r)));
+double dtheta_dy=y_vertex*z_vertex/(r*r*r*sqrt(1-z_vertex/(r*r)));
+double dtheta_dz=(1/r-z_vertex*z_vertex/(r*r*r))/sqrt(1-z_vertex*z_vertex/(r*r));
+
+double sigma_theta=sqrt(dtheta_dx*dtheta_dx*sigma_x*sigma_x+dtheta_dy*dtheta_dy*sigma_y*sigma_y+dtheta_dz*dtheta_dz*sigma_z*sigma_z);
+
+// Calculate the error in phi
+double r_2D = sqrt(x_vertex*x_vertex+y_vertex*y_vertex);
+
+double dphi_dx = -x_vertex*y_vertex/(sqrt(x_vertex*x_vertex/(r_2D*r_2D))*r_2D*r_2D*r_2D);
+double dphi_dy = sqrt(x_vertex*x_vertex/(r_2D*r_2D))/r_2D;
+// dphi_dz=0;
+
+double sigma_phi = sqrt(dphi_dx*dphi_dx*sigma_x*sigma_x+dphi_dy*dphi_dy*sigma_y*sigma_y);
+
+// Calculate the error in R
+double dR_dx=x_vertex/r_2D;
+double dR_dy=y_vertex/r_2D;
+
+double sigma_R=sqrt(dR_dx*dR_dx*sigma_x*sigma_x+dR_dy*dR_dy*sigma_y*sigma_y);
+
+fCovarianceLambda.ResizeTo(5,5);
+fCovarianceLambda(0,0)=9999999;
+fCovarianceLambda(1,1)=sigma_theta*sigma_theta;
+fCovarianceLambda(2,2)=sigma_phi*sigma_phi;
+fCovarianceLambda(3,3)=sigma_R*sigma_R;
+fCovarianceLambda(4,4)=sigma_z*sigma_z;
 
 }
 

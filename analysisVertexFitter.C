@@ -647,6 +647,7 @@ Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr
 
 		std::cout << "--------------------" << std::endl;
 		std::cout << "Lambda candidate: " << std::endl;
+		std::cout << "Estimated Momentum: " << lambdaCand.getMomentum()  << std::endl;
 		std::cout << "Theta: " << lambdaCand.getTheta() << std::endl;
 		std::cout << "Phi: " << lambdaCand.getPhi() << std::endl;
                 std::cout << "Theta: " << lambdaCand.Theta() << std::endl;
@@ -654,7 +655,41 @@ Int_t analysisVertexFitter(TString infileList = "pp_pKlambda_100000evts1_dst_apr
                 std::cout << "R: " << lambdaCand.getR() << std::endl;
                 std::cout << "Z: " << lambdaCand.getZ() << std::endl;
                 std::cout << "--------------------" << std::endl;
+		
+		TMatrixD lambdaCov(5, 5);
+		lambdaCov=vtxFitter.getCovarianceMatrixLambda();
+		lambdaCov.Print();
+	    	
+		double deg2rad = TMath::DegToRad();
+                double rad2deg = TMath::RadToDeg();
 
+		//HVirtualCand* lambdaCandPtr;
+		//lambdaCandPtr = Â&lambdaCand;
+
+		HRefitCand lambdaCandRefit(&lambdaCand);
+		lambdaCandRefit.SetXYZM(lambdaCand.getMomentum() * std::sin(lambdaCand.getTheta() * deg2rad) *
+                        std::cos(lambdaCand.getPhi() * deg2rad),
+                    lambdaCand.getMomentum() * std::sin(lambdaCand.getTheta() * deg2rad) *
+                        std::sin(lambdaCand.getPhi() * deg2rad),
+                    lambdaCand.getMomentum() * std::cos(lambdaCand.getTheta() * deg2rad),
+                    1115.683);
+    		lambdaCandRefit.setR(lambdaCand.getR());
+    		lambdaCandRefit.setZ(lambdaCand.getZ());
+    		lambdaCandRefit.setCovariance(lambdaCov);
+
+		std::cout << "--------------------" << std::endl;
+                std::cout << "Lambda candidate Refit: " << std::endl;
+                std::cout << "Estimated Momentum: " << lambdaCandRefit.P()  << std::endl;
+                std::cout << "Theta: " << lambdaCandRefit.Theta() << " , in degrees: " << lambdaCandRefit.Theta()*rad2deg << std::endl;
+                std::cout << "Phi: " << lambdaCandRefit.Phi() << " , in degrees: " << lambdaCandRefit.Phi()*rad2deg << std::endl;
+                std::cout << "R: " << lambdaCandRefit.getR() << std::endl;
+                std::cout << "Z: " << lambdaCandRefit.getZ() << std::endl;
+                std::cout << "--------------------" << std::endl;
+
+		TMatrixD lambdaRefitCov(5,5);
+                lambdaRefitCov=lambdaCandRefit.getCovariance();
+		lambdaRefitCov.Print();
+		
 		double distProtonPion = vtxFitter.getDistanceBetweenFittedParticles();
 
                 hDistanceToVertexProtonPreFit->Fill(vtxFitter.getDistanceFirstParticleVertex());
