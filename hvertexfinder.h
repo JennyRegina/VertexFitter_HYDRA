@@ -1,11 +1,11 @@
 /**
- * HVertexFitter.h
+ * HVertexFinder.h
  *
  *
  */
 
-#ifndef HVERTEXFITTER_H
-#define HVERTEXFITTER_H
+#ifndef HVERTEXFINDER_H
+#define HVERTEXFINDER_H
 
 // system includes
 #include <iostream>
@@ -49,13 +49,10 @@ void Print(T const &matrix)
     cout << endl;
 }
 
-class HVertexFitter
+class HVertexFinder
 {
 private:
-    TMatrixD y, V, fPull;
-    double fChi2, fProb;
-    bool fConverged;
-    int fIteration, fN;
+
     std::vector<HRefitCand> fCands;
 
     // data members for constraints
@@ -70,9 +67,6 @@ private:
     TVector3 fPrimaryVertex;
     int fVerbose;
 
-    double fLearningRate;
-    int fNumIterations;
-
     double fDistanceParticleToParticle;
     double fDistanceParticleToVertex;
 
@@ -81,17 +75,11 @@ private:
     HVirtualCand fLambdaCandidate;
 
 public:
-    HVertexFitter(const std::vector<HRefitCand> &cands);
-    ~HVertexFitter(){};
+    HVertexFinder(const std::vector<HRefitCand> &cands);
+    ~HVertexFinder(){};
     TVector3 findVertex(const std::vector<HRefitCand> &cands);
     std::vector<HRefitCand> UpdateTrackParameters(std::vector<HRefitCand> &cands, TVector3 &VertexPos);
 
-    void setLearningRate(double val) { fLearningRate = val; }
-    void setNumberOfIterations(int val) { fNumIterations = val; }
-
-    double getChi2() const { return fChi2; }
-    double getProb() const { return fProb; }
-    double getPull(int val = 0) { return fPull(val, val); }
     TVector3 getVertex() const { return fVertex; } // Function that the user should use in the analysis macro
 
     // The functions below are functions to obtain information about distances
@@ -110,10 +98,6 @@ public:
     HVirtualCand getLambdaCandidate() { return fLambdaCandidate; }
     TMatrixD getCovarianceMatrixLambda() { return fCovarianceLambda; }
 
-    bool isConverged() const { return fConverged; }
-    int getIteration() const { return fIteration; }
-    void setCovariance(TMatrixD &val) { V = val; }
-    void setMeasurement(TMatrixD &val) { y = val; }
     void setVerbosity(int val) { fVerbose = val; }
 
     void setPhiOriginal(double val1, double val2){
@@ -144,4 +128,4 @@ protected:
     void updateDaughters();
 };
 
-#endif /* HVERTEXFITTER_H */
+#endif /* HVERTEXFINDER_H */

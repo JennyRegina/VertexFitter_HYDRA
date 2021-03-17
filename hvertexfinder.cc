@@ -1,44 +1,13 @@
-#include "hvertexfitter.h"
+#include "hvertexfinder.h"
 
 const size_t cov_dim = 5;
 
-HVertexFitter::HVertexFitter(const std::vector<HRefitCand> &cands) : fCands(cands), fVerbose(0), fLearningRate(0.5), fNumIterations(5), fPrimaryVertexFound(false)
+HVertexFinder::HVertexFinder(const std::vector<HRefitCand> &cands) : fCands(cands), fVerbose(0), fPrimaryVertexFound(false)
 {
-    // fN is the number of daughters e.g. (L->ppi-) n=2
-    fN = cands.size();
 
-    y.ResizeTo(fN * cov_dim, 1);
-    V.ResizeTo(fN * cov_dim, fN * cov_dim);
-
-    y.Zero();
-    V.Zero();
-
-    fConverged = false;
-    fIteration = 0;
-
-    // set 'y=alpha' measurements
-    // and the covariance
-    for (int ix = 0; ix < fN; ix++)
-    {
-        HRefitCand cand = cands[ix];
-        y(0 + ix * cov_dim, 0) = 1. / cand.P();
-        y(1 + ix * cov_dim, 0) = cand.Theta();
-        y(2 + ix * cov_dim, 0) = cand.Phi();
-        y(3 + ix * cov_dim, 0) = cand.getR();
-        y(4 + ix * cov_dim, 0) = cand.getZ();
-        fM.push_back(cand.M());
-
-        // FIX ME: only for diagonal elements
-        TMatrixD covariance = cand.getCovariance();
-        V(0 + ix * cov_dim, 0 + ix * cov_dim) = covariance(0, 0);
-        V(1 + ix * cov_dim, 1 + ix * cov_dim) = covariance(1, 1);
-        V(2 + ix * cov_dim, 2 + ix * cov_dim) = covariance(2, 2);
-        V(3 + ix * cov_dim, 3 + ix * cov_dim) = covariance(3, 3);
-        V(4 + ix * cov_dim, 4 + ix * cov_dim) = covariance(4, 4);
-    }
 }
 
-TVector3 HVertexFitter::findVertex(const std::vector<HRefitCand> &cands)
+TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
 {
     if (fVerbose > 0)
     {
@@ -72,10 +41,6 @@ TVector3 HVertexFitter::findVertex(const std::vector<HRefitCand> &cands)
     double momentumAfterDecay = sqrt(energy_cand1*energy_cand1+2*energy_cand1*energy_cand2+energy_cand2*energy_cand2-1115.683*1115.683);
 
     //double momentumAfterDecay= param_p1 + param_p2;
-
-    // Set the original phi angles
-    //fPhi1Original=param_phi1;
-    //fPhi2Original=param_phi2;
 
     // Calculate the base and direction vectors of the two candidates
     TVector3 vtx_base_1, vtx_base_2, vtx_dir_1, vtx_dir_2;
@@ -186,7 +151,7 @@ TVector3 HVertexFitter::findVertex(const std::vector<HRefitCand> &cands)
     return fVertex;
 }
 
-std::vector<HRefitCand> HVertexFitter::UpdateTrackParameters(std::vector<HRefitCand> &cands, TVector3 &vertexPos)
+std::vector<HRefitCand> HVertexFinder::UpdateTrackParameters(std::vector<HRefitCand> &cands, TVector3 &vertexPos)
 {
     if (fVerbose > 0)
     {
@@ -262,12 +227,6 @@ std::vector<HRefitCand> HVertexFitter::UpdateTrackParameters(std::vector<HRefitC
     double phi_secondary1 = vtx_base_1_updated.Phi();
     double phi_secondary2 = vtx_base_2_updated.Phi();
 
-    /*double R_secondary1=;
-    double R_secondary2=;
-
-    double Z_secondary1=;
-    double Z_secondary2=; */
-
     TVector3 vtx_dir_1_updated, vtx_dir_2_updated;
 
     vtx_dir_1_updated.SetXYZ(std::sin(theta_secondary1) * std::cos(phi_secondary1),
@@ -320,7 +279,7 @@ std::vector<HRefitCand> HVertexFitter::UpdateTrackParameters(std::vector<HRefitC
     return newCands;
 }
 
-void HVertexFitter::setLambdaCandidate(double valMomentum, double valTheta, double valPhi, double valR, double valZ, TVector3 decayVertex){
+void HVertexFinder::setLambdaCandidate(double valMomentum, double valTheta, double valPhi, double valR, double valZ, TVector3 decayVertex){
 
 //TODO make sure that all properties of the virtual can is set properly
 //TODO use matrix notation to include the correlations in the errors
