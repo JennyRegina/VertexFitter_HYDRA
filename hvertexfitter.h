@@ -83,8 +83,6 @@ private:
 public:
     HVertexFitter(const std::vector<HRefitCand> &cands);
     ~HVertexFitter(){};
-    TMatrixD f_eval(const TMatrixD &m_iter);
-    TMatrixD Feta_eval(const TMatrixD &miter);
     TVector3 findVertex(const std::vector<HRefitCand> &cands);
     std::vector<HRefitCand> UpdateTrackParameters(std::vector<HRefitCand> &cands, TVector3 &VertexPos);
 
@@ -116,7 +114,6 @@ public:
     int getIteration() const { return fIteration; }
     void setCovariance(TMatrixD &val) { V = val; }
     void setMeasurement(TMatrixD &val) { y = val; }
-    bool fit();
     void setVerbosity(int val) { fVerbose = val; }
 
     void setPhiOriginal(double val1, double val2){
@@ -139,9 +136,9 @@ public:
 
     HRefitCand getDaughter(int val);
 
+    // J.R. Variable noting if the primary vertex was found
+    // This influences the calculation of the Lambda Candidate
     bool fPrimaryVertexFound;
-
-    void update();
 
 protected:
     void updateDaughters();
