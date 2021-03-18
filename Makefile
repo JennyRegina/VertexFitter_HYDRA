@@ -8,12 +8,13 @@
 ##############################################################################
 
 
-LIB_NAME := VertexFit_3C
+LIB_NAME := VertexFit
 
 USES_ORACLE= : no
 
 SOURCE_FILES := hrefitcand.cc \
-		h3cfitter.cc
+		h3cfitter.cc \
+		hvertexfitter.cc
 
 
 include $(HADDIR)/hades.def.mk
