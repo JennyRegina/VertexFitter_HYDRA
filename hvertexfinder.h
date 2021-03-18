@@ -21,8 +21,6 @@
 using std::cout;
 using std::endl;
 
-const double pi2 = TMath::PiOver2();
-
 template <typename T>
 void Print(T const &matrix)
 {
@@ -55,13 +53,9 @@ private:
 
     std::vector<HRefitCand> fCands;
 
-    // data members for constraints
-    double fMass;
-    int fNdf;
-
     std::vector<double> fM;
     TLorentzVector fInit;
-    bool fVtxConstraint;
+   
     double fVtxPos;
     TVector3 fVertex;
     TVector3 fPrimaryVertex;
@@ -72,15 +66,18 @@ private:
 
     double fPhi1Original;
     double fPhi2Original;
-    HVirtualCand fLambdaCandidate;
+    HVirtualCand fNeutralMotherCandidate;
 
 public:
     HVertexFinder(const std::vector<HRefitCand> &cands);
     ~HVertexFinder(){};
     TVector3 findVertex(const std::vector<HRefitCand> &cands);
+    TVector3 findPrimaryVertex(const std::vector<HRefitCand> &cands);
     std::vector<HRefitCand> UpdateTrackParameters(std::vector<HRefitCand> &cands, TVector3 &VertexPos);
+    void calculateVertexProperties(TVector3 primaryVertex, TVector3 decayVertex);
 
     TVector3 getVertex() const { return fVertex; } // Function that the user should use in the analysis macro
+    TVector3 gePrimarytVertex() const { return fPrimaryVertex; } // Function that the user should use in the analysis macro
 
     // The functions below are functions to obtain information about distances
     // from the analysis macro
@@ -93,10 +90,10 @@ public:
     // The first function is for creating a Lambda candidate if only information of the decay vertex is available
     // The second function is for creating the Lambda candidate if information about the primary vertex is also available
 
-    void setLambdaCandidate(double valMomentum, double valTheta, double valPhi, double valR, double ValZ, TVector3 decayVertex);
-    void  setLambdaCandidateFromPrimaryVtxInfo(double valMomentum, double valTheta, double valPhi, double valR, double ValZ, TVector3 primVtx);
-    HVirtualCand getLambdaCandidate() { return fLambdaCandidate; }
-    TMatrixD getCovarianceMatrixLambda() { return fCovarianceLambda; }
+    void setNeutralMotherCandidate(double valMomentum, double valTheta, double valPhi, double valR, double ValZ, TVector3 decayVertex);
+    void  setNeutralMotherCandidateFromPrimaryVtxInfo(double valMomentum, TVector3 primVtx, TVector3 decayVtx);
+    HVirtualCand getNeutralMotherCandidate() { return fNeutralMotherCandidate; }
+    TMatrixD getCovarianceMatrixNeutralMother() { return fCovarianceNeutralMother; }
 
     void setVerbosity(int val) { fVerbose = val; }
 
@@ -111,7 +108,7 @@ public:
     double fDistParticle2Origin;
 
     //TMatrixD fCovarianceLambda(5, 5);
-    TMatrixD fCovarianceLambda;
+    TMatrixD fCovarianceNeutralMother;
 
     // J.R. The following line was present in the
     // original code. It does not seen to work with the
@@ -124,8 +121,17 @@ public:
     // This influences the calculation of the Lambda Candidate
     bool fPrimaryVertexFound;
 
+// Properties related to 
+TVector3 fVecPrimToDecayVertex;
+double fDistPrimToDecayVertex;
+
+bool fPrimaryVertexIsBetforeDecayVertex;
+bool fPrimaryVertexIsOutsideDecayVertex;
+
 protected:
+
     void updateDaughters();
+
 };
 
 #endif /* HVERTEXFINDER_H */
