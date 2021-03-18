@@ -2,7 +2,11 @@
 
 const size_t cov_dim = 5;
 
-HVertexFitter::HVertexFitter(const std::vector<HRefitCand> &cands) : fCands(cands), fVerbose(0), fLearningRate(1), fNumIterations(10)
+HVertexFitter::HVertexFitter(const std::vector<HRefitCand> &cands) : 
+    fCands(cands), 
+    fVerbose(0), 
+    fLearningRate(1), 
+    fNumIterations(10)
 {
     // fN is the number of daughters e.g. (L->ppi-) n=2
     fN = cands.size();
@@ -93,17 +97,17 @@ HVertexFitter::HVertexFitter(const std::vector<HRefitCand>& cands, HRefitCand& m
 	//for mother
     HRefitCand cand = fMother;
 
-    y(fN * cov_dim, 0) = cand.Theta();
-    y(1 + fN * cov_dim, 0) = cand.Phi();
-    y(2 + fN * cov_dim, 0) = cand.getR();
-    y(3 + fN * cov_dim, 0) = cand.getZ();
-    fM.push_back(mother.M());
+    y(fyDim, 0) = cand.Theta();
+    y(1 + fyDim, 0) = cand.Phi();
+    y(2 + fyDim, 0) = cand.getR();
+    y(3 + fyDim, 0) = cand.getZ();
+    fM.push_back(cand.M());
 
-    TMatrixD covariance = mother.getCovariance();
-    V(0 + fN * cov_dim, 0 + fN * cov_dim) = covariance(1, 1);
-    V(1 + fN * cov_dim, 1 + fN * cov_dim) = covariance(2, 2);
-    V(2 + fN * cov_dim, 2 + fN * cov_dim) = covariance(3, 3);
-    V(3 + fN * cov_dim, 3 + fN * cov_dim) = covariance(4, 4);
+    TMatrixD covariance = cand.getCovariance();
+    V(0 + fyDim, 0 + fyDim) = covariance(1, 1);
+    V(1 + fyDim, 1 + fyDim) = covariance(2, 2);
+    V(2 + fyDim, 2 + fyDim) = covariance(3, 3);
+    V(3 + fyDim, 3 + fyDim) = covariance(4, 4);
 }
 
 
@@ -196,6 +200,8 @@ TMatrixD HVertexFitter::f_eval(const TMatrixD &m_iter, const TMatrixD& xi_iter)
 
 //Jacobian (derivative of constraint equations with respect to measured variables)
 TMatrixD HVertexFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD& xi_iter)
+{
+    TMatrixD H;
 
     if(fVtxConstraint){
         H.ResizeTo(1, fyDim);
@@ -383,19 +389,19 @@ TMatrixD HVertexFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD& xi_ite
 		
 		//Mother variables
 		//dtht
-        H(0, fN * cov_dim) = -1./xi_iter(0, 0) * cos(m_iter(0 + fN * cov_dim, 0)) * cos(m_iter(1 + fN * cov_dim, 0));
-        H(1, fN * cov_dim) = -1./xi_iter(0, 0) * cos(m_iter(0 + fN * cov_dim, 0)) * sin(m_iter(1 + fN * cov_dim, 0));
-        H(2, fN * cov_dim) = 1./xi_iter(0, 0) * sin(m_iter(0 + fN * cov_dim, 0));
+        H(0, fyDim) = -1./xi_iter(0, 0) * cos(m_iter(0 + fyDim, 0)) * cos(m_iter(1 + fyDim, 0));
+        H(1, fyDim) = -1./xi_iter(0, 0) * cos(m_iter(0 + fyDim, 0)) * sin(m_iter(1 + fyDim, 0));
+        H(2, fyDim) = 1./xi_iter(0, 0) * sin(m_iter(0 + fyDim, 0));
         //dphi
-        H(0, 1 + fN * cov_dim) = 1./xi_iter(0, 0) * sin(m_iter(0 + fN * cov_dim, 0)) * sin(m_iter(1 + fN * cov_dim, 0));
-        H(1, 1 + fN * cov_dim) = -1./xi_iter(0, 0) * sin(m_iter(0 + fN * cov_dim, 0)) * cos(m_iter(1 + fN * cov_dim, 0));
+        H(0, 1 + fyDim) = 1./xi_iter(0, 0) * sin(m_iter(0 + fyDim, 0)) * sin(m_iter(1 + fyDim, 0));
+        H(1, 1 + fyDim) = -1./xi_iter(0, 0) * sin(m_iter(0 + fyDim, 0)) * cos(m_iter(1 + fyDim, 0));
     }
     
     return H;
 }
 
 //Jacobian (derivative of constraint equations with respect to unmeasured variables)
-TMatrixD H3cFitter::Fxi_eval(const TMatrixD& m_iter, const TMatrixD& xi_iter)
+TMatrixD HVertexFitter::Fxi_eval(const TMatrixD& m_iter, const TMatrixD& xi_iter)
 {
     TMatrixD H;
 
@@ -405,9 +411,9 @@ TMatrixD H3cFitter::Fxi_eval(const TMatrixD& m_iter, const TMatrixD& xi_iter)
         H.Zero();
 
         //d(1/p)
-        H(0, 0) = 1./pow(xi_iter(0, 0),2) * sin(m_iter(0 + fN * cov_dim, 0)) * cos(m_iter(1 + fN * cov_dim, 0));
-        H(1, 0) = 1./pow(xi_iter(0, 0),2) * sin(m_iter(0 + fN * cov_dim, 0)) * sin(m_iter(1 + fN * cov_dim, 0));
-        H(2, 0) = 1./pow(xi_iter(0, 0),2) * cos(m_iter(0 + fN * cov_dim, 0));
+        H(0, 0) = 1./pow(xi_iter(0, 0),2) * sin(m_iter(0 + fyDim, 0)) * cos(m_iter(1 + fyDim, 0));
+        H(1, 0) = 1./pow(xi_iter(0, 0),2) * sin(m_iter(0 + fyDim, 0)) * sin(m_iter(1 + fyDim, 0));
+        H(2, 0) = 1./pow(xi_iter(0, 0),2) * cos(m_iter(0 + fyDim, 0));
         H(3, 0) = 1./pow(xi_iter(0, 0),3) * 1./ sqrt(pow(m_iter(0, 0),2) + pow(fM[fN], 2));
     }
 
@@ -419,14 +425,14 @@ bool HVertexFitter::fit()
     if (fVerbose > 0)
     {
         std::cout << " ----------- HVertexFitter::fit() -----------" << std::endl;
-        std::cout << "Vertex constraint set: " << fVetxConstraint << std::endl;
+        std::cout << "Vertex constraint set: " << fVtxConstraint << std::endl;
         std::cout << "3C set: " << f3Constraint << std::endl;
         std::cout << "" << std::endl;
     }
 
     double lr = fLearningRate;
     TMatrixD alpha0(fyDim, 1), alpha(fyDim, 1);
-    TMatrixD xi0(1, 1), xi(1, 1);
+    TMatrixD xi0(1, 1), xi(1, 1), neu_xi(1, 1);
     TMatrixD A0(y), V0(V);
     alpha0 = y;
     alpha = alpha0;
@@ -437,6 +443,7 @@ bool HVertexFitter::fit()
 
     xi0.Zero();
     xi.Zero();
+    neu_xi.Zero();
 
     if(f3Constraint){
         xi0(0,0) = 1/fMother.P();
@@ -453,6 +460,8 @@ bool HVertexFitter::fit()
     TMatrixD d = f_eval(alpha, xi);
     TMatrixD VD(D.GetNrows(), D.GetNrows());
     VD.Zero();
+    TMatrixD VDD(D_xi.GetNrows(), D_xi.GetNrows());
+    VDD.Zero();
 
     for (int q = 0; q < fNumIterations; q++)
     {
@@ -465,7 +474,7 @@ bool HVertexFitter::fit()
         VD.Invert();
         if(f3Constraint){
             DT_xi.Transpose(D_xi);
-            TMatrixD VDD = DT_xi * VD * D_xi;
+            VDD = DT_xi * VD * D_xi;
             VDD.Invert();
         }
 
@@ -473,11 +482,10 @@ bool HVertexFitter::fit()
         TMatrixD lambda(d);       //Lagrange multiplier
         lambda.Zero();
         if(f3Constraint){
-            TMatrixD neu_xi = xi - lr * VDD * DT_xi * VD * r;
-            TMatrixD delta_xi = neu_xi - xi;
-            lambda = VD * (r + D_xi * delta_xi);
+            neu_xi = xi - lr * VDD * DT_xi * VD * r;
         }
-        if(fVtxConstraint) lambda = VD * r;
+        TMatrixD delta_xi = neu_xi - xi;
+        lambda = VD * (r + D_xi * delta_xi);
         TMatrixD lambdaT(lambda.GetNcols(), lambda.GetNrows());
         lambdaT.Transpose(lambda);
         TMatrixD neu_alpha(fyDim, 1);
@@ -518,7 +526,7 @@ bool HVertexFitter::fit()
     }
 
     y = alpha;
-    p = xi;
+    x = xi;
     fChi2 = chi2;
     fProb = TMath::Prob(chi2, fNdf);
 
@@ -530,7 +538,7 @@ bool HVertexFitter::fit()
         TMatrixD invertedMatrix = DT_xi*VD*D_xi;
         invertedMatrix.Invert();
         V = V0 - lr * V0 * (DT * VD * D - (matrix*invertedMatrix*matrixT)) * V0;
-        Vp = invertedMatrix;
+        Vx = invertedMatrix;
     }
     if(fVtxConstraint) V = V0 - lr * V0 * DT * VD * D * V0;
 
@@ -538,12 +546,12 @@ bool HVertexFitter::fit()
     // Pull
     // -----------------------------------------
     fPull.ResizeTo(fyDim, fyDim);
-    for (uint b = 0; b < (fyDim); b++)
+    for (int b = 0; b < (fyDim); b++)
         fPull(b, b) = -10000;
 
     if (true)
     {
-        for (uint b = 0; b < (fyDim); b++)
+        for (int b = 0; b < (fyDim); b++)
         {
             double num = A0(b, 0) - alpha(b, 0);
             double dem = V0(b, b) - V(b, b);
@@ -566,7 +574,7 @@ HRefitCand HVertexFitter::getDaughter(int val)
     return fCands[val];
 }
 
-HRefitCand H3cFitter::getMother()
+HRefitCand HVertexFitter::getMother()
 {
     return fMother;
 }
@@ -603,31 +611,31 @@ void HVertexFitter::updateDaughters()
     }
 }
 
-void H3cFitter::updateMother()
+void HVertexFitter::updateMother()
 {
     HRefitCand& mother = fMother;
-    double Px = (1. / p(0, 0)) *
-                std::sin(y(0 + fN * cov_dim, 0)) *
-                std::cos(y(1 + fN * cov_dim, 0));
-    double Py = (1. / p(0, 0)) *
-                std::sin(y(0 + fN * cov_dim, 0)) *
-                std::sin(y(1 + fN * cov_dim, 0));
+    double Px = (1. / x(0, 0)) *
+                std::sin(y(0 + fyDim, 0)) *
+                std::cos(y(1 + fyDim, 0));
+    double Py = (1. / x(0, 0)) *
+                std::sin(y(0 + fyDim, 0)) *
+                std::sin(y(1 + fyDim, 0));
     double Pz =
-        (1. / p(0, 0)) * std::cos(y(0 + fN * cov_dim, 0));
+        (1. / x(0, 0)) * std::cos(y(0 + fyDim, 0));
     double M = fM[fN];
     mother.SetXYZM(Px, Py, Pz, M);
-    mother.setR(y(2 + fN * cov_dim, 0));
-    mother.setZ(y(3 + fN * cov_dim, 0));
+    mother.setR(y(2 + fyDim, 0));
+    mother.setZ(y(3 + fyDim, 0));
 
     // ---------------------------------------------------------------------------
     // set covariance
     // ---------------------------------------------------------------------------
     TMatrixD cov(5, 5);
-    cov(0, 0) = Vp(0, 0);
-    cov(1, 1) = V(1 + fN * cov_dim, 1 + fN * cov_dim);
-    cov(2, 2) = V(2 + fN * cov_dim, 2 + fN * cov_dim);
-    cov(3, 3) = V(3 + fN * cov_dim, 3 + fN * cov_dim);
-    cov(4, 4) = V(4 + fN * cov_dim, 4 + fN * cov_dim);
+    cov(0, 0) = Vx(0, 0);
+    cov(1, 1) = V(1 + fyDim, 1 + fyDim);
+    cov(2, 2) = V(2 + fyDim, 2 + fyDim);
+    cov(3, 3) = V(3 + fyDim, 3 + fyDim);
+    cov(4, 4) = V(4 + fyDim, 4 + fyDim);
     mother.setCovariance(cov);
     // ---------------------------------------------------------------------------
 }

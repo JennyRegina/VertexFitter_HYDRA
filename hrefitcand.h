@@ -16,6 +16,8 @@ private:
 
 public:
     HRefitCand(HVirtualCand * cand);
+    HRefitCand(); //Does that work like this? See https://os.mbed.com/users/fpucher/code/HIM0Board/wiki/Vererbung-in-C%2B%2B
+    ~HRefitCand(){};
     void setR(Double_t val) { fR = val; }
     void setZ(Double_t val) { fZ = val; }
     //void setTheta(Double_t val) { fTheta = val; }
