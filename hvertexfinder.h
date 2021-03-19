@@ -21,8 +21,8 @@
 using std::cout;
 using std::endl;
 
-const double pi2 = TMath::PiOver2();
-
+//const double pi2 = TMath::PiOver2();
+/*
 template <typename T>
 void Print(T const &matrix)
 {
@@ -48,7 +48,7 @@ void Print(T const &matrix)
 
     cout << endl;
 }
-
+*/
 class HVertexFinder
 {
 private:

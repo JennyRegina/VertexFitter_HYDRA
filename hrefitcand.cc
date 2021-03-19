@@ -4,8 +4,16 @@
 //: TLorentzVector(*cand), fR(cand->getR()), fZ(cand->getZ()), fTheta(cand->Theta()), fPhi(cand->Phi()), cand(cand)
 
 HRefitCand::HRefitCand(HVirtualCand* cand)
-    : TLorentzVector(*cand), fR(cand->getR()), fZ(cand->getZ()), cand(cand)
+    : TLorentzVector(*cand), cand(cand), fR(cand->getR()), fZ(cand->getZ())
 {
+}
+
+HRefitCand::HRefitCand()
+    : TLorentzVector()
+{
+    cand = new HVirtualCand();
+    fR = cand->getR();
+    fZ = cand->getZ();
 }
 
 void HRefitCand::setCovariance(const TMatrixD& cov)

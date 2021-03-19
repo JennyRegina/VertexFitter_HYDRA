@@ -453,11 +453,11 @@ bool HVertexFitter::fit()
     double chi2 = 1e6;
     TMatrixD D = Feta_eval(alpha, xi);
     TMatrixD DT(D.GetNcols(), D.GetNrows());
-    TMatrixD D_xi(4, 1), DT_xi(1, 4);       //check dimension if other fitters are added
+    TMatrixD d = f_eval(alpha, xi);
+    TMatrixD D_xi(d.GetNrows(), 1), DT_xi(1, d.GetNrows());       //check dimension if other fitters are added
     D_xi.Zero();
     DT_xi.Zero();
     if(f3Constraint) D_xi = Fxi_eval(alpha, xi);
-    TMatrixD d = f_eval(alpha, xi);
     TMatrixD VD(D.GetNrows(), D.GetNrows());
     VD.Zero();
     TMatrixD VDD(D_xi.GetNrows(), D_xi.GetNrows());

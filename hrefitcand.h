@@ -10,9 +10,9 @@
 
 class HRefitCand : public TLorentzVector {
 private:
+    HVirtualCand * cand;
     Double_t fR, fZ; //fTheta, fPhi;
     TMatrixD fCov;
-    HVirtualCand * cand;
 
 public:
     HRefitCand(HVirtualCand * cand);
