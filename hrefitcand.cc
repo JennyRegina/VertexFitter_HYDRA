@@ -7,6 +7,10 @@ HRefitCand::HRefitCand(HVirtualCand* cand)
     : TLorentzVector(*cand), fR(cand->getR()), fZ(cand->getZ()), cand(cand)
 {
 }
+HRefitCand::HRefitCand() 
+	: TLorentzVector() 
+{
+}
 
 void HRefitCand::setCovariance(const TMatrixD& cov)
 {

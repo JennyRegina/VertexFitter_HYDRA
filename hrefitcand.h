@@ -16,6 +16,7 @@ private:
 
 public:
     HRefitCand(HVirtualCand * cand);
+    HRefitCand(); // Empty constryctor
     void setR(Double_t val) { fR = val; }
     void setZ(Double_t val) { fZ = val; }
     //void setTheta(Double_t val) { fTheta = val; }
