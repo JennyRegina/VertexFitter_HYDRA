@@ -463,7 +463,7 @@ bool HVertexFitter::fit()
     if(f3Constraint) D_xi = Fxi_eval(alpha, xi);
     TMatrixD VD(D.GetNrows(), D.GetNrows());
     VD.Zero();
-    TMatrixD VDD(D_xi.GetNrows(), D_xi.GetNrows());
+    TMatrixD VDD(D_xi.GetNcols(), D_xi.GetNcols());
     VDD.Zero();
 
     for (int q = 0; q < fNumIterations; q++)
@@ -533,8 +533,10 @@ bool HVertexFitter::fit()
         D = Feta_eval(alpha, xi);
         if(f3Constraint) D_xi = Fxi_eval(alpha, xi);
         d = f_eval(alpha, xi);
+	    	      
     }
 
+  cout << " exit iterations" << endl;
     y = alpha;
     x = xi;
     fChi2 = chi2;
