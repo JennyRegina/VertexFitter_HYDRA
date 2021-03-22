@@ -433,6 +433,7 @@ bool HVertexFitter::fit()
     double lr = fLearningRate;
     TMatrixD alpha0(fyDim, 1), alpha(fyDim, 1);
     TMatrixD xi0(1, 1), xi(1, 1), neu_xi(1, 1);
+    x.ResizeTo(xi.GetNrows(), xi.GetNcols());
     TMatrixD A0(y), V0(V);
     alpha0 = y;
     alpha = alpha0;
@@ -645,10 +646,10 @@ void HVertexFitter::updateMother()
     // ---------------------------------------------------------------------------
     TMatrixD cov(5, 5);
     cov(0, 0) = Vx(0, 0);
-    cov(1, 1) = V(1 + fN * cov_dim, 1 + fN * cov_dim);
-    cov(2, 2) = V(2 + fN * cov_dim, 2 + fN * cov_dim);
-    cov(3, 3) = V(3 + fN * cov_dim, 3 + fN * cov_dim);
-    cov(4, 4) = V(4 + fN * cov_dim, 4 + fN * cov_dim);
+    cov(1, 1) = V(0 + fN * cov_dim, 0 + fN * cov_dim);
+    cov(2, 2) = V(1 + fN * cov_dim, 1 + fN * cov_dim);
+    cov(3, 3) = V(2 + fN * cov_dim, 2 + fN * cov_dim);
+    cov(4, 4) = V(3 + fN * cov_dim, 3 + fN * cov_dim);
     mother.setCovariance(cov);
     // ---------------------------------------------------------------------------
 }
