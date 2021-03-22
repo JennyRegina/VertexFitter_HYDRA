@@ -451,12 +451,15 @@ bool HVertexFitter::fit()
     }
 
     double chi2 = 1e6;
+    cout << " calc Feta" << endl;
     TMatrixD D = Feta_eval(alpha, xi);
     TMatrixD DT(D.GetNcols(), D.GetNrows());
+    cout << " calc f" << endl;
     TMatrixD d = f_eval(alpha, xi);
     TMatrixD D_xi(d.GetNrows(), 1), DT_xi(1, d.GetNrows());       //check dimension if other fitters are added
     D_xi.Zero();
     DT_xi.Zero();
+    cout << " calc Fxi" << endl;
     if(f3Constraint) D_xi = Fxi_eval(alpha, xi);
     TMatrixD VD(D.GetNrows(), D.GetNrows());
     VD.Zero();
@@ -467,13 +470,16 @@ bool HVertexFitter::fit()
     {
         TMatrixD delta_alpha = alpha0 - alpha;
         //calc r
+    cout << " calc r" << endl;
         TMatrixD r = d + D * delta_alpha;
         DT.Transpose(D);
         //calc S
+    cout << " calc S" << endl;
         VD = D * V0 * DT;
         VD.Invert();
         if(f3Constraint){
             DT_xi.Transpose(D_xi);
+    cout << " calc Sxi" << endl;
             VDD = DT_xi * VD * D_xi;
             VDD.Invert();
         }
@@ -482,13 +488,16 @@ bool HVertexFitter::fit()
         TMatrixD lambda(d);       //Lagrange multiplier
         lambda.Zero();
         if(f3Constraint){
+    cout << " calc neuxi" << endl;
             neu_xi = xi - lr * VDD * DT_xi * VD * r;
         }
         TMatrixD delta_xi = neu_xi - xi;
+    cout << " calc lambda" << endl;
         lambda = VD * (r + D_xi * delta_xi);
         TMatrixD lambdaT(lambda.GetNcols(), lambda.GetNrows());
         lambdaT.Transpose(lambda);
         TMatrixD neu_alpha(fyDim, 1);
+    cout << " calc neueta" << endl;
         neu_alpha = alpha0 - lr * V0 * DT * lambda; 
         
         //Calculate new chi2
@@ -497,6 +506,7 @@ bool HVertexFitter::fit()
         delta_alphaT.Transpose(delta_alpha);
         TMatrixD two(1, 1);
         two(0, 0) = 2;
+    cout << " calc chi2" << endl;
         chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * d;
         
         //for checking convergence
@@ -531,6 +541,7 @@ bool HVertexFitter::fit()
     fProb = TMath::Prob(chi2, fNdf);
 
     //Update covariance
+    cout << " calc Vneu" << endl;
     if(f3Constraint){
         TMatrixD matrix = DT*VD*D_xi;
         TMatrixD matrixT(matrix.GetNcols(), matrix.GetNrows());
