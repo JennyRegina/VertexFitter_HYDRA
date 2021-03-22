@@ -8,7 +8,6 @@ HRefitCand::HRefitCand(HVirtualCand* cand)
 {
 }
 HRefitCand::HRefitCand() 
-	: TLorentzVector() 
 {
 }
 

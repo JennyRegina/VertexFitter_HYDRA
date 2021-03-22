@@ -50,11 +50,12 @@ void Print(T const &matrix)
 class HVertexFinder
 {
 private:
+
     std::vector<HRefitCand> fCands;
 
     std::vector<double> fM;
     TLorentzVector fInit;
-
+   
     double fVtxPos;
     TVector3 fVertex;
     TVector3 fPrimaryVertex;
@@ -75,7 +76,7 @@ public:
     std::vector<HRefitCand> UpdateTrackParameters(std::vector<HRefitCand> &cands, TVector3 &VertexPos);
     void calculateVertexProperties(TVector3 primaryVertex, TVector3 decayVertex);
 
-    TVector3 getVertex() const { return fVertex; }               // Function that the user should use in the analysis macro
+    TVector3 getVertex() const { return fVertex; } // Function that the user should use in the analysis macro
     TVector3 gePrimarytVertex() const { return fPrimaryVertex; } // Function that the user should use in the analysis macro
 
     // The functions below are functions to obtain information about distances
@@ -90,17 +91,16 @@ public:
     // The second function is for creating the Lambda candidate if information about the primary vertex is also available
 
     void setNeutralMotherCandidate(double valMomentum, double valTheta, double valPhi, double valR, double ValZ, TVector3 decayVertex);
-    void setNeutralMotherCandidateFromPrimaryVtxInfo(double valMomentum, TVector3 primVtx, TVector3 decayVtx);
+    void  setNeutralMotherCandidateFromPrimaryVtxInfo(double valMomentum, TVector3 primVtx, TVector3 decayVtx);
     HVirtualCand getNeutralMotherCandidate() { return fNeutralMotherCandidate; }
     TMatrixD getCovarianceMatrixNeutralMother() { return fCovarianceNeutralMother; }
 
     void setVerbosity(int val) { fVerbose = val; }
 
-    void setPhiOriginal(double val1, double val2)
-    {
-        fPhi1Original = val1;
-        fPhi2Original = val2;
-    }
+    void setPhiOriginal(double val1, double val2){
+        fPhi1Original=val1;
+        fPhi2Original=val2;
+        }
 
     double fDistParticle1Vertex;
     double fDistParticle2Vertex;
@@ -121,15 +121,24 @@ public:
     // This influences the calculation of the Lambda Candidate
     bool fPrimaryVertexFound;
 
-    // Properties related to
-    TVector3 fVecPrimToDecayVertex;
-    double fDistPrimToDecayVertex;
+// Properties related to difference between primary and decay vertex
+TVector3 fVecPrimToDecayVertex;
+double fDistPrimToDecayVertex;
 
-    bool fPrimaryVertexIsBetforeDecayVertex;
-    bool fPrimaryVertexIsOutsideDecayVertex;
+bool fPrimaryVertexIsBetforeDecayVertex;
+bool fPrimaryVertexIsInsideDecayVertex;
+
+double getDistBetweenVertices(){return fDistPrimToDecayVertex;}
+
+bool isPrimVertexBeforeDecayVertex(){return fPrimaryVertexIsBetforeDecayVertex;}
+bool isPrimVertexInsideDecayVertex(){return fPrimaryVertexIsInsideDecayVertex;}
+
+TVector3 getPrimaryVertex(){return fPrimaryVertex;}
 
 protected:
+
     void updateDaughters();
+
 };
 
 #endif /* HVERTEXFINDER_H */
