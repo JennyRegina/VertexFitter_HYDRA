@@ -1,6 +1,6 @@
 #include "hvertexfinder.h"
 
-HVertexFinder::HVertexFinder(const std::vector<HRefitCand> &cands) : fCands(cands), fVerbose(0), fPrimaryVertexFound(false)
+HVertexFinder::HVertexFinder(const std::vector<HRefitCand> &cands) : fCands(cands), fVerbose(0), fPrimaryVertexFound(false), fUsePrimaryVertexInNeutralCandidateCalculation(false)
 {
 }
 
@@ -149,11 +149,11 @@ TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
 
     // If the primary vertex was found, the neutral mother candidate is created from the primary and decay vertex info
 
-    if (fPrimaryVertexFound == false)
+    if (fPrimaryVertexFound == false || fUsePrimaryVertexInNeutralCandidateCalculation == false)
     {
         setNeutralMotherCandidate(momentumAfterDecay, fVertex.Theta(), fVertex.Phi(), 0.0, 0.0, fVertex);
     }
-    if (fPrimaryVertexFound == true)
+    if (fPrimaryVertexFound == true && fUsePrimaryVertexInNeutralCandidateCalculation == true)
     {
         setNeutralMotherCandidateFromPrimaryVtxInfo(momentumAfterDecay, fPrimaryVertex, fVertex);
     }

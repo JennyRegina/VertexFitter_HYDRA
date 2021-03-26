@@ -47,8 +47,12 @@ private:
     TVector3 fVecPrimToDecayVertex;
     double fDistPrimToDecayVertex;
 
+    // Checks if the decay vertex is located further downstream in z-position
+    // and at larger values of R compared to the primary vertex
     bool fPrimaryVertexIsBetforeDecayVertex;
     bool fPrimaryVertexIsInsideDecayVertex;
+
+    bool fUsePrimaryVertexInNeutralCandidateCalculation;
 
 public:
     HVertexFinder(const std::vector<HRefitCand> &cands);
@@ -74,6 +78,7 @@ public:
     // The second function is for creating the neutral candidate if information about the primary vertex is also available
     void setNeutralMotherCandidate(double valMomentum, double valTheta, double valPhi, double valR, double ValZ, TVector3 decayVertex);
     void setNeutralMotherCandidateFromPrimaryVtxInfo(double valMomentum, TVector3 primVtx, TVector3 decayVtx);
+    void setUsePrimaryVertexInNeutralMotherCalculation(bool val){ fUsePrimaryVertexInNeutralCandidateCalculation = val; }
 
     HVirtualCand getNeutralMotherCandidate() { return fNeutralMotherCandidate; }
 
