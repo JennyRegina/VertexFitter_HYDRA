@@ -24,7 +24,7 @@ common_libs +="VertexFit";
 
 You might need to remove other external libraries from rootlogon.C.
 
-Now the macro analysis.C should work.
+Now the macro analysisVertexFinder.C should work.
 
 The macro needs to be run pre-compiled. To run the macro on virgo, type
 
@@ -32,4 +32,10 @@ root -b
 
 and in root session
 
-.X analysis.C+
+.X analysisVertexFinder.C+
+
+How the classes work:
+
+The hvertexfinder.cc class finds the primary vertex as well as the decay vertex. It also creates the neutral canidate. Currently the primary vertex is not used in this creation. 
+
+The vertexfitter.cc class can perform two types of fitting procedures, first a fit where the tracks are constrained to originate from the same point, i.e. a vertex constraint. This can be done for both the primary and secondary vertices. It can also take as input this neutral candidate created in the hvertexfinder.cc class and perform a fit with a 3C constraint utilizing the information from this object. 
