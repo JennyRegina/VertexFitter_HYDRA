@@ -1,7 +1,5 @@
 #include "hvertexfinder.h"
 
-const size_t cov_dim = 5;
-
 HVertexFinder::HVertexFinder(const std::vector<HRefitCand> &cands) : fCands(cands), fVerbose(0), fPrimaryVertexFound(false)
 {
 }
