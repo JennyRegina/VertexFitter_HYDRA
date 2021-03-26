@@ -284,7 +284,6 @@ Int_t analysisVertexFinder(TString infileList = "pp_pKlambda_100000evts1_dst_apr
     hPrimaryVertexZPreFit->SetXTitle("Vertex, Z / mm");
     hPrimaryVertexZPreFit->SetYTitle(" Counts ");
 
-
     TH1F *hDistanceBetweenProtonAndPionPreFit = new TH1F("hDistanceBetweenProtonAndPionPreFit", "", 500, 0, 50);
     hDistanceBetweenProtonAndPionPreFit->SetXTitle("Distance between particles / mm");
     hDistanceBetweenProtonAndPionPreFit->SetYTitle(" Counts ");
@@ -473,7 +472,7 @@ Int_t analysisVertexFinder(TString infileList = "pp_pKlambda_100000evts1_dst_apr
     hRecoBetaPions->SetXTitle("#beta");
     hRecoBetaPions->SetYTitle(" Counts ");
 
-// ---------------- LAMBDA PLOTS --------------------
+    // ---------------- LAMBDA PLOTS --------------------
     TH1F *hMomLambda = new TH1F("hMomLambda", "", 1000, 0, 3000);
     hMomLambda->SetXTitle("Momentum / MeV/c");
     hMomLambda->SetYTitle(" Counts ");
@@ -497,8 +496,7 @@ Int_t analysisVertexFinder(TString infileList = "pp_pKlambda_100000evts1_dst_apr
     hErrorPhiLambda->SetXTitle("#phi / rad");
     hErrorPhiLambda->SetYTitle(" Counts ");
 
-
-// ---------------- LAMBDA PLOTS CUT --------------------
+    // ---------------- LAMBDA PLOTS CUT --------------------
     TH1F *hMomLambdaCut = new TH1F("hMomLambdaCut", "", 1000, 0, 3000);
     hMomLambdaCut->SetXTitle("Momentum / MeV/c");
     hMomLambdaCut->SetYTitle(" Counts ");
@@ -563,10 +561,10 @@ Int_t analysisVertexFinder(TString infileList = "pp_pKlambda_100000evts1_dst_apr
     if (nEvents < entries && nEvents >= 0)
         entries = nEvents;
 
-int primVertexBeforeDecayVertex=0;
-int decayVertexBeforePrimVertex=0;
-int primVertexInsideDecayVertex=0;
-int decayVertexInsidePrimVertex=0;
+    int primVertexBeforeDecayVertex = 0;
+    int decayVertexBeforePrimVertex = 0;
+    int primVertexInsideDecayVertex = 0;
+    int decayVertexInsidePrimVertex = 0;
 
     // start of the event loop
     for (Int_t i = 1; i < nEvents; i++)
@@ -682,87 +680,95 @@ int decayVertexInsidePrimVertex=0;
         for (size_t n = 0; n < protons.size(); n++)
         {
 
-	    HRefitCand cand1 = protons[n];
+            HRefitCand cand1 = protons[n];
 
             for (size_t m = 0; m < pions.size(); m++)
             {
                 HRefitCand cand2 = pions[m];
 
-            for (size_t p = 0; p < kaons.size(); p++)
-            {
-                HRefitCand cand3 = kaons[p];
+                for (size_t p = 0; p < kaons.size(); p++)
+                {
+                    HRefitCand cand3 = kaons[p];
 
-                std::vector<HRefitCand> cands;
-                cands.clear();
-                cands.push_back(cand1);
-		cands.push_back(cand2);
-                cands.push_back(cand3);
+                    std::vector<HRefitCand> cands;
+                    cands.clear();
+                    cands.push_back(cand1);
+                    cands.push_back(cand2);
+                    cands.push_back(cand3);
 
-                // Initiate the vertex fitter
-                HVertexFinder vtxFinder(cands);
+                    // Initiate the vertex fitter
+                    HVertexFinder vtxFinder(cands);
 
-                //vtxFitter.setVerbosity(0);
-                // Find the vertex
+                    //vtxFitter.setVerbosity(0);
+                    // Find the vertex
 
-		TVector3 vertex = vtxFinder.findVertex(cands);
-		TVector3 primaryVertex= vtxFinder.getPrimaryVertex();
-                //TVector3 primaryVertex = vtxFinder.findPrimaryVertex(cands);
+                    TVector3 vertex = vtxFinder.findVertex(cands);
+                    TVector3 primaryVertex = vtxFinder.getPrimaryVertex();
+                    //TVector3 primaryVertex = vtxFinder.findPrimaryVertex(cands);
 
-		hVertexXPreFit->Fill(vertex.X());
-                hVertexYPreFit->Fill(vertex.Y());
-                hVertexZPreFit->Fill(vertex.Z());
+                    hVertexXPreFit->Fill(vertex.X());
+                    hVertexYPreFit->Fill(vertex.Y());
+                    hVertexZPreFit->Fill(vertex.Z());
 
-                hPrimaryVertexXPreFit->Fill(primaryVertex.X());
-                hPrimaryVertexYPreFit->Fill(primaryVertex.Y());
-                hPrimaryVertexZPreFit->Fill(primaryVertex.Z());
+                    hPrimaryVertexXPreFit->Fill(primaryVertex.X());
+                    hPrimaryVertexYPreFit->Fill(primaryVertex.Y());
+                    hPrimaryVertexZPreFit->Fill(primaryVertex.Z());
 
-		double distBetweenVertices = vtxFinder.getDistBetweenVertices();
-		hDistPrimToDecayVertex->Fill(distBetweenVertices);
+                    double distBetweenVertices = vtxFinder.getDistBetweenVertices();
+                    hDistPrimToDecayVertex->Fill(distBetweenVertices);
 
-                if(vtxFinder.isPrimVertexBeforeDecayVertex()==true){primVertexBeforeDecayVertex++;}
-		if(vtxFinder.isPrimVertexBeforeDecayVertex()==false){decayVertexBeforePrimVertex++;}
-		if(vtxFinder.isPrimVertexInsideDecayVertex()==false){decayVertexInsidePrimVertex++;}
-		if(vtxFinder.isPrimVertexInsideDecayVertex()==true){primVertexInsideDecayVertex++;}
+                    if (vtxFinder.isPrimVertexBeforeDecayVertex() == true)
+                    {
+                        primVertexBeforeDecayVertex++;
+                    }
+                    if (vtxFinder.isPrimVertexBeforeDecayVertex() == false)
+                    {
+                        decayVertexBeforePrimVertex++;
+                    }
+                    if (vtxFinder.isPrimVertexInsideDecayVertex() == false)
+                    {
+                        decayVertexInsidePrimVertex++;
+                    }
+                    if (vtxFinder.isPrimVertexInsideDecayVertex() == true)
+                    {
+                        primVertexInsideDecayVertex++;
+                    }
 
-		// Create a vector of candidates to originate from primary vertex
-                std::vector<HRefitCand> primCands;
-                primCands.clear();
-                primCands.push_back(cand1);
-                primCands.push_back(cand3);
+                    // Create a vector of candidates to originate from primary vertex
+                    std::vector<HRefitCand> primCands;
+                    primCands.clear();
+                    primCands.push_back(cand1);
+                    primCands.push_back(cand3);
 
-		// Perform fitting of primary vertex
-		HVertexFitter vtxFitterPrimCands(primCands);
-		vtxFitterPrimCands.addVertexConstraint();
-		vtxFitterPrimCands.fit();
-		double probPrim;
-		probPrim = vtxFitterPrimCands.getProb();
-		std::cout << "Probability Prim vtx: " << probPrim << std::endl;
+                    // Perform fitting of primary vertex
+                    HVertexFitter vtxFitterPrimCands(primCands);
+                    vtxFitterPrimCands.addVertexConstraint();
+                    vtxFitterPrimCands.fit();
+                    double probPrim;
+                    probPrim = vtxFitterPrimCands.getProb();
+                    std::cout << "Probability Prim vtx: " << probPrim << std::endl;
 
-		// Create a vector of candidates to originate from decay vertex
-                std::vector<HRefitCand> secCands;
-                secCands.clear();
-                secCands.push_back(cand1);
-                secCands.push_back(cand2);
+                    // Create a vector of candidates to originate from decay vertex
+                    std::vector<HRefitCand> secCands;
+                    secCands.clear();
+                    secCands.push_back(cand1);
+                    secCands.push_back(cand2);
 
-		// Perform fitting of secondary vertex
-		HVertexFitter vtxFitterSecCands(secCands);
-                vtxFitterSecCands.addVertexConstraint();
-                vtxFitterSecCands.fit();
-                double probSec;
-                probSec = vtxFitterSecCands.getProb();
-                std::cout << "Probability Sec vtx: " << probSec << std::endl;
-
+                    // Perform fitting of secondary vertex
+                    HVertexFitter vtxFitterSecCands(secCands);
+                    vtxFitterSecCands.addVertexConstraint();
+                    vtxFitterSecCands.fit();
+                    double probSec;
+                    probSec = vtxFitterSecCands.getProb();
+                    std::cout << "Probability Sec vtx: " << probSec << std::endl;
+                }
             }
-
-
-        }
         }
 
     } // end of the events loop
 
-std::cout << "Number of prim vertices before the decay vertex: " << primVertexBeforeDecayVertex << ", and after: " << decayVertexBeforePrimVertex << std::endl;
-std::cout << "Number of prim vertices inside the decay vertex: " << primVertexInsideDecayVertex << ", and outside: " << decayVertexInsidePrimVertex << std::endl;
-
+    std::cout << "Number of prim vertices before the decay vertex: " << primVertexBeforeDecayVertex << ", and after: " << decayVertexBeforePrimVertex << std::endl;
+    std::cout << "Number of prim vertices inside the decay vertex: " << primVertexInsideDecayVertex << ", and outside: " << decayVertexInsidePrimVertex << std::endl;
 
     // write histograms to the output file
     outfile->cd();
@@ -856,8 +862,8 @@ std::cout << "Number of prim vertices inside the decay vertex: " << primVertexIn
     hRecoThetaPions->Write();
     hRecoPhiPions->Write();
     hRecoMomentumPions->Write();
-    hRecoBetaPions->Write();                    
-    
+    hRecoBetaPions->Write();
+
     h25->Write();
     h26->Write();
     h27->Write();
@@ -868,26 +874,25 @@ std::cout << "Number of prim vertices inside the decay vertex: " << primVertexIn
     h32->Write();
     h33->Write();
 
-	hMomLambda->Write();
-        hRecoThetaLambda->Write();
-        hRecoPhiLambda->Write();
+    hMomLambda->Write();
+    hRecoThetaLambda->Write();
+    hRecoPhiLambda->Write();
 
-        hErrorRLambda->Write();
-        hErrorZLambda->Write();
-        hErrorThetaLambda->Write();
-        hErrorPhiLambda->Write();
+    hErrorRLambda->Write();
+    hErrorZLambda->Write();
+    hErrorThetaLambda->Write();
+    hErrorPhiLambda->Write();
 
+    hMomLambdaCut->Write();
+    hRecoThetaLambdaCut->Write();
+    hRecoPhiLambdaCut->Write();
 
-        hMomLambdaCut->Write();
-        hRecoThetaLambdaCut->Write();
-        hRecoPhiLambdaCut->Write();
+    hErrorRLambdaCut->Write();
+    hErrorZLambdaCut->Write();
+    hErrorThetaLambdaCut->Write();
+    hErrorPhiLambdaCut->Write();
 
-        hErrorRLambdaCut->Write();
-        hErrorZLambdaCut->Write();
-        hErrorThetaLambdaCut->Write();
-        hErrorPhiLambdaCut->Write();
-
-hDistPrimToDecayVertex->Write();
+    hDistPrimToDecayVertex->Write();
 
     outfile->Close();
 
