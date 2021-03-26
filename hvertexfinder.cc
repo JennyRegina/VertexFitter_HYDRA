@@ -40,8 +40,6 @@ TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
 
     double momentumAfterDecay = sqrt(energy_cand1*energy_cand1+2*energy_cand1*energy_cand2+energy_cand2*energy_cand2-1115.683*1115.683);
 
-    //double momentumAfterDecay= param_p1 + param_p2;
-
     // Calculate the base and direction vectors of the two candidates
     TVector3 vtx_base_1, vtx_base_2, vtx_dir_1, vtx_dir_2;
 
@@ -136,11 +134,12 @@ TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
     fDistParticle1Origin = distanceFromParticleToOrigin_1;
     fDistParticle2Origin = distanceFromParticleToOrigin_2;
 
-    // Create a Lambda candidate object.
-    // As a first approximation it originates from x,y,z = 0,0,0
-
+    // Find the primary vertex
+    
+   if(fVerbose>0){
    std::cout << "Vertex: theta: " << fVertex.Theta() << " and phi: " << fVertex.Phi() << std::endl;
-
+   }
+   
    fPrimaryVertexFound=false;
 
    findPrimaryVertex(cands);
@@ -149,12 +148,14 @@ TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
         calculateVertexProperties(fPrimaryVertex, fVertex);
    }
 
-   //if(fPrimaryVertexFound==false){
-   //	setNeutralMotherCandidate(momentumAfterDecay, fVertex.Theta(), fVertex.Phi(), 0.0, 0.0, fVertex);
-   //}
-   //if(fPrimaryVertexFound==true){
-   //	setNeutralMotherCandidateFromPrimaryVtxInfo(momentumAfterDecay, fPrimaryVertex, fVertex);
-   //}
+   // If the primary vertex was found, the neutral mother candidate is created from the primary and decay vertex info
+
+   if(fPrimaryVertexFound==false){
+   	setNeutralMotherCandidate(momentumAfterDecay, fVertex.Theta(), fVertex.Phi(), 0.0, 0.0, fVertex);
+   }
+   if(fPrimaryVertexFound==true){
+   	setNeutralMotherCandidateFromPrimaryVtxInfo(momentumAfterDecay, fPrimaryVertex, fVertex);
+   }
 
     return fVertex;
 }
@@ -306,17 +307,6 @@ TVector3 HVertexFinder::findPrimaryVertex(const std::vector<HRefitCand> &cands)
     param_R1 = primaryCand1.getR();
     param_Z1 = primaryCand1.getZ();
 
-    // All found kaons in the event
-   /* HRefitCand primaryCand2;
-
-if(cands.size()==2){
-primaryCand2 = cands[1];
-}
-
-if(cands.size()==3){
-primaryCand2 = cands[2];
-}*/
-
     HRefitCand primaryCand2=cands[2];
     param_theta2 = primaryCand2.Theta();
     param_phi2 = primaryCand2.Phi();
@@ -384,7 +374,7 @@ void HVertexFinder::setNeutralMotherCandidate(double valMomentum, double valThet
     }
 
 
-//TODO make sure that all properties of the virtual can is set properly
+//TODO make sure that all properties of the virtual cand is set properly
 //TODO use matrix notation to include the correlations in the errors
 
 fNeutralMotherCandidate.setMomentum(valMomentum);
@@ -395,7 +385,9 @@ fNeutralMotherCandidate.SetPhi(valPhi);
 fNeutralMotherCandidate.setR(valR);
 fNeutralMotherCandidate.setZ(valZ);
 
+if(fVerbose>0){
 std::cout << "setNeutralMotherCandidate, fNeutralMotherCandidate: theta= " << fNeutralMotherCandidate.getTheta() << " and phi = " << fNeutralMotherCandidate.getPhi() << std::endl; 
+}
 
 // Calculate the covariance matrix for the Lambda Candidate
 
@@ -451,6 +443,8 @@ void HVertexFinder::setNeutralMotherCandidateFromPrimaryVtxInfo(double valMoment
         std::cout << " ----------- HVertexFinder::setNeutralMotherCandidateFromPrimaryVtxInfo() -----------" << std::endl;
         std::cout << "" << std::endl;
     }
+
+// TODO: Set the other track parameters and the covariance matrix
 
 calculateVertexProperties(primaryVertex, decayVertex);
 
