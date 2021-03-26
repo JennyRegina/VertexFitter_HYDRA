@@ -24,7 +24,6 @@ using std::endl;
 class HVertexFinder
 {
 private:
-
     std::vector<HRefitCand> fCands;
 
     TVector3 fVertex;
@@ -44,25 +43,25 @@ private:
     TMatrixD fCovarianceNeutralMother;
     bool fPrimaryVertexFound;
 
-// Properties related to difference between primary and decay vertex
-TVector3 fVecPrimToDecayVertex;
-double fDistPrimToDecayVertex;
+    // Properties related to difference between primary and decay vertex
+    TVector3 fVecPrimToDecayVertex;
+    double fDistPrimToDecayVertex;
 
-bool fPrimaryVertexIsBetforeDecayVertex;
-bool fPrimaryVertexIsInsideDecayVertex;
+    bool fPrimaryVertexIsBetforeDecayVertex;
+    bool fPrimaryVertexIsInsideDecayVertex;
 
 public:
     HVertexFinder(const std::vector<HRefitCand> &cands);
     ~HVertexFinder(){};
 
-     void setVerbosity(int val) { fVerbose = val; }
+    void setVerbosity(int val) { fVerbose = val; }
 
     TVector3 findVertex(const std::vector<HRefitCand> &cands);
     TVector3 findPrimaryVertex(const std::vector<HRefitCand> &cands);
     std::vector<HRefitCand> UpdateTrackParameters(std::vector<HRefitCand> &cands, TVector3 &VertexPos);
     void calculateVertexProperties(TVector3 primaryVertex, TVector3 decayVertex);
 
-    TVector3 getVertex() const { return fVertex; } // Function that the user should use in the analysis macro
+    TVector3 getVertex() const { return fVertex; }               // Function that the user should use in the analysis macro
     TVector3 gePrimarytVertex() const { return fPrimaryVertex; } // Function that the user should use in the analysis macro
 
     double getDistanceBetweenFittedParticles() const { return fDistanceParticleToParticle; }
@@ -74,19 +73,18 @@ public:
     // The first function is for creating a Lambda candidate if only information of the decay vertex is available
     // The second function is for creating the Lambda candidate if information about the primary vertex is also available
     void setNeutralMotherCandidate(double valMomentum, double valTheta, double valPhi, double valR, double ValZ, TVector3 decayVertex);
-    void  setNeutralMotherCandidateFromPrimaryVtxInfo(double valMomentum, TVector3 primVtx, TVector3 decayVtx);
+    void setNeutralMotherCandidateFromPrimaryVtxInfo(double valMomentum, TVector3 primVtx, TVector3 decayVtx);
 
     HVirtualCand getNeutralMotherCandidate() { return fNeutralMotherCandidate; }
 
-    TMatrixD getCovarianceMatrixNeutralMother() { return fCovarianceNeutralMother;} 
+    TMatrixD getCovarianceMatrixNeutralMother() { return fCovarianceNeutralMother; }
 
-double getDistBetweenVertices(){return fDistPrimToDecayVertex;}
+    double getDistBetweenVertices() { return fDistPrimToDecayVertex; }
 
-bool isPrimVertexBeforeDecayVertex(){return fPrimaryVertexIsBetforeDecayVertex;}
-bool isPrimVertexInsideDecayVertex(){return fPrimaryVertexIsInsideDecayVertex;}
+    bool isPrimVertexBeforeDecayVertex() { return fPrimaryVertexIsBetforeDecayVertex; }
+    bool isPrimVertexInsideDecayVertex() { return fPrimaryVertexIsInsideDecayVertex; }
 
-TVector3 getPrimaryVertex(){return fPrimaryVertex;}
-
+    TVector3 getPrimaryVertex() { return fPrimaryVertex; }
 };
 
 #endif /* HVERTEXFINDER_H */

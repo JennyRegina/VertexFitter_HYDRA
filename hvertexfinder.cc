@@ -4,7 +4,6 @@ const size_t cov_dim = 5;
 
 HVertexFinder::HVertexFinder(const std::vector<HRefitCand> &cands) : fCands(cands), fVerbose(0), fPrimaryVertexFound(false)
 {
-
 }
 
 TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
@@ -35,10 +34,10 @@ TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
     param_Z2 = cand2.getZ();
 
     double energy_cand1, energy_cand2;
-    energy_cand1 = sqrt(param_p1*param_p1+983.272*983.272);
-    energy_cand2 = sqrt(param_p2*param_p2+139.570*139.570);
+    energy_cand1 = sqrt(param_p1 * param_p1 + 983.272 * 983.272);
+    energy_cand2 = sqrt(param_p2 * param_p2 + 139.570 * 139.570);
 
-    double momentumAfterDecay = sqrt(energy_cand1*energy_cand1+2*energy_cand1*energy_cand2+energy_cand2*energy_cand2-1115.683*1115.683);
+    double momentumAfterDecay = sqrt(energy_cand1 * energy_cand1 + 2 * energy_cand1 * energy_cand2 + energy_cand2 * energy_cand2 - 1115.683 * 1115.683);
 
     // Calculate the base and direction vectors of the two candidates
     TVector3 vtx_base_1, vtx_base_2, vtx_dir_1, vtx_dir_2;
@@ -135,27 +134,31 @@ TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
     fDistParticle2Origin = distanceFromParticleToOrigin_2;
 
     // Find the primary vertex
-    
-   if(fVerbose>0){
-   std::cout << "Vertex: theta: " << fVertex.Theta() << " and phi: " << fVertex.Phi() << std::endl;
-   }
-   
-   fPrimaryVertexFound=false;
 
-   findPrimaryVertex(cands);
+    if (fVerbose > 0)
+    {
+        std::cout << "Vertex: theta: " << fVertex.Theta() << " and phi: " << fVertex.Phi() << std::endl;
+    }
 
-   if(fPrimaryVertexFound==true){
+    fPrimaryVertexFound = false;
+
+    findPrimaryVertex(cands);
+
+    if (fPrimaryVertexFound == true)
+    {
         calculateVertexProperties(fPrimaryVertex, fVertex);
-   }
+    }
 
-   // If the primary vertex was found, the neutral mother candidate is created from the primary and decay vertex info
+    // If the primary vertex was found, the neutral mother candidate is created from the primary and decay vertex info
 
-   if(fPrimaryVertexFound==false){
-   	setNeutralMotherCandidate(momentumAfterDecay, fVertex.Theta(), fVertex.Phi(), 0.0, 0.0, fVertex);
-   }
-   if(fPrimaryVertexFound==true){
-   	setNeutralMotherCandidateFromPrimaryVtxInfo(momentumAfterDecay, fPrimaryVertex, fVertex);
-   }
+    if (fPrimaryVertexFound == false)
+    {
+        setNeutralMotherCandidate(momentumAfterDecay, fVertex.Theta(), fVertex.Phi(), 0.0, 0.0, fVertex);
+    }
+    if (fPrimaryVertexFound == true)
+    {
+        setNeutralMotherCandidateFromPrimaryVtxInfo(momentumAfterDecay, fPrimaryVertex, fVertex);
+    }
 
     return fVertex;
 }
@@ -307,7 +310,7 @@ TVector3 HVertexFinder::findPrimaryVertex(const std::vector<HRefitCand> &cands)
     param_R1 = primaryCand1.getR();
     param_Z1 = primaryCand1.getZ();
 
-    HRefitCand primaryCand2=cands[2];
+    HRefitCand primaryCand2 = cands[2];
     param_theta2 = primaryCand2.Theta();
     param_phi2 = primaryCand2.Phi();
     param_R2 = primaryCand2.getR();
@@ -335,7 +338,7 @@ TVector3 HVertexFinder::findPrimaryVertex(const std::vector<HRefitCand> &cands)
                      std::cos(param_theta2));
 
     HGeomVector vtx_geom_dir_1, vtx_geom_dir_2, vtx_geom_base_1, vtx_geom_base_2;
-    
+
     // Direction vectors
     vtx_geom_dir_1.setX(std::sin(param_theta1) * std::cos(param_theta1));
     vtx_geom_dir_1.setY(std::sin(param_theta1) * std::sin(param_phi1));
@@ -356,16 +359,17 @@ TVector3 HVertexFinder::findPrimaryVertex(const std::vector<HRefitCand> &cands)
 
     fPrimaryVertex.SetXYZ(primaryVertex.X(), primaryVertex.Y(), primaryVertex.Z());
 
-	// if the primary vertex was not found, each coordinate x,y,z is set to -20000
-	if(primaryVertex.X()!=-2000){
-    		fPrimaryVertexFound=true;
-	}
+    // if the primary vertex was not found, each coordinate x,y,z is set to -20000
+    if (primaryVertex.X() != -2000)
+    {
+        fPrimaryVertexFound = true;
+    }
 
     return fPrimaryVertex;
-
 }
 
-void HVertexFinder::setNeutralMotherCandidate(double valMomentum, double valTheta, double valPhi, double valR, double valZ, TVector3 decayVertex){
+void HVertexFinder::setNeutralMotherCandidate(double valMomentum, double valTheta, double valPhi, double valR, double valZ, TVector3 decayVertex)
+{
 
     if (fVerbose > 0)
     {
@@ -373,70 +377,70 @@ void HVertexFinder::setNeutralMotherCandidate(double valMomentum, double valThet
         std::cout << "" << std::endl;
     }
 
+    //TODO make sure that all properties of the virtual cand is set properly
+    //TODO use matrix notation to include the correlations in the errors
 
-//TODO make sure that all properties of the virtual cand is set properly
-//TODO use matrix notation to include the correlations in the errors
+    fNeutralMotherCandidate.setMomentum(valMomentum);
+    fNeutralMotherCandidate.setTheta(TMath::RadToDeg() * valTheta);
+    fNeutralMotherCandidate.setPhi(TMath::RadToDeg() * valPhi);
+    fNeutralMotherCandidate.SetTheta(valTheta);
+    fNeutralMotherCandidate.SetPhi(valPhi);
+    fNeutralMotherCandidate.setR(valR);
+    fNeutralMotherCandidate.setZ(valZ);
 
-fNeutralMotherCandidate.setMomentum(valMomentum);
-fNeutralMotherCandidate.setTheta(TMath::RadToDeg() * valTheta);
-fNeutralMotherCandidate.setPhi(TMath::RadToDeg() * valPhi);
-fNeutralMotherCandidate.SetTheta(valTheta);
-fNeutralMotherCandidate.SetPhi(valPhi);
-fNeutralMotherCandidate.setR(valR);
-fNeutralMotherCandidate.setZ(valZ);
+    if (fVerbose > 0)
+    {
+        std::cout << "setNeutralMotherCandidate, fNeutralMotherCandidate: theta= " << fNeutralMotherCandidate.getTheta() << " and phi = " << fNeutralMotherCandidate.getPhi() << std::endl;
+    }
 
-if(fVerbose>0){
-std::cout << "setNeutralMotherCandidate, fNeutralMotherCandidate: theta= " << fNeutralMotherCandidate.getTheta() << " and phi = " << fNeutralMotherCandidate.getPhi() << std::endl; 
+    // Calculate the covariance matrix for the Lambda Candidate
+
+    double x_vertex = decayVertex.X();
+    double y_vertex = decayVertex.Y();
+    double z_vertex = decayVertex.Z();
+
+    // the errors below are estimated from difference distributions between reconstructed - MC truth for the vertex
+
+    double sigma_x = 33.39; // In mm
+    double sigma_y = 26.70; // In mm
+    double sigma_z = 44.92; // In mm
+
+    // Use coordinate transformation cartesian->polar to estimate error in theta and phi
+
+    // Calculate the error in theta
+    double r = sqrt(x_vertex * x_vertex + y_vertex * y_vertex + z_vertex * z_vertex);
+
+    double dtheta_dx = x_vertex * z_vertex / (r * r * r * sqrt(1 - z_vertex / (r * r)));
+    double dtheta_dy = y_vertex * z_vertex / (r * r * r * sqrt(1 - z_vertex / (r * r)));
+    double dtheta_dz = (1 / r - z_vertex * z_vertex / (r * r * r)) / sqrt(1 - z_vertex * z_vertex / (r * r));
+
+    double sigma_theta = sqrt(dtheta_dx * dtheta_dx * sigma_x * sigma_x + dtheta_dy * dtheta_dy * sigma_y * sigma_y + dtheta_dz * dtheta_dz * sigma_z * sigma_z);
+
+    // Calculate the error in phi
+    double r_2D = sqrt(x_vertex * x_vertex + y_vertex * y_vertex);
+
+    double dphi_dx = -x_vertex * y_vertex / (sqrt(x_vertex * x_vertex / (r_2D * r_2D)) * r_2D * r_2D * r_2D);
+    double dphi_dy = sqrt(x_vertex * x_vertex / (r_2D * r_2D)) / r_2D;
+    // dphi_dz=0;
+
+    double sigma_phi = sqrt(dphi_dx * dphi_dx * sigma_x * sigma_x + dphi_dy * dphi_dy * sigma_y * sigma_y);
+
+    // Calculate the error in R
+    double dR_dx = x_vertex / r_2D;
+    double dR_dy = y_vertex / r_2D;
+
+    double sigma_R = sqrt(dR_dx * dR_dx * sigma_x * sigma_x + dR_dy * dR_dy * sigma_y * sigma_y);
+
+    fCovarianceNeutralMother.ResizeTo(5, 5);
+    fCovarianceNeutralMother(0, 0) = 9999999;
+    fCovarianceNeutralMother(1, 1) = sigma_theta * sigma_theta;
+    fCovarianceNeutralMother(2, 2) = sigma_phi * sigma_phi;
+    fCovarianceNeutralMother(3, 3) = sigma_R * sigma_R;
+    fCovarianceNeutralMother(4, 4) = sigma_z * sigma_z;
 }
 
-// Calculate the covariance matrix for the Lambda Candidate
-
-double x_vertex=decayVertex.X();
-double y_vertex=decayVertex.Y();
-double z_vertex=decayVertex.Z();
-
-// the errors below are estimated from difference distributions between reconstructed - MC truth for the vertex
-
-double sigma_x=33.39; // In mm
-double sigma_y=26.70; // In mm
-double sigma_z=44.92; // In mm
-
-// Use coordinate transformation cartesian->polar to estimate error in theta and phi
-
-// Calculate the error in theta
-double r=sqrt(x_vertex*x_vertex+y_vertex*y_vertex+z_vertex*z_vertex);
-
-double dtheta_dx=x_vertex*z_vertex/(r*r*r*sqrt(1-z_vertex/(r*r)));
-double dtheta_dy=y_vertex*z_vertex/(r*r*r*sqrt(1-z_vertex/(r*r)));
-double dtheta_dz=(1/r-z_vertex*z_vertex/(r*r*r))/sqrt(1-z_vertex*z_vertex/(r*r));
-
-double sigma_theta=sqrt(dtheta_dx*dtheta_dx*sigma_x*sigma_x+dtheta_dy*dtheta_dy*sigma_y*sigma_y+dtheta_dz*dtheta_dz*sigma_z*sigma_z);
-
-// Calculate the error in phi
-double r_2D = sqrt(x_vertex*x_vertex+y_vertex*y_vertex);
-
-double dphi_dx = -x_vertex*y_vertex/(sqrt(x_vertex*x_vertex/(r_2D*r_2D))*r_2D*r_2D*r_2D);
-double dphi_dy = sqrt(x_vertex*x_vertex/(r_2D*r_2D))/r_2D;
-// dphi_dz=0;
-
-double sigma_phi = sqrt(dphi_dx*dphi_dx*sigma_x*sigma_x+dphi_dy*dphi_dy*sigma_y*sigma_y);
-
-// Calculate the error in R
-double dR_dx=x_vertex/r_2D;
-double dR_dy=y_vertex/r_2D;
-
-double sigma_R=sqrt(dR_dx*dR_dx*sigma_x*sigma_x+dR_dy*dR_dy*sigma_y*sigma_y);
-
-fCovarianceNeutralMother.ResizeTo(5,5);
-fCovarianceNeutralMother(0,0)=9999999;
-fCovarianceNeutralMother(1,1)=sigma_theta*sigma_theta;
-fCovarianceNeutralMother(2,2)=sigma_phi*sigma_phi;
-fCovarianceNeutralMother(3,3)=sigma_R*sigma_R;
-fCovarianceNeutralMother(4,4)=sigma_z*sigma_z;
-
-}
-
-void HVertexFinder::setNeutralMotherCandidateFromPrimaryVtxInfo(double valMomentum, TVector3 primaryVertex, TVector3 decayVertex){
+void HVertexFinder::setNeutralMotherCandidateFromPrimaryVtxInfo(double valMomentum, TVector3 primaryVertex, TVector3 decayVertex)
+{
 
     if (fVerbose > 0)
     {
@@ -444,41 +448,46 @@ void HVertexFinder::setNeutralMotherCandidateFromPrimaryVtxInfo(double valMoment
         std::cout << "" << std::endl;
     }
 
-// TODO: Set the other track parameters and the covariance matrix
+    // TODO: Set the other track parameters and the covariance matrix
 
-calculateVertexProperties(primaryVertex, decayVertex);
+    calculateVertexProperties(primaryVertex, decayVertex);
 
-double thetaPrimaryToSecondaryVertex, phiPrimaryToSecondaryVertex;
+    double thetaPrimaryToSecondaryVertex, phiPrimaryToSecondaryVertex;
 
-thetaPrimaryToSecondaryVertex=fVecPrimToDecayVertex.Theta();
-phiPrimaryToSecondaryVertex=fVecPrimToDecayVertex.Phi();
+    thetaPrimaryToSecondaryVertex = fVecPrimToDecayVertex.Theta();
+    phiPrimaryToSecondaryVertex = fVecPrimToDecayVertex.Phi();
 
-fNeutralMotherCandidate.setTheta(TMath::RadToDeg() * thetaPrimaryToSecondaryVertex);
-fNeutralMotherCandidate.setPhi(TMath::RadToDeg() * phiPrimaryToSecondaryVertex);
-
+    fNeutralMotherCandidate.setTheta(TMath::RadToDeg() * thetaPrimaryToSecondaryVertex);
+    fNeutralMotherCandidate.setPhi(TMath::RadToDeg() * phiPrimaryToSecondaryVertex);
 }
 
-void HVertexFinder::calculateVertexProperties(TVector3 primaryVertex, TVector3 decayVertex){
+void HVertexFinder::calculateVertexProperties(TVector3 primaryVertex, TVector3 decayVertex)
+{
 
-fVecPrimToDecayVertex = decayVertex - primaryVertex;
+    fVecPrimToDecayVertex = decayVertex - primaryVertex;
 
-fDistPrimToDecayVertex = sqrt((decayVertex.X()-primaryVertex.X())*(decayVertex.X()-primaryVertex.X())+(decayVertex.Y()-primaryVertex.Y())*(decayVertex.Y()-primaryVertex.Y())+(decayVertex.Z()-primaryVertex.Z())*(decayVertex.Z()-primaryVertex.Z()));
+    fDistPrimToDecayVertex = sqrt((decayVertex.X() - primaryVertex.X()) * (decayVertex.X() - primaryVertex.X()) + (decayVertex.Y() - primaryVertex.Y()) * (decayVertex.Y() - primaryVertex.Y()) + (decayVertex.Z() - primaryVertex.Z()) * (decayVertex.Z() - primaryVertex.Z()));
 
-if(decayVertex.Z()>primaryVertex.Z()){
-fPrimaryVertexIsBetforeDecayVertex=true;
-}else{
-fPrimaryVertexIsBetforeDecayVertex=false;
-}
+    if (decayVertex.Z() > primaryVertex.Z())
+    {
+        fPrimaryVertexIsBetforeDecayVertex = true;
+    }
+    else
+    {
+        fPrimaryVertexIsBetforeDecayVertex = false;
+    }
 
-double R_primaryVertex, R_decayVertex;
+    double R_primaryVertex, R_decayVertex;
 
-R_primaryVertex=sqrt(primaryVertex.X()*primaryVertex.X()+primaryVertex.Y()*primaryVertex.Y());
-R_decayVertex=sqrt(decayVertex.X()*decayVertex.X()+decayVertex.Y()*decayVertex.Y());
+    R_primaryVertex = sqrt(primaryVertex.X() * primaryVertex.X() + primaryVertex.Y() * primaryVertex.Y());
+    R_decayVertex = sqrt(decayVertex.X() * decayVertex.X() + decayVertex.Y() * decayVertex.Y());
 
-if(R_primaryVertex<R_decayVertex){
-fPrimaryVertexIsInsideDecayVertex=true;
-}else{
-fPrimaryVertexIsInsideDecayVertex=false;
-}
-
+    if (R_primaryVertex < R_decayVertex)
+    {
+        fPrimaryVertexIsInsideDecayVertex = true;
+    }
+    else
+    {
+        fPrimaryVertexIsInsideDecayVertex = false;
+    }
 }
