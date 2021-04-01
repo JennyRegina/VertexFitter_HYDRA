@@ -110,13 +110,13 @@ HVertexFitter::HVertexFitter(const std::vector<HRefitCand> &cands, HRefitCand &m
 
 void HVertexFitter::add3Constraint()
 {
-    fNdf += 3;
+    if(!f3Constraint) fNdf += 3;
     f3Constraint = true;
 }
 
 void HVertexFitter::addVertexConstraint()
 {
-    fNdf += 1;
+    if(!fVtxConstraint) fNdf += 1;
     fVtxConstraint = true;
 }
 
