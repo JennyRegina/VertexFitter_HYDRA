@@ -73,13 +73,13 @@ private:
 
 public:
     HVertexFitter(const std::vector<HRefitCand> &cands);
-    HVertexFitter(const std::vector<HRefitCand> &cands, HRefitCand & mother);
+    HVertexFitter(const std::vector<HRefitCand> &cands, HRefitCand &mother);
     ~HVertexFitter(){};
 
     TMatrixD f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter);
     TMatrixD Feta_eval(const TMatrixD &miter, const TMatrixD &xi_iter);
     TMatrixD Fxi_eval(const TMatrixD &miter, const TMatrixD &xi_iter);
-    
+
     void add3Constraint();
     void addVertexConstraint();
 
@@ -89,7 +89,7 @@ public:
     double getChi2() const { return fChi2; }
     double getProb() const { return fProb; }
     double getPull(int val = 0) { return fPull(val, val); }
-    
+
     bool isConverged() const { return fConverged; }
     int getIteration() const { return fIteration; }
     void setCovariance(TMatrixD &val) { V = val; }

@@ -110,13 +110,15 @@ HVertexFitter::HVertexFitter(const std::vector<HRefitCand> &cands, HRefitCand &m
 
 void HVertexFitter::add3Constraint()
 {
-    if(!f3Constraint) fNdf += 3;
+    if (!f3Constraint)
+        fNdf += 3;
     f3Constraint = true;
 }
 
 void HVertexFitter::addVertexConstraint()
 {
-    if(!fVtxConstraint) fNdf += 1;
+    if (!fVtxConstraint)
+        fNdf += 1;
     fVtxConstraint = true;
 }
 
@@ -427,6 +429,12 @@ bool HVertexFitter::fit()
     xi0.Zero();
     xi.Zero();
     neu_xi.Zero();
+
+    if (f3Constraint == false && fVtxConstraint == false)
+    {
+        Error("fit()", Form("No constraint is chosen, use add3Constraint() or addVertexConstraint()"));
+        abort();
+    }
 
     if (f3Constraint)
     {
