@@ -15,6 +15,14 @@ TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
     double param_p1, param_theta1, param_phi1, param_R1, param_Z1;
     double param_p2, param_theta2, param_phi2, param_R2, param_Z2;
 
+    if (cands.size() < 2)
+    {
+
+        std::cout << "WARNING: No vertex can be found, not enough charged particles in the event" << std::endl;
+        fVertex.SetXYZ(-2000., -2000., -2000.);
+        return fVertex;
+    }
+
     HRefitCand cand1 = cands[0];
 
     param_p1 = cand1.P(); // Not the inverse, this momentum is used for estimating the momentum of the Lambda Candidate
@@ -140,7 +148,10 @@ TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
 
     fPrimaryVertexFound = false;
 
-    findPrimaryVertex(cands);
+    if (cands.size() > 2)
+    {
+        findPrimaryVertex(cands);
+    }
 
     if (fPrimaryVertexFound == true)
     {
