@@ -14,7 +14,8 @@ USES_ORACLE= : no
 
 SOURCE_FILES := hrefitcand.cc \
 		hvertexfitter.cc \
-		hvertexfinder.cc
+		hvertexfinder.cc \
+        hneutralcandfinder.cc
 
 
 include $(HADDIR)/hades.def.mk

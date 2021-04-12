@@ -33,14 +33,11 @@ private:
     double fDistanceParticleToParticle;
     double fDistanceParticleToVertex;
 
-    HVirtualCand fNeutralMotherCandidate;
-
     double fDistParticle1Vertex;
     double fDistParticle2Vertex;
     double fDistParticle1Origin;
     double fDistParticle2Origin;
 
-    TMatrixD fCovarianceNeutralMother;
     bool fPrimaryVertexFound;
 
     // Properties related to difference between primary and decay vertex
@@ -55,7 +52,7 @@ private:
     bool fUsePrimaryVertexInNeutralCandidateCalculation;
 
 public:
-    HVertexFinder(const std::vector<HRefitCand> &cands);
+    HVertexFinder();
     ~HVertexFinder(){};
 
     void setVerbosity(int val) { fVerbose = val; }
@@ -73,16 +70,6 @@ public:
     double getDistanceSecondParticleVertex() const { return fDistParticle2Vertex; }
     double getDistanceFirstParticleOrigin() const { return fDistParticle1Origin; }
     double getDistanceSecondParticleOrigin() const { return fDistParticle2Origin; }
-
-    // The first function is for creating a neutral mother candidate if only information of the decay vertex is available
-    // The second function is for creating the neutral candidate if information about the primary vertex is also available
-    void setNeutralMotherCandidate(double valMomentum, double valTheta, double valPhi, double valR, double ValZ, TVector3 decayVertex);
-    void setNeutralMotherCandidateFromPrimaryVtxInfo(double valMomentum, TVector3 primVtx, TVector3 decayVtx);
-    void setUsePrimaryVertexInNeutralMotherCalculation(bool val){ fUsePrimaryVertexInNeutralCandidateCalculation = val; }
-
-    HVirtualCand getNeutralMotherCandidate() { return fNeutralMotherCandidate; }
-
-    TMatrixD getCovarianceMatrixNeutralMother() { return fCovarianceNeutralMother; }
 
     double getDistBetweenVertices() { return fDistPrimToDecayVertex; }
 
