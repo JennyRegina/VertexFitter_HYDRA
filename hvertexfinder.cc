@@ -58,11 +58,11 @@ TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
                       param_Z2);
 
     // Direction vectors
-    vtx_dir_1.SetXYZ(std::sin(param_theta1) * std::cos(param_theta1),
+    vtx_dir_1.SetXYZ(std::sin(param_theta1) * std::cos(param_phi1),
                      std::sin(param_theta1) * std::sin(param_phi1),
                      std::cos(param_theta1));
 
-    vtx_dir_2.SetXYZ(std::sin(param_theta2) * std::cos(param_theta2),
+    vtx_dir_2.SetXYZ(std::sin(param_theta2) * std::cos(param_phi2),
                      std::sin(param_theta2) * std::sin(param_phi2),
                      std::cos(param_theta2));
 
@@ -79,10 +79,10 @@ TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
     HGeomVector vtx_geom_dir_1, vtx_geom_dir_2, vtx_geom_base_1, vtx_geom_base_2;
 
     // Direction vectors
-    vtx_geom_dir_1.setX(std::sin(param_theta1) * std::cos(param_theta1));
+    vtx_geom_dir_1.setX(std::sin(param_theta1) * std::cos(param_phi1));
     vtx_geom_dir_1.setY(std::sin(param_theta1) * std::sin(param_phi1));
     vtx_geom_dir_1.setZ(std::cos(param_theta1));
-    vtx_geom_dir_2.setX(std::sin(param_theta2) * std::cos(param_theta2));
+    vtx_geom_dir_2.setX(std::sin(param_theta2) * std::cos(param_phi2));
     vtx_geom_dir_2.setY(std::sin(param_theta2) * std::sin(param_phi2));
     vtx_geom_dir_2.setZ(std::cos(param_theta2));
 
@@ -119,7 +119,44 @@ TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
         std::cout << " " << std::endl;
     }
 
-    HGeomVector vertex = HParticleTool::calculatePointOfClosestApproach(vtx_geom_base_1, vtx_geom_dir_1, vtx_geom_dir_2, vtx_geom_dir_2);
+    //HGeomVector vertex = HParticleTool::calculatePointOfClosestApproach(vtx_geom_base_1, vtx_geom_dir_1, vtx_geom_dir_2, vtx_geom_dir_2);
+    
+    HGeomVector vertex;
+    HGeomVertexFit *vtxFit = new HGeomVertexFit();
+    vtxFit->addLine(vtx_geom_base_1,vtx_geom_dir_1,1);
+    vtxFit->addLine(vtx_geom_base_2,vtx_geom_dir_2,1);
+    vtxFit->getVertex(vertex);
+
+    /* HGeomVector cross = vtx_geom_dir_1.vectorProduct(vtx_geom_dir_2); // cross product: dir1 x dir2
+
+    // straight lines are either skew or have a cross point
+
+    HGeomVector diff = vtx_geom_base_1;
+    diff-=vtx_geom_base_2; // Difference of two base vectors base1 - base2
+
+    Double_t D;
+    D =  HParticleTool::calcDeterminant(vtx_geom_dir_2, vtx_geom_dir_1 ,cross);
+
+    Double_t Dm =  HParticleTool::calcDeterminant(diff , vtx_geom_dir_1, cross);
+    Double_t Dl = -HParticleTool::calcDeterminant(diff , vtx_geom_dir_2, cross);
+
+    HGeomVector vertex;
+    HGeomVector dm;
+    HGeomVector dl;
+
+    dm = vtx_geom_dir_2;
+    dm *= Dm;
+
+    dl = vtx_geom_dir_1;
+    dl *= Dl;
+
+    vertex = dm - dl;
+
+    vertex *= 2*((1.)/D); // Jenny added 2
+
+    vertex+=vtx_geom_base_1;
+    vertex+=vtx_geom_base_2;
+    vertex*=0.5; */
 
     fVertex.SetXYZ(vertex.X(), vertex.Y(), vertex.Z());
 

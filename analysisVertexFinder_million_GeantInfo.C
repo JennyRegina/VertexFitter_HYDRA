@@ -660,6 +660,10 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     hDistPrimToDecayVertex->SetXTitle(" Distance Between Primary and Decay Vertex ");
     hDistPrimToDecayVertex->SetYTitle(" Counts ");
 
+    TH1F *hvertex_z = new TH1F("hvertex_z", "", 200,-100, 100);
+    TH1F *hvertex_x = new TH1F("hvertex_x", "", 200,-50, 50);
+    TH1F *hvertex_y = new TH1F("hvertex_y", "", 200,-50, 50);
+    
     HLoop loop(kTRUE);
     Bool_t ret = loop.addFiles(infileList);
     if (ret == 0)
@@ -721,6 +725,12 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
         std::vector<HRefitCand> protons, pions, kaons;
         std::vector<HParticleCandSim *> virtualCandLambdas, virtualCandProtons, virtualCandPions, virtualCandKaons;
 
+        HEventHeader* eventheader = gHades->getCurrentEvent()->getHeader();
+        HVertex evtVertex = eventheader -> getVertexReco();
+        hvertex_x->Fill(evtVertex.getX());
+        hvertex_y->Fill(evtVertex.getY());
+        hvertex_z->Fill(evtVertex.getZ());
+
         for (Int_t j = 0; j < ntracks; j++)
         {
             HParticleCandSim *cand =
@@ -762,7 +772,7 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
                 pions.push_back(candidate);
             }*/
 
-            if (cand->getGeantPID() == 14) //Proton found
+/*             if (cand->getGeantPID() == 14) //Proton found
             {
                 //std::cout << "Parent ID: " << cand->getGeantParentPID() << std::endl;
                 if(selectHadrons(cand)==true){
@@ -800,9 +810,9 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
             }
             else
                 continue;
-        } // end track loop
+        } // end track loop */
         
-        /* if (cand->getGeantPID() == 14) //Proton found
+         if (cand->getGeantPID() == 14) //Proton found
             {
                 virtualCandProtons.push_back(cand);
                 Double_t mom = cand->getGeantTotalMom();
@@ -842,7 +852,7 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
             }
             else
                 continue;
-        } // end track loop */
+        } // end track loop 
 
         // -----------------------------------------------------------------------
         // looking at Lambda invariant mass here
@@ -893,7 +903,9 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
                         hVertexXPreFit->Fill(decayVertex.X());
                         hVertexYPreFit->Fill(decayVertex.Y());
                         hVertexZPreFit->Fill(decayVertex.Z());
-
+                        hDistanceToVertexProtonPreFit->Fill(vtxFinderSec->getDistanceFirstParticleVertex());
+                        hDistanceToVertexPionPreFit->Fill(vtxFinderSec->getDistanceSecondParticleVertex());
+                        
                         // Perform fitting of secondary vertex
                         HVertexFitter vtxFitterSecCands(candsSec);
                         vtxFitterSecCands.addVertexConstraint();
@@ -1231,6 +1243,10 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     hErrorPhiLambdaCut->Write();
 
     hDistPrimToDecayVertex->Write();
+    
+    hvertex_x->Write();
+    hvertex_y->Write();
+    hvertex_z->Write();
 
     outfile->Close();
 
