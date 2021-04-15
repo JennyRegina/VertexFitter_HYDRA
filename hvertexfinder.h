@@ -17,6 +17,7 @@
 #include "hrefitcand.h"
 #include "hgeomvector.h"
 #include "hparticletool.h"
+#include "hgeomvertexfit.h"
 
 using std::cout;
 using std::endl;

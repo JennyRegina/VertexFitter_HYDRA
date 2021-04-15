@@ -425,6 +425,7 @@ void HVertexFinder::calculateVertexProperties(TVector3 primaryVertex, TVector3 d
     if (decayVertex.Z() > primaryVertex.Z())
     {   
         fPrimaryVertexIsBetforeDecayVertex = true;
+
     }
     else
     {

@@ -195,9 +195,6 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     TH1F *h09SecondaryVtx = new TH1F("hPullZSecondaryVtx", "", 100, -5, 5);
     h09SecondaryVtx->SetXTitle("Pull(Z)");
     h09SecondaryVtx->SetYTitle(" Counts ");
-    /*  TH1F *h10 = new TH1F("hSuccessfulConvergence", "", 100, 1070, 1170);
-    h10->SetXTitle("M_{p#pi^{-}} [MeV/c^{2}]");
-    h10->SetYTitle(" Counts "); */
 
     TH1F *h10 = new TH1F("hSuccessfulConvergence", "", 2, 0, 2);
     h10->SetXTitle("Fit has converged");
@@ -210,6 +207,7 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     TH1F *h11SecVtx = new TH1F("hIterationsSecVtx", "", 100, 0, 20);
     h11SecVtx->SetXTitle("Number of Iterations");
     h11SecVtx->SetYTitle(" Counts ");
+
     // ------------------------- Histos after probability cut    --------------------
 
     TH1F *h12 = new TH1F("hPullPInvCut", "", 100, -5, 5);
@@ -376,6 +374,10 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     TH1F *hDistanceBetweenProtonAndPionPreFit = new TH1F("hDistanceBetweenProtonAndPionPreFit", "", 500, 0, 50);
     hDistanceBetweenProtonAndPionPreFit->SetXTitle("Distance between particles / mm");
     hDistanceBetweenProtonAndPionPreFit->SetYTitle(" Counts ");
+    
+    TH1F *hDistanceBetweenPrimaryProtonAndKaonPreFit = new TH1F("hDistanceBetweenPrimaryProtonAndKaonPreFit", "", 500, 0, 50);
+    hDistanceBetweenPrimaryProtonAndKaonPreFit->SetXTitle("Distance between particles / mm");
+    hDistanceBetweenPrimaryProtonAndKaonPreFit->SetYTitle(" Counts ");
 
     TH1F *hDistanceToVertexProtonPreFit = new TH1F("hDistanceToVertexProtonPreFit", "", 1000, 0, 100);
     hDistanceToVertexProtonPreFit->SetXTitle("Distance to vertex / mm");
@@ -384,7 +386,15 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     TH1F *hDistanceToVertexPionPreFit = new TH1F("hDistanceToVertexPionPreFit", "", 1000, 0, 100);
     hDistanceToVertexPionPreFit->SetXTitle("Distance to vertex / mm");
     hDistanceToVertexPionPreFit->SetYTitle(" Counts ");
+    
+    TH1F *hDistanceToVertexPrimaryProtonPreFit = new TH1F("hDistanceToVertexPrimaryProtonPreFit", "", 1000, 0, 100);
+    hDistanceToVertexPrimaryProtonPreFit->SetXTitle("Distance to vertex / mm");
+    hDistanceToVertexPrimaryProtonPreFit->SetYTitle(" Counts ");
 
+    TH1F *hDistanceToVertexKaonPreFit = new TH1F("hDistanceToVertexKaonPreFit", "", 1000, 0, 100);
+    hDistanceToVertexKaonPreFit->SetXTitle("Distance to vertex / mm");
+    hDistanceToVertexKaonPreFit->SetYTitle(" Counts ");
+    
     TH1F *hDistanceToOriginProtonPreFit = new TH1F("hDistanceToOriginProtonPreFit", "", 1000, 0, 100);
     hDistanceToOriginProtonPreFit->SetXTitle("Distance to origin / mm");
     hDistanceToOriginProtonPreFit->SetYTitle(" Counts ");
@@ -567,8 +577,34 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     TH1F *hGeantZMomentumPions = new TH1F("hGeantZMomentumPions", "", 1000, -100, 3000);
     hGeantZMomentumPions->SetXTitle("Momentum, Z / MeV/c");
     hGeantZMomentumPions->SetYTitle(" Counts ");
+    
+    TH1F *hGeantTotMomentumPrimProtons = new TH1F("hGeantTotMomentumPrimProtons", "", 1000, 0, 3000);
+    hGeantTotMomentumPrimProtons->SetXTitle("Momentum, X / MeV/c");
+    hGeantTotMomentumPrimProtons->SetYTitle(" Counts ");
+    TH1F *hGeantXMomentumPrimProtons = new TH1F("hGeantXMomentumPrimProtons", "", 1000, -1000, 1000);
+    hGeantXMomentumPrimProtons->SetXTitle("Momentum, X / MeV/c");
+    hGeantXMomentumPrimProtons->SetYTitle(" Counts ");
+    TH1F *hGeantYMomentumPrimProtons = new TH1F("hGeantYMomentumPrimProtons", "", 1000, -1000, 1000);
+    hGeantYMomentumPrimProtons->SetXTitle("Momentum, Y / MeV/c");
+    hGeantYMomentumPrimProtons->SetYTitle(" Counts ");
+    TH1F *hGeantZMomentumPrimProtons = new TH1F("hGeantZMomentumPrimProtons", "", 1000, -100, 3000);
+    hGeantZMomentumPrimProtons->SetXTitle("Momentum, Z / MeV/c");
+    hGeantZMomentumPrimProtons->SetYTitle(" Counts ");
 
-    // ------- Reconstructed quantities -----------
+    TH1F *hGeantTotMomentumKaons = new TH1F("hGeantTotMomentumKaons", "", 1000, 0, 3000);
+    hGeantTotMomentumKaons->SetXTitle("Momentum, X / MeV/c");
+    hGeantTotMomentumKaons->SetYTitle(" Counts ");
+    TH1F *hGeantXMomentumKaons = new TH1F("hGeantXMomentumKaons", "", 1000, -1000, 1000);
+    hGeantXMomentumKaons->SetXTitle("Momentum, X / MeV/c");
+    hGeantXMomentumKaons->SetYTitle(" Counts ");
+    TH1F *hGeantYMomentumKaons = new TH1F("hGeantYMomentumKaons", "", 1000, -1000, 1000);
+    hGeantYMomentumKaons->SetXTitle("Momentum, Y / MeV/c");
+    hGeantYMomentumKaons->SetYTitle(" Counts ");
+    TH1F *hGeantZMomentumKaons = new TH1F("hGeantZMomentumKaons", "", 1000, -100, 3000);
+    hGeantZMomentumKaons->SetXTitle("Momentum, Z / MeV/c");
+    hGeantZMomentumKaons->SetYTitle(" Counts ");
+    
+    // ------- Reconstructed quantities -------
     TH1F *hRecoRProtons = new TH1F("hRecoRProtons", "", 1000, -100, 100);
     hRecoRProtons->SetXTitle("R / mm");
     hRecoRProtons->SetYTitle(" Counts ");
@@ -605,7 +641,41 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     hRecoMomentumPions->SetYTitle(" Counts ");
     TH1F *hRecoBetaPions = new TH1F("hRecoBetaPions", "", 100, -0.1, 1);
     hRecoBetaPions->SetXTitle("#beta");
-    hRecoBetaPions->SetYTitle(" Counts ");
+    hRecoBetaPions->SetYTitle(" Counts ");    
+    
+    // ------- Reconstructed quantities Primaries -----------
+    TH1F *hRecoRPrimProtons = new TH1F("hRecoRPrimProtons", "", 1000, -100, 100);
+    hRecoRPrimProtons->SetXTitle("R / mm");
+    hRecoRPrimProtons->SetYTitle(" Counts ");
+    TH1F *hRecoZPrimProtons = new TH1F("hRecoZPrimProtons", "", 1000, -100, 100);
+    hRecoZPrimProtons->SetXTitle("Z / mm");
+    hRecoZPrimProtons->SetYTitle(" Counts ");
+    TH1F *hRecoThetaPrimProtons = new TH1F("hRecoThetaPrimProtons", "", 500, 0, 3);
+    hRecoThetaPrimProtons->SetXTitle("#theta / rad");
+    hRecoThetaPrimProtons->SetYTitle(" Counts ");
+    TH1F *hRecoPhiPrimProtons = new TH1F("hRecoPhiPrimProtons", "", 500, -4, 4);
+    hRecoPhiPrimProtons->SetXTitle("#phi / rad");
+    hRecoPhiPrimProtons->SetYTitle(" Counts ");
+    TH1F *hRecoMomentumPrimProtons = new TH1F("hRecoMomentumPrimProtons", "", 1000, 0, 3000);
+    hRecoMomentumPrimProtons->SetXTitle("Momentum / MeV/c");
+    hRecoMomentumPrimProtons->SetYTitle(" Counts ");
+
+    TH1F *hRecoRKaons = new TH1F("hRecoRKaons", "", 1000, -100, 100);
+    hRecoRKaons->SetXTitle("R / mm");
+    hRecoRKaons->SetYTitle(" Counts ");
+    TH1F *hRecoZKaons = new TH1F("hRecoZKaons", "", 1000, -100, 100);
+    hRecoZKaons->SetXTitle("Z / mm");
+    hRecoZKaons->SetYTitle(" Counts ");
+    TH1F *hRecoThetaKaons = new TH1F("hRecoThetaKaons", "", 500, 0, 3);
+    hRecoThetaKaons->SetXTitle("#theta / rad");
+    hRecoThetaKaons->SetYTitle(" Counts ");
+    TH1F *hRecoPhiKaons = new TH1F("hRecoPhiKaons", "", 500, -4, 4);
+    hRecoPhiKaons->SetXTitle("#phi / rad");
+    hRecoPhiKaons->SetYTitle(" Counts ");
+    TH1F *hRecoMomentumKaons = new TH1F("hRecoMomentumKoans", "", 1000, 0, 3000);
+    hRecoMomentumKaons->SetXTitle("Momentum / MeV/c");
+    hRecoMomentumKaons->SetYTitle(" Counts ");
+
 
     // ---------------- LAMBDA PLOTS --------------------
     TH1F *hMomLambda = new TH1F("hMomLambda", "", 1000, 0, 3000);
@@ -617,6 +687,12 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     TH1F *hRecoPhiLambda = new TH1F("hRecoPhiLambda", "", 500, -4, 4);
     hRecoPhiLambda->SetXTitle("#phi / rad");
     hRecoPhiLambda->SetYTitle(" Counts ");
+    TH1F *hRecoRLambda = new TH1F("hRecoRLambda", "", 1000, -100, 100);
+    hRecoRLambda->SetXTitle("R / mm");
+    hRecoRLambda->SetYTitle(" Counts ");
+    TH1F *hRecoZLambda = new TH1F("hRecoZLambda", "", 1000, -100, 100);
+    hRecoZLambda->SetXTitle("Z / mm");
+    hRecoZLambda->SetYTitle(" Counts ");
 
     TH1F *hErrorRLambda = new TH1F("hErrorRLambda", "", 1000, -100, 100);
     hErrorRLambda->SetXTitle("R / mm");
@@ -655,7 +731,7 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     hErrorPhiLambdaCut->SetXTitle("#phi / rad");
     hErrorPhiLambdaCut->SetYTitle(" Counts ");
 
-    // Vertex prim and dicay info
+    // Vertex prim and decay info
     TH1F *hDistPrimToDecayVertex = new TH1F("hDistPrimToDecayVertex", "", 100, 0, 150);
     hDistPrimToDecayVertex->SetXTitle(" Distance Between Primary and Decay Vertex ");
     hDistPrimToDecayVertex->SetYTitle(" Counts ");
@@ -905,7 +981,7 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
                         hVertexZPreFit->Fill(decayVertex.Z());
                         hDistanceToVertexProtonPreFit->Fill(vtxFinderSec->getDistanceFirstParticleVertex());
                         hDistanceToVertexPionPreFit->Fill(vtxFinderSec->getDistanceSecondParticleVertex());
-                        
+                        hDistanceBetweenProtonAndPionPreFit->Fill(vtxFinderSec->getDistanceBetweenFittedParticles());
                         // Perform fitting of secondary vertex
                         HVertexFitter vtxFitterSecCands(candsSec);
                         vtxFitterSecCands.addVertexConstraint();
@@ -943,6 +1019,28 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
                         hVertexXDiff->Fill(decayVertex.X() - virtualCand1->getGeantxVertex());
                         hVertexYDiff->Fill(decayVertex.Y() - virtualCand1->getGeantyVertex());
                         hVertexZDiff->Fill(decayVertex.Z() - virtualCand1->getGeantzVertex());
+                        
+                        hGeantTotMomentumProtons->Fill(virtualCand1->getGeantTotalMom());
+                        hGeantXMomentumProtons->Fill(virtualCand1->getGeantxMom());
+                        hGeantYMomentumProtons->Fill(virtualCand1->getGeantyMom());
+                        hGeantZMomentumProtons->Fill(virtualCand1->getGeantzMom());
+                        hGeantTotMomentumPions->Fill(virtualCand2->getGeantTotalMom());
+                        hGeantXMomentumPions->Fill(virtualCand2->getGeantxMom());
+                        hGeantYMomentumPions->Fill(virtualCand2->getGeantyMom());
+                        hGeantZMomentumPions->Fill(virtualCand2->getGeantzMom());                
+                        
+                        hRecoRProtons->Fill(cand1.getR());
+                        hRecoZProtons->Fill(cand1.getZ());
+                        hRecoThetaProtons->Fill(cand1.Theta());
+                        hRecoPhiProtons->Fill(cand1.Phi());
+                        hRecoMomentumProtons->Fill(cand1.P());
+                        //hRecoBetaProtons->Fill(cand1.getBeta());
+
+                        hRecoRPions->Fill(cand2.getR());
+                        hRecoZPions->Fill(cand2.getZ());
+                        hRecoThetaPions->Fill(cand2.Theta());
+                        hRecoPhiPions->Fill(cand2.Phi());
+                        hRecoMomentumPions->Fill(cand2.P());
 
                     }
                 }
@@ -973,7 +1071,30 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
                         hPrimaryVertexXPreFit->Fill(primaryVertex.X());
                         hPrimaryVertexYPreFit->Fill(primaryVertex.Y());
                         hPrimaryVertexZPreFit->Fill(primaryVertex.Z());                    
+                        hDistanceBetweenPrimaryProtonAndKaonPreFit->Fill(vtxFinderPrim->getDistanceBetweenFittedParticles());
+                        hDistanceToVertexPrimaryProtonPreFit->Fill(vtxFinderPrim->getDistanceFirstParticleVertex());
+                        hDistanceToVertexKaonPreFit->Fill(vtxFinderPrim->getDistanceSecondParticleVertex());                        
                         
+                        hGeantTotMomentumPrimProtons->Fill(virtualCand1->getGeantTotalMom());
+                        hGeantXMomentumPrimProtons->Fill(virtualCand1->getGeantxMom());
+                        hGeantYMomentumPrimProtons->Fill(virtualCand1->getGeantyMom());
+                        hGeantZMomentumPrimProtons->Fill(virtualCand1->getGeantzMom());
+                        hGeantTotMomentumKaons->Fill(virtualCand3->getGeantTotalMom());
+                        hGeantXMomentumKaons->Fill(virtualCand3->getGeantxMom());
+                        hGeantYMomentumKaons->Fill(virtualCand3->getGeantyMom());
+                        hGeantZMomentumKaons->Fill(virtualCand3->getGeantzMom());
+                        
+                        hRecoRPrimProtons->Fill(cand1.getR());
+                        hRecoZPrimProtons->Fill(cand1.getZ());
+                        hRecoThetaPrimProtons->Fill(cand1.Theta());
+                        hRecoPhiPrimProtons->Fill(cand1.Phi());
+                        hRecoMomentumPrimProtons->Fill(cand1.P());
+
+                        hRecoRKaons->Fill(cand3.getR());
+                        hRecoZKaons->Fill(cand3.getZ());
+                        hRecoThetaKaons->Fill(cand3.Theta());
+                        hRecoPhiKaons->Fill(cand3.Phi());
+                        hRecoMomentumKaons->Fill(cand3.P());
                         // Perform fitting of primary vertex
                         HVertexFitter vtxFitterPrimCands(candsPrim);
                         //vtxFitterPrimCands.setNumberOfIterations(1);
@@ -1039,10 +1160,28 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
                                         std::sin(lambdaCand.getPhi() * deg2rad),
                                     lambdaCand.getMomentum() * std::cos(lambdaCand.getTheta() * deg2rad),
                                     1115.683);
-                                    
+            
+            TMatrixD lambdaCov(5, 5);
+            lambdaCov=lambdaCandFinder.getCovarianceMatrixNeutralMother();
+            lambdaCandRefit.setCovariance(lambdaCov);                     
             hMomLambda->Fill(lambdaCand.getMomentum());
+            
+            lambdaCandRefit.setR(lambdaCand.getR());
+
+            //std::cout << "Lambda R " << lambdaCand.getR() << std::endl;
+
+            hRecoRLambda->Fill(lambdaCand.getR());
+            hRecoZLambda->Fill(lambdaCand.getZ());
             hRecoThetaLambda->Fill(lambdaCand.getTheta() * deg2rad);
             hRecoPhiLambda->Fill(lambdaCand.getPhi() * deg2rad);
+            
+            TMatrixD lambdaRefitCov(5,5);
+            lambdaRefitCov=lambdaCandRefit.getCovariance();
+		
+    		hErrorRLambda->Fill(sqrt(lambdaRefitCov(3,3)));
+    		hErrorZLambda->Fill(sqrt(lambdaRefitCov(4,4)));
+    		hErrorThetaLambda->Fill(sqrt(lambdaRefitCov(1,1)));
+    		hErrorPhiLambda->Fill(sqrt(lambdaRefitCov(2,2)));
 
             if(probPrim && probSec){
 
@@ -1141,8 +1280,11 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
 
     hVertexPreFit->Write();
     hDistanceBetweenProtonAndPionPreFit->Write();
+    hDistanceBetweenPrimaryProtonAndKaonPreFit->Write();
     hDistanceToVertexProtonPreFit->Write();
     hDistanceToVertexPionPreFit->Write();
+    hDistanceToVertexPrimaryProtonPreFit->Write();                    
+    hDistanceToVertexKaonPreFit->Write();
     hDistanceToOriginProtonPreFit->Write();
     hDistanceToOriginPionPreFit->Write();
     hDistanceToOriginSumPreFit->Write();
@@ -1200,6 +1342,15 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     hGeantYMomentumPions->Write();
     hGeantZMomentumPions->Write();
 
+    hGeantTotMomentumPrimProtons->Write();
+    hGeantXMomentumPrimProtons->Write();
+    hGeantYMomentumPrimProtons->Write();
+    hGeantZMomentumPrimProtons->Write();
+    hGeantTotMomentumKaons->Write();
+    hGeantXMomentumKaons->Write();
+    hGeantYMomentumKaons->Write();
+    hGeantZMomentumKaons->Write();
+
     hRecoRProtons->Write();
     hRecoZProtons->Write();
     hRecoThetaProtons->Write();
@@ -1212,7 +1363,19 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     hRecoThetaPions->Write();
     hRecoPhiPions->Write();
     hRecoMomentumPions->Write();
-    hRecoBetaPions->Write();
+    hRecoBetaPions->Write();    
+    
+    hRecoRPrimProtons->Write();
+    hRecoZPrimProtons->Write();
+    hRecoThetaPrimProtons->Write();
+    hRecoPhiPrimProtons->Write();
+    hRecoMomentumPrimProtons->Write();
+
+    hRecoRKaons->Write();
+    hRecoZKaons->Write();
+    hRecoThetaKaons->Write();
+    hRecoPhiKaons->Write();
+    hRecoMomentumKaons->Write();
 
     h25->Write();
     h26->Write();
@@ -1227,6 +1390,8 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     hMomLambda->Write();
     hRecoThetaLambda->Write();
     hRecoPhiLambda->Write();
+    hRecoRLambda->Write();
+    hRecoZLambda->Write();
 
     hErrorRLambda->Write();
     hErrorZLambda->Write();
