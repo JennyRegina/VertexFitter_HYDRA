@@ -423,8 +423,8 @@ bool HVertexFitter::fit()
     alpha = alpha0;
 
     // Calculating the inverse of the original covariance matrix that is not changed in the iterations
-    TMatrixD V0_inv(V); // J.R New
-    V0_inv.Invert();    // J.R New
+    TMatrixD V0_inv(V);
+    V0_inv.Invert();
 
     xi0.Zero();
     xi.Zero();
@@ -532,10 +532,10 @@ bool HVertexFitter::fit()
         {
             cout << " calc chi2" << endl;
         }
-        chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * d;
-
+        //chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * d;
+        chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * f_eval(neu_alpha, neu_xi);
         //for checking convergence
-        if (fabs(chi2 - chisqrd(0, 0)) < 1)
+        if (fabs(chi2 - chisqrd(0, 0)) < 0.01)
         {
             fIteration = q;
             fConverged = true;
@@ -562,6 +562,7 @@ bool HVertexFitter::fit()
         if (f3Constraint)
             D_xi = Fxi_eval(alpha, xi);
         d = f_eval(alpha, xi);
+
     }
 
     if (fVerbose > 0)

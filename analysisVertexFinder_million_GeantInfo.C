@@ -860,35 +860,38 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
                 pions.push_back(candidate);
             }*/
 
-            if (cand->getGeantPID() == 14) //Proton found
+/*             if (cand->getGeantPID() == 14) //Proton found
             {
                 //std::cout << "Parent ID: " << cand->getGeantParentPID() << std::endl;
-                if(selectHadrons(cand)==true){
-                virtualCandProtons.push_back(cand);
-                double errors[] = {1.469 * 1e-5, 2.410 * 1e-3, 5.895 * 1e-3,
-                                   1.188, 2.652};
-                FillData(cand, candidate, errors, 938.272);
-                protons.push_back(candidate);
+                if (selectHadrons(cand) == true)
+                {
+                    virtualCandProtons.push_back(cand);
+                    double errors[] = {1.469 * 1e-5, 2.410 * 1e-3, 5.895 * 1e-3,
+                                       1.188, 2.652};
+                    FillData(cand, candidate, errors, 938.272);
+                    protons.push_back(candidate);
                 }
             }
             else if (cand->getGeantPID() == 9) // Pion found
             {
-                if(selectHadrons(cand)==true){
-                virtualCandPions.push_back(cand);
-                double errors[] = {5.959 * 1e-5, 9.316 * 1e-3, 1.991 * 1e-2,
-                                   4.006, 7.629};
-                FillData(cand, candidate, errors, 139.570);
-                pions.push_back(candidate);
+                if (selectHadrons(cand) == true)
+                {
+                    virtualCandPions.push_back(cand);
+                    double errors[] = {5.959 * 1e-5, 9.316 * 1e-3, 1.991 * 1e-2,
+                                       4.006, 7.629};
+                    FillData(cand, candidate, errors, 139.570);
+                    pions.push_back(candidate);
                 }
             }
             else if (cand->getGeantPID() == 11) // Kaon found
-            { 
-                if(selectHadrons(cand)==true){
-                virtualCandKaons.push_back(cand);
-                double errors[] = {1.947 * 1e-5, 2.296 * 1e-3, 6.312 * 1e-3,
-                                   1.404, 2.723};
-                FillData(cand, candidate, errors, 493.7);
-                kaons.push_back(candidate);
+            {
+                if (selectHadrons(cand) == true)
+                {
+                    virtualCandKaons.push_back(cand);
+                    double errors[] = {1.947 * 1e-5, 2.296 * 1e-3, 6.312 * 1e-3,
+                                       1.404, 2.723};
+                    FillData(cand, candidate, errors, 493.7);
+                    kaons.push_back(candidate);
                 }
             }
             if (cand->getGeantPID() == 18) //Lambda found
@@ -898,9 +901,9 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
             }
             else
                 continue;
-        } // end track loop 
-        
-         /* if (cand->getGeantPID() == 14) //Proton found
+        } // end track loop */
+
+          if (cand->getGeantPID() == 14) //Proton found
             {
                 virtualCandProtons.push_back(cand);
                 Double_t mom = cand->getGeantTotalMom();
@@ -940,7 +943,7 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
             }
             else
                 continue;
-        } // end track loop  */
+        } // end track loop  
 
         // -----------------------------------------------------------------------
         // looking at Lambda invariant mass here
@@ -1181,6 +1184,11 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
             
             lambdaCandRefit.setR(lambdaCand.getR());
             lambdaCandRefit.setZ(lambdaCand.getZ());
+
+            lambdaCandRefit.SetTheta(lambdaCand.getTheta() * deg2rad);
+            lambdaCandRefit.SetPhi(lambdaCand.getPhi() * deg2rad);
+            
+            //std::cout << lambdaCandRefit.Theta() << lambdaCandRefit.Phi() << std::endl;
             
             //std::cout << "Lambda R " << lambdaCand.getR() << std::endl;
 
@@ -1256,6 +1264,8 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
             h021->Fill(Fitter3c.getChi2());
             h031->Fill(Fitter3c.getProb());
             h041->Fill(flambda.M());
+
+            //std::cout << "Masses: " << lambdaCandRefit.M() << " " << fcand1.M() << " " << fcand2.M() << std::endl;
 
             if (Fitter3c.getProb() > 0.01)
             {
