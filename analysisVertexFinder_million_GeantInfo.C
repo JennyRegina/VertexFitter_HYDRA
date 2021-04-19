@@ -139,10 +139,14 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     TH1F *h02 = new TH1F("hChi2", "", 100, 0, 10);
     h02->SetXTitle("#chi^{2}");
     h02->SetYTitle(" Counts ");
+    TH1F *h021 = (TH1F*)h02->Clone("hChi2_3c");
+    TH1F *h023 = (TH1F*)h02->Clone("hChi2_3cConv");
 
     TH1F *h03 = new TH1F("hPChi2", "", 100, 0, 1);
     h03->SetXTitle("P(#chi^{2})");
     h03->SetYTitle(" Counts ");
+    TH1F *h031 = (TH1F*)h03->Clone("hPChi2_3c");
+    TH1F *h033 = (TH1F*)h03->Clone("hPChi2_3cConv");
 
     TH1F *h02SecondaryVtx = new TH1F("hChi2SecondaryVtx", "", 100, 0, 10);
     h02SecondaryVtx->SetXTitle("#chi^{2}");
@@ -155,7 +159,10 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     TH1F *h04 = new TH1F("hLambdaMassPostFit", "", 100, 1070, 1170);
     h04->SetXTitle(" M_{p#pi^{-}} [MeV/c^{2}]");
     h04->SetYTitle(" Events ");
-
+    TH1F *h040 = (TH1F*)h04->Clone("hLambdaMassPostFitCut");
+    TH1F *h041 = (TH1F*)h04->Clone("hLambdaMassPostFit_3c");
+    TH1F *h044 = (TH1F*)h04->Clone("hLambdaMassPostFit_3cConvCut");    
+    TH1F *h045 = (TH1F*)h04->Clone("hLambdaMassPreFit");
     //TH1F *h17 = new TH1F("hLambdaMassPostFitCut", "", 100, 1070, 1170);
     //h17->SetXTitle(" M_{p#pi^{-}} [MeV/c^{2}]");
     //h17->SetYTitle(" Events ");
@@ -163,6 +170,9 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     TH1F *h05 = new TH1F("hPullPInv", "", 100, -5, 5);
     h05->SetXTitle("Pull(1/P_{p})");
     h05->SetYTitle(" Counts ");
+    TH1F *h050 = (TH1F*)h05->Clone("hPullPInvCut");
+    TH1F *h051 = (TH1F*)h05->Clone("hPullPInv_3c");
+    TH1F *h054 = (TH1F*)h05->Clone("hPullPInv_3cConvCut");
 
     TH1F *h06 = new TH1F("hPullTheta", "", 100, -5, 5);
     h06->SetXTitle("Pull(#theta)");
@@ -203,6 +213,8 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     TH1F *h11 = new TH1F("hIterations", "", 100, 0, 20);
     h11->SetXTitle("Number of Iterations");
     h11->SetYTitle(" Counts ");
+    TH1F *h111 = (TH1F*)h11->Clone("hNIterations_3c");
+    TH1F *h114 = (TH1F*)h11->Clone("hNIterations_3cCut");
 
     TH1F *h11SecVtx = new TH1F("hIterationsSecVtx", "", 100, 0, 20);
     h11SecVtx->SetXTitle("Number of Iterations");
@@ -678,7 +690,7 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
 
 
     // ---------------- LAMBDA PLOTS --------------------
-    TH1F *hMomLambda = new TH1F("hMomLambda", "", 1000, 0, 3000);
+    TH1F *hMomLambda = new TH1F("hMomLambda", "", 1000, 0, 4000);
     hMomLambda->SetXTitle("Momentum / MeV/c");
     hMomLambda->SetYTitle(" Counts ");
     TH1F *hRecoThetaLambda = new TH1F("hRecoThetaLambda", "", 500, 0, 3);
@@ -848,7 +860,7 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
                 pions.push_back(candidate);
             }*/
 
-/*             if (cand->getGeantPID() == 14) //Proton found
+            if (cand->getGeantPID() == 14) //Proton found
             {
                 //std::cout << "Parent ID: " << cand->getGeantParentPID() << std::endl;
                 if(selectHadrons(cand)==true){
@@ -886,9 +898,9 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
             }
             else
                 continue;
-        } // end track loop */
+        } // end track loop 
         
-         if (cand->getGeantPID() == 14) //Proton found
+         /* if (cand->getGeantPID() == 14) //Proton found
             {
                 virtualCandProtons.push_back(cand);
                 Double_t mom = cand->getGeantTotalMom();
@@ -928,7 +940,7 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
             }
             else
                 continue;
-        } // end track loop 
+        } // end track loop  */
 
         // -----------------------------------------------------------------------
         // looking at Lambda invariant mass here
@@ -969,7 +981,8 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
                         candsSec.clear();
                         candsSec.push_back(cand1);
                         candsSec.push_back(cand2);
-
+                        TLorentzVector lambda =cand1+cand2;
+                        h045->Fill(lambda.M());
                         eventCandidates.push_back(cand1);
                         eventCandidates.push_back(cand2);
 
@@ -1164,10 +1177,11 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
             TMatrixD lambdaCov(5, 5);
             lambdaCov=lambdaCandFinder.getCovarianceMatrixNeutralMother();
             lambdaCandRefit.setCovariance(lambdaCov);                     
-            hMomLambda->Fill(lambdaCand.getMomentum());
+            hMomLambda->Fill(lambdaCandRefit.P());
             
             lambdaCandRefit.setR(lambdaCand.getR());
-
+            lambdaCandRefit.setZ(lambdaCand.getZ());
+            
             //std::cout << "Lambda R " << lambdaCand.getR() << std::endl;
 
             hRecoRLambda->Fill(lambdaCand.getR());
@@ -1225,6 +1239,46 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
             {
                 decayVertexBeforePrimVertex++;
             }
+            std::vector<HRefitCand> cands3c;
+            cands3c.clear();
+            cands3c.push_back(eventCandidates[0]);
+            cands3c.push_back(eventCandidates[1]);
+            
+            HVertexFitter Fitter3c(cands3c, lambdaCandRefit);
+            Fitter3c.add3Constraint();
+
+            Fitter3c.fit();
+
+            HRefitCand fcand1 = Fitter3c.getDaughter(0); // proton
+            HRefitCand fcand2 = Fitter3c.getDaughter(1); // pion
+            HRefitCand flambda = Fitter3c.getMother();
+
+            h021->Fill(Fitter3c.getChi2());
+            h031->Fill(Fitter3c.getProb());
+            h041->Fill(flambda.M());
+
+            if (Fitter3c.getProb() > 0.01)
+            {
+                if (Fitter3c.isConverged())
+                {
+                    h044->Fill(flambda.M());
+                    h054->Fill(Fitter3c.getPull(0)); // get Pull example (1/P for the fitted proton)
+                    h114->Fill(Fitter3c.getIteration());
+                }
+            }
+
+            if (Fitter3c.isConverged())
+            {
+                h023->Fill(Fitter3c.getChi2());
+                h033->Fill(Fitter3c.getProb());
+                h111->Fill(Fitter3c.getIteration());
+                
+                HRefitCand cand13C = Fitter3c.getDaughter(0); // proton
+                HRefitCand cand23C = Fitter3c.getDaughter(1); // pion
+                TLorentzVector lambdaCand3C = cand13C + cand23C;
+                h04->Fill(lambdaCand3C.M());
+
+            }
         }
 
     } // end of the events loop
@@ -1237,8 +1291,18 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     h01->Write();
     h02->Write();
     h03->Write();
+    h021->Write();
+    h031->Write();
+    h041->Write();                    
+    h044->Write();
+    h054->Write(); // get Pull example (1/P for the fitted proton)
+    h114->Write();
+    h023->Write();
+    h033->Write();
+    h111->Write();
     h02SecondaryVtx->Write();
     h03SecondaryVtx->Write();
+    h045->Write();
     h04->Write();
     h05->Write();
     h06SecondaryVtx->Write();
