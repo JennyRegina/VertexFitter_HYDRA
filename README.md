@@ -30,13 +30,13 @@ Now the macro analysisVertexFinder_million_Geant.C should work.
 
 The macro needs to be run pre-compiled. To run the macro on virgo, type
 
-root -l -b -q analysisVertexFinder_million_Geant.C+
+root -l -b -q analysisVertexFinder_million_GeantInfo.C+
 
 This macro analysis.C illustrates how to use the vertex finding and fitting classes together. The output is a root file called "testvertexfit.root" that contains some example histograms. This macro currently needs to be updated to work for the new structure of the vertexfitter. This macro will be updated to reflect the newest changes.
 
 How the classes work:
 
-analysisVertexFinder_million_Geant.C is an example macro of how the vertex finding and fitting and 3C fit can be used in an exclusive event where the decay chain is known from the Geant information so it gives the best case scenario.
+analysisVertexFinder_million_GeantInfo.C is an example macro of how the vertex finding and fitting and 3C fit can be used in an exclusive event where the decay chain is known from the Geant information so it gives the best case scenario.
 
 A more realistic analysis can be found in the macro analysisVertexFinder_million_Realistic.C. Here cuts on the vertex fit probabilities are used to select the veritices from which the neutral mother candidate is calculated. No 3C fit is done yet here. 
 
