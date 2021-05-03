@@ -100,30 +100,30 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
 
     //Momentum dependent uncertainty estimation input
     TFile *momErr = new TFile("/lustre/hades/user/jrieger/pp_pKLambda/sim/ana/pp_pKLambda_p3500p_momDepMomErrors_allParticles_errFunc.root", "read");
-    TF1 *momErrP = (TF1*) momErr->Get("f_pP");
-    TF1 *momErrPi = (TF1*) momErr->Get("f_pPi");
-    TF1 *momErrK = (TF1*) momErr->Get("f_pK");
+    TF1 *momErrP = (TF1 *)momErr->Get("f_pP");
+    TF1 *momErrPi = (TF1 *)momErr->Get("f_pPi");
+    TF1 *momErrK = (TF1 *)momErr->Get("f_pK");
 
     TFile *thtErr = new TFile("/lustre/hades/user/jrieger/pp_pKLambda/sim/ana/pp_pKLambda_p3500p_momDepThtErrors_allParticles_errFunc.root", "read");
     TFile *thtErr_PK = new TFile("/lustre/hades/user/jrieger/pp_pKLambda/sim/ana/pp_pKLambda_p3500p_momDepThtErrors_PK_errFunc.root", "read");
-    TF1 *thtErrP = (TF1*) thtErr->Get("f_thtP");
-    TF1 *thtErrPi = (TF1*) thtErr->Get("f_thtPi");
-    TF1 *thtErrK = (TF1*) thtErr_PK->Get("f_thtK");
+    TF1 *thtErrP = (TF1 *)thtErr->Get("f_thtP");
+    TF1 *thtErrPi = (TF1 *)thtErr->Get("f_thtPi");
+    TF1 *thtErrK = (TF1 *)thtErr_PK->Get("f_thtK");
 
-    TFile *phiErr = new TFile("/lustre/hades/user/jrieger/pp_pKLambda/sim/ana/pp_pKLambda_p4500p_momDepPhiErrors_PPi_errFunc.root", "read");    //if 4500 in name this is just a name issue
+    TFile *phiErr = new TFile("/lustre/hades/user/jrieger/pp_pKLambda/sim/ana/pp_pKLambda_p4500p_momDepPhiErrors_PPi_errFunc.root", "read"); //if 4500 in name this is just a name issue
     TFile *phiErr_PK = new TFile("/lustre/hades/user/jrieger/pp_pKLambda/sim/ana/pp_pKLambda_p4500p_momDepPhiErrors_PK_errFunc.root", "read");
-    TF1 *phiErrP = (TF1*) phiErr->Get("f_phiP");
-    TF1 *phiErrPi = (TF1*) phiErr->Get("f_phiPi");
-    TF1 *phiErrK = (TF1*) phiErr_PK->Get("f_phiK");
+    TF1 *phiErrP = (TF1 *)phiErr->Get("f_phiP");
+    TF1 *phiErrPi = (TF1 *)phiErr->Get("f_phiPi");
+    TF1 *phiErrK = (TF1 *)phiErr_PK->Get("f_phiK");
 
     TFile *RZErr_PPi = new TFile("/lustre/hades/user/jrieger/pp_pKLambda/sim/ana/pp_pKLambda_p4500p_momDepRZErrors_PPi_errFunc.root", "read");
-    TFile *RZErr_PK= new TFile("/lustre/hades/user/jrieger/pp_pKLambda/sim/ana/pp_pKLambda_p4500p_momDepRZErrors_PK_errFunc.root", "read");
-    TF1 *RErrP = (TF1*) RZErr_PPi->Get("f_RP");
-    TF1 *RErrPi = (TF1*) RZErr_PPi->Get("f_RPi");
-    TF1 *RErrK = (TF1*) RZErr_PK->Get("f_RK");
-    TF1 *ZErrP = (TF1*) RZErr_PPi->Get("f_ZP");
-    TF1 *ZErrPi = (TF1*) RZErr_PPi->Get("f_ZPi");
-    TF1 *ZErrK = (TF1*) RZErr_PK->Get("f_ZK");
+    TFile *RZErr_PK = new TFile("/lustre/hades/user/jrieger/pp_pKLambda/sim/ana/pp_pKLambda_p4500p_momDepRZErrors_PK_errFunc.root", "read");
+    TF1 *RErrP = (TF1 *)RZErr_PPi->Get("f_RP");
+    TF1 *RErrPi = (TF1 *)RZErr_PPi->Get("f_RPi");
+    TF1 *RErrK = (TF1 *)RZErr_PK->Get("f_RK");
+    TF1 *ZErrP = (TF1 *)RZErr_PPi->Get("f_ZP");
+    TF1 *ZErrPi = (TF1 *)RZErr_PPi->Get("f_ZPi");
+    TF1 *ZErrK = (TF1 *)RZErr_PK->Get("f_ZK");
 
     // -----------------------------------------------------------------------
     // define output file and some histograms
@@ -138,29 +138,29 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
     TH1F *h02 = new TH1F("hChi2", "", 100, 0, 10);
     h02->SetXTitle("#chi^{2}");
     h02->SetYTitle(" Counts ");
-    TH1F *h021 = (TH1F*)h02->Clone("hChi2_3c");
-    TH1F *h023 = (TH1F*)h02->Clone("hChi2_3cConv");
+    TH1F *h021 = (TH1F *)h02->Clone("hChi2_3c");
+    TH1F *h023 = (TH1F *)h02->Clone("hChi2_3cConv");
 
     TH1F *h03 = new TH1F("hPChi2", "", 100, 0, 1);
     h03->SetXTitle("P(#chi^{2})");
     h03->SetYTitle(" Counts ");
-    TH1F *h031 = (TH1F*)h03->Clone("hPChi2_3c");
-    TH1F *h033 = (TH1F*)h03->Clone("hPChi2_3cConv");
+    TH1F *h031 = (TH1F *)h03->Clone("hPChi2_3c");
+    TH1F *h033 = (TH1F *)h03->Clone("hPChi2_3cConv");
 
     TH1F *h04 = new TH1F("hLambdaMassPostFit", "", 100, 1070, 1170);
     h04->SetXTitle(" M_{p#pi^{-}} [MeV/c^{2}]");
     h04->SetYTitle(" Events ");
-    TH1F *h040 = (TH1F*)h04->Clone("hLambdaMassPostFitCut");
-    TH1F *h041 = (TH1F*)h04->Clone("hLambdaMassPostFit_3c");
-    TH1F *h044 = (TH1F*)h04->Clone("hLambdaMassPostFit_3cConvCut");
+    TH1F *h040 = (TH1F *)h04->Clone("hLambdaMassPostFitCut");
+    TH1F *h041 = (TH1F *)h04->Clone("hLambdaMassPostFit_3c");
+    TH1F *h044 = (TH1F *)h04->Clone("hLambdaMassPostFit_3cConvCut");
 
     TH1F *h05 = new TH1F("hPullPInv", "", 100, -5, 5);
     h05->SetXTitle("Pull(1/P_{p})");
     h05->SetYTitle(" Counts ");
-    TH1F *h050 = (TH1F*)h05->Clone("hPullPInvCut");
-    TH1F *h051 = (TH1F*)h05->Clone("hPullPInv_3c");
-    TH1F *h054 = (TH1F*)h05->Clone("hPullPInv_3cConvCut");
-/*
+    TH1F *h050 = (TH1F *)h05->Clone("hPullPInvCut");
+    TH1F *h051 = (TH1F *)h05->Clone("hPullPInv_3c");
+    TH1F *h054 = (TH1F *)h05->Clone("hPullPInv_3cConvCut");
+    /*
     TH1F* h06 = new TH1F("hTotMomPreFit", "", 100, 3800, 4800);
     h06->SetXTitle(" p [MeV/c]");
     h06->SetYTitle(" events ");
@@ -177,10 +177,8 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
     TH1F *h08 = new TH1F("hIterations", "", 10, 0, 10);
     h08->SetXTitle("Number of Iterations");
     h08->SetYTitle(" Counts ");
-    TH1F *h081 = (TH1F*)h08->Clone("hNIterations_3c");
-    TH1F *h084 = (TH1F*)h08->Clone("hNIterations_3cCut");
-
-    
+    TH1F *h081 = (TH1F *)h08->Clone("hNIterations_3c");
+    TH1F *h084 = (TH1F *)h08->Clone("hNIterations_3cCut");
 
     // -----------------------------------------------------------------------
     // ------- Vertex histograms pre fit -----------------------
@@ -487,7 +485,8 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
     }
 
     Int_t entries = loop.getEntries();
-    if (nEvents > entries || nEvents < 0) nEvents = entries;
+    if (nEvents > entries || nEvents < 0)
+        nEvents = entries;
 
     int primVertexBeforeDecayVertex = 0;
     int decayVertexBeforePrimVertex = 0;
@@ -528,16 +527,14 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
 
             HRefitCand candidate(cand);
 
-            
-
             if (cand->getGeantPID() == 14) //Proton found
             {
                 virtualCandProtons.push_back(cand);
                 Double_t mom = cand->getGeantTotalMom();
                 //double errors[] = {1.469 * 1e-5, 2.410 * 1e-3, 5.895 * 1e-3,
-                 //                  1.188, 2.652};   //rough error estimates
+                //                  1.188, 2.652};   //rough error estimates
                 double errors[] = {momErrP->Eval(mom), thtErrP->Eval(mom), phiErrP->Eval(mom),
-                                   RErrP->Eval(mom), ZErrP->Eval(mom)};  //momentum dependent error estimates                 
+                                   RErrP->Eval(mom), ZErrP->Eval(mom)}; //momentum dependent error estimates
                 FillData(cand, candidate, errors, 938.272);
                 protons.push_back(candidate);
             }
@@ -546,9 +543,9 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
                 virtualCandPions.push_back(cand);
                 Double_t mom = cand->getGeantTotalMom();
                 //double errors[] = {5.959 * 1e-5, 9.316 * 1e-3, 1.991 * 1e-2,
-                 //                  4.006, 7.629};   //rough error estimates
+                //                  4.006, 7.629};   //rough error estimates
                 double errors[] = {momErrPi->Eval(mom), thtErrPi->Eval(mom), phiErrPi->Eval(mom),
-                                   RErrPi->Eval(mom), ZErrPi->Eval(mom)};    //momentum dependent error estimates                
+                                   RErrPi->Eval(mom), ZErrPi->Eval(mom)}; //momentum dependent error estimates
                 FillData(cand, candidate, errors, 139.570);
                 pions.push_back(candidate);
             }
@@ -557,9 +554,9 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
                 virtualCandKaons.push_back(cand);
                 Double_t mom = cand->getGeantTotalMom();
                 //double errors[] = {1.947 * 1e-5, 2.296 * 1e-3, 6.312 * 1e-3,
-                  //                 1.404, 2.723};   //rough error estimates
+                //                 1.404, 2.723};   //rough error estimates
                 double errors[] = {momErrK->Eval(mom), thtErrK->Eval(mom), phiErrK->Eval(mom),
-                                   RErrK->Eval(mom), ZErrK->Eval(mom)};  //momentum dependent error estimates
+                                   RErrK->Eval(mom), ZErrK->Eval(mom)}; //momentum dependent error estimates
                 FillData(cand, candidate, errors, 493.7);
                 kaons.push_back(candidate);
             }
@@ -582,188 +579,424 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
         //std::cout << "Number of protons: " << protons.size() << std::endl;
         //std::cout << "Number of Pions: " << pions.size() << std::endl;
 
-        for (size_t s = 0; s < virtualCandLambdas.size(); s++)
-        {
+        primVtxFound = false;
+        secVtxFound = false;
 
-            HParticleCandSim *virtualCandLambda = virtualCandLambdas[s];
+        //if (protons.size() < 2)
+        //  continue;
 
-            hGeantVertexXLambda->Fill(virtualCandLambda->getGeantxVertex());
-            hGeantVertexYLambda->Fill(virtualCandLambda->getGeantyVertex());
-            hGeantVertexZLambda->Fill(virtualCandLambda->getGeantzVertex());
-        }
+        TVector3 primaryVertex, decayVertex;
 
+        double probPrim = -99999, probSec = -99999;
+
+        bool bestDecayVertexFound = false;
+        bool bestPrimVertexFound = false;
+
+        TVector3 decayVertex_Temp, primVertex_Temp;
+        TVector3 decayVertex_TempUpdated, tempVertex_TempUpdated;
+        TVector3 decayVertexBestFit, primVertexBestFit;
+
+        double probDecayVertex_Temp = -1;
+        double probPrimVertex_Temp = -1;
+        double probDecayVertex_TempUpdated = -1;
+        double probPrimVertex_TempUpdated = -1;
+
+        double bestDiffXDecay = -1;
+        double bestDiffYDecay = -1;
+        double bestDiffZDecay = -1;
+        double bestDiffXPrim = -1;
+        double bestDiffYPrim = -1;
+        double bestDiffZPrim = -1;
+
+        double indexPrimaryProton;
+        double indexDecayProton;
+
+        std::vector<HRefitCand> cands3c;
+        cands3c.clear();
+
+        // Brief description
+        // Looping over all found protons in one event.
+        // For each found proton, all found pions and kaons are looped over respectively
+        // A vertex is found and fitted for all combinations of protons and pions
+        // A vertex found from a proton-kaon combination is labelled as a primary vertex
+        // A vertex found from a proton-pion combination is labelled as a decay vertex
+        // If several primary vertices are found in one event, the primary vertex with the best (highest) fit probability is kept
+        // If several decay vertices are found in one event, the decay vertex with the best (highest) fit probability is kept
+        // If both a primary vertex and a decay vertex were found in the same event, a neutral mother candidate is created with 
+        // parameters calculated from the two vertices
+        // A 3C fit is performed to the decay products and the neutral mother candidate utilizing momentum conservation
+
+        // Proton loop
         for (size_t n = 0; n < protons.size(); n++)
         {
+
+            // Proton
             HRefitCand cand1 = protons[n];
 
+            //HParticleCandSim *virtualCand1 = virtualCandProtons[n];
+
+            // Pion loop
             for (size_t m = 0; m < pions.size(); m++)
             {
-                HRefitCand cand2 = pions[m];
-
-                for (size_t p = 0; p < kaons.size(); p++)
-                {
-                    HRefitCand cand3 = kaons[p];
-
-                    TLorentzVector lambda = cand1 + cand2;
-                    h01->Fill(lambda.M());
-
-                    std::vector<HRefitCand> cands;
-                    cands.clear();
-                    cands.push_back(cand1);
-                    cands.push_back(cand2);
-                    cands.push_back(cand3);
-
-                    // Initiate the vertex fitter
-                    HVertexFinder vtxFinder(cands);
-
-                    //vtxFitter.setVerbosity(0);
-                    // Find the vertex
-
-                    TVector3 vertex = vtxFinder.findVertex(cands);
-                    TVector3 primaryVertex = vtxFinder.getPrimaryVertex();
-                    //TVector3 primaryVertex = vtxFinder.findPrimaryVertex(cands);
-
-                    hVertexXPreFit->Fill(vertex.X());
-                    hVertexYPreFit->Fill(vertex.Y());
-                    hVertexZPreFit->Fill(vertex.Z());
-
-                    hPrimaryVertexXPreFit->Fill(primaryVertex.X());
-                    hPrimaryVertexYPreFit->Fill(primaryVertex.Y());
-                    hPrimaryVertexZPreFit->Fill(primaryVertex.Z());
-
-                    double distBetweenVertices = vtxFinder.getDistBetweenVertices();
-                    hDistPrimToDecayVertex->Fill(distBetweenVertices);
-
-                    if (vtxFinder.isPrimVertexBeforeDecayVertex() == true)
-                    {
-                        primVertexBeforeDecayVertex++;
-                    }
-                    if (vtxFinder.isPrimVertexBeforeDecayVertex() == false)
-                    {
-                        decayVertexBeforePrimVertex++;
-                    }
-                    if (vtxFinder.isPrimVertexInsideDecayVertex() == false)
-                    {
-                        decayVertexInsidePrimVertex++;
-                    }
-                    if (vtxFinder.isPrimVertexInsideDecayVertex() == true)
-                    {
-                        primVertexInsideDecayVertex++;
-                    }
-
-		            double deg2rad = TMath::DegToRad();
-
-                    // Lambda candidate
-                    HVirtualCand lambdaCand;
-		            lambdaCand  = vtxFinder.getNeutralMotherCandidate();
-                    TMatrixD lambdaCov(5, 5);
-                    lambdaCov=vtxFinder.getCovarianceMatrixNeutralMother();
-                    HRefitCand lambdaCandRefit(&lambdaCand);
-		            lambdaCandRefit.SetXYZM(lambdaCand.getMomentum() * std::sin(lambdaCand.getTheta() * deg2rad) *
-                        std::cos(lambdaCand.getPhi() * deg2rad),
-                    lambdaCand.getMomentum() * std::sin(lambdaCand.getTheta() * deg2rad) *
-                        std::sin(lambdaCand.getPhi() * deg2rad),
-                    lambdaCand.getMomentum() * std::cos(lambdaCand.getTheta() * deg2rad),
-                    1115.683);
-    		        lambdaCandRefit.setR(lambdaCand.getR());
-    		        lambdaCandRefit.setZ(lambdaCand.getZ());
-    		        lambdaCandRefit.setCovariance(lambdaCov);
-
-                    // Create a vector of candidates to originate from primary vertex
-                    std::vector<HRefitCand> primCands;
-                    primCands.clear();
-                    primCands.push_back(cand1);
-                    primCands.push_back(cand3);
-
-                    // Perform fitting of primary vertex
-                    HVertexFitter vtxFitterPrimCands(primCands);
-                    vtxFitterPrimCands.addVertexConstraint();
-                    vtxFitterPrimCands.fit();
-                    double probPrim;
-                    probPrim = vtxFitterPrimCands.getProb();
-                    //std::cout << "Probability Prim vtx: " << probPrim << std::endl;
-
-                    // Create a vector of candidates to originate from decay vertex
-                    std::vector<HRefitCand> secCands;
-                    secCands.clear();
-                    secCands.push_back(cand1);
-                    secCands.push_back(cand2);
-
-                    // Perform fitting of secondary vertex
-                    HVertexFitter vtxFitterSecCands(secCands);
-                    vtxFitterSecCands.addVertexConstraint();
-                    vtxFitterSecCands.fit();
-                    double probSec;
-                    probSec = vtxFitterSecCands.getProb();
-                    //std::cout << "Probability Sec vtx: " << probSec << std::endl;
-               
-                    if(vtxFitterSecCands.isConverged()){
-                        h08->Fill(vtxFitterSecCands.getIteration());
-                    }
-
-                    // Get fitted particles from secondary vertex
-                    HRefitCand fcand1Vtx = vtxFitterSecCands.getDaughter(0); // proton
-                    HRefitCand fcand2Vtx = vtxFitterSecCands.getDaughter(1); // pion
-
-                    // Build Lambda from those
-                    TLorentzVector lambdaVtx = fcand1Vtx + fcand2Vtx;
-
-                    h02->Fill(vtxFitterSecCands.getChi2());
-                    h03->Fill(vtxFitterSecCands.getProb());
-                    h04->Fill(lambdaVtx.M());
-                    // get Pull example (1/P for the fitted proton)
-                    h05->Fill(vtxFitterSecCands.getPull(0));
-
-                    // Perform 3C fit in secondary vertex to retrieve the Lambda momentum
-                    if (probSec > 0.01)
-                    {
-                        h040->Fill(lambdaVtx.M());
-                        // get Pull example (1/P for the fitted proton)
-                        h050->Fill(vtxFitterSecCands.getPull(0));
-
-                        // get fitted objects fittedcand1 and fittedcand2 from secondary vertex fitter
-                        HRefitCand fvtxcand1 = vtxFitterSecCands.getDaughter(0); // proton
-                        HRefitCand fvtxcand2 = vtxFitterSecCands.getDaughter(1); // pion
-
-                        std::vector<HRefitCand> cands3c;
-                        cands3c.clear();
-                        cands3c.push_back(fvtxcand1);
-                        cands3c.push_back(fvtxcand2);
-
-                        cout << " ini 3c fitter: " << endl;
-                        HVertexFitter Fitter3c(cands3c, lambdaCandRefit);
-                        Fitter3c.add3Constraint();
-
-                        Fitter3c.fit();
-
-                        HRefitCand fcand1 = Fitter3c.getDaughter(0); // proton
-                        HRefitCand fcand2 = Fitter3c.getDaughter(1); // pion
-                        HRefitCand flambda = Fitter3c.getMother();
-
-                        h021->Fill(Fitter3c.getChi2());
-                        h031->Fill(Fitter3c.getProb());
-                        h041->Fill(flambda.M());
-                        // get Pull example (1/P for the fitted proton)
-                        h051->Fill(Fitter3c.getPull(0));
                 
-                        if(Fitter3c.getProb()>0.01){
-                            if(Fitter3c.isConverged()){
-                                h044->Fill(flambda.M());
-                                h054->Fill(Fitter3c.getPull(0)); // get Pull example (1/P for the fitted proton)
-                                h084->Fill(Fitter3c.getIteration());
-                            }
-                        }
+                // Pion
+                HRefitCand cand2 = pions[m];
+                
+                // Object for obtaining the Geant information and 
+                // calculating the resolution
+                HParticleCandSim *virtualCand2 = virtualCandPions[m];
 
-                        if(Fitter3c.isConverged()){
-                            h023->Fill(Fitter3c.getChi2());
-                            h033->Fill(Fitter3c.getProb());
-                            h081->Fill(Fitter3c.getIteration());
+                // A decay vertex has been found
+                secVtxFound = true;
+                
+                // Vector of HRefitCand to pass to the vertex fit
+                std::vector<HRefitCand> candsSec;
+                candsSec.clear();
+                candsSec.push_back(cand1);
+                candsSec.push_back(cand2);
 
-                        }
-                    }
+                // Calculating the invariant mass before the fit
+                TLorentzVector lambda = cand1 + cand2;
+                h045->Fill(lambda.M());
+
+                // Initiating the vertex finder
+                HVertexFinder *vtxFinderSec = new HVertexFinder();
+                
+                // Finding the decay vertex
+                decayVertex = vtxFinderSec->findVertex(candsSec);
+
+                // Filling histograms with vertex positions and distances between particles and particles-decay vertex
+                hVertexXPreFit->Fill(decayVertex.X());
+                hVertexYPreFit->Fill(decayVertex.Y());
+                hVertexZPreFit->Fill(decayVertex.Z());
+                hDistanceToVertexProtonPreFit->Fill(vtxFinderSec->getDistanceFirstParticleVertex());
+                hDistanceToVertexPionPreFit->Fill(vtxFinderSec->getDistanceSecondParticleVertex());
+                hDistanceBetweenProtonAndPionPreFit->Fill(vtxFinderSec->getDistanceBetweenFittedParticles());
+
+                // Perform fitting of secondary vertex
+                HVertexFitter vtxFitterSecCands(candsSec);
+                
+                // Adding the vertex constraint
+                vtxFitterSecCands.addVertexConstraint();
+                
+                // Performing the fit
+                vtxFitterSecCands.fit();
+                
+                // Filling histograms with the chi2 and probability
+                h02SecondaryVtx->Fill(vtxFitterSecCands.getChi2());
+                h03SecondaryVtx->Fill(vtxFitterSecCands.getProb());
+
+                // Example Pull for 1/p of proton
+                h06SecondaryVtx->Fill(vtxFitterSecCands.getPull(1));
+
+                probSec = vtxFitterSecCands.getProb();
+
+                // If several decay vertices were found, the one with the largest probability is kept
+                if (probSec > probDecayVertex_Temp)
+                {
+
+                    // Updating variables that are used if a best decay vertex was found
+                    bestDecayVertexFound = true;
+                    probDecayVertex_Temp = probSec;
+                    decayVertexBestFit = decayVertex;
+                    bestDiffXDecay = decayVertex.X() - virtualCand2->getGeantxVertex();
+                    bestDiffYDecay = decayVertex.Y() - virtualCand2->getGeantyVertex();
+                    bestDiffZDecay = decayVertex.Z() - virtualCand2->getGeantzVertex();
+
+                    // Index of proton to be compared with the index of the proton that was used to find the primary vertex
+                    indexDecayProton = n;
+
+                    // Vector with charged particles to pass to the 3C fit
+                    cands3c.clear();
+
+                    // Get the proton daughter and pass it to the 3C fit later
+                    cands3c.push_back(vtxFitterSecCands.getDaughter(0));
+
+                    // Get the pion daughter and pass it to the 3C fit later
+                    cands3c.push_back(vtxFitterSecCands.getDaughter(1));
+                }
+
+                // Fill histogram with the number of iterations before the fit converged
+                h11SecVtx->Fill(vtxFitterSecCands.getIteration());
+
+                if (probSec > 0)
+                {
+                    // Example Pull for 1/p of proton
+                    h13SecondaryVtx->Fill(vtxFitterSecCands.getPull(1));
+
+                    // Vertex reolution plots
+                    hVertexXDiff_ProbCut->Fill(decayVertex.X() - virtualCand2->getGeantxVertex());
+                    hVertexYDiff_ProbCut->Fill(decayVertex.Y() - virtualCand2->getGeantyVertex());
+                    hVertexZDiff_ProbCut->Fill(decayVertex.Z() - virtualCand2->getGeantzVertex());
+
+                    // Create a neutral mother candidate from the fitted objects
+                    TLorentzVector lambdaVtxFit = vtxFitterSecCands.getDaughter(0) + vtxFitterSecCands.getDaughter(1);
+
+                    // Checking how the mass histogram looks after the decay vertex fit
+                    h040->Fill(lambdaVtxFit.M());
+                }
+
+                // Vertex reolution plots
+                hVertexXDiff->Fill(decayVertex.X() - virtualCand2->getGeantxVertex());
+                hVertexYDiff->Fill(decayVertex.Y() - virtualCand2->getGeantyVertex());
+                hVertexZDiff->Fill(decayVertex.Z() - virtualCand2->getGeantzVertex());
+
+                // Reconstructed track parameters for the proton
+                hRecoRProtons->Fill(cand1.getR());
+                hRecoZProtons->Fill(cand1.getZ());
+                hRecoThetaProtons->Fill(cand1.Theta());
+                hRecoPhiProtons->Fill(cand1.Phi());
+                hRecoMomentumProtons->Fill(cand1.P());
+
+                // Reconstructed track parameters pions
+                hRecoRPions->Fill(cand2.getR());
+                hRecoZPions->Fill(cand2.getZ());
+                hRecoThetaPions->Fill(cand2.Theta());
+                hRecoPhiPions->Fill(cand2.Phi());
+                hRecoMomentumPions->Fill(cand2.P());
+            }
+
+            // Kaon loop
+            for (size_t p = 0; p < kaons.size(); p++)
+            {
+
+                // Kaons
+                HRefitCand cand3 = kaons[p];
+
+                // Object used for obtaining the Geant information for the resolution plots
+                HParticleCandSim *virtualCand3 = virtualCandKaons[p];
+
+                // A primary vertex was found in the event
+                primVtxFound = true;
+
+                // Vector with primary candidates
+                std::vector<HRefitCand> candsPrim;
+                candsPrim.clear();
+                candsPrim.push_back(cand1);
+                candsPrim.push_back(cand3);
+
+                // Initiate the vertex finding
+                HVertexFinder *vtxFinderPrim = new HVertexFinder();
+                
+                // Find a primary vertex from the current candidates
+                primaryVertex = vtxFinderPrim->findVertex(candsPrim);
+
+                // Vertex histograms
+                hPrimaryVertexXPreFit->Fill(primaryVertex.X());
+                hPrimaryVertexYPreFit->Fill(primaryVertex.Y());
+                hPrimaryVertexZPreFit->Fill(primaryVertex.Z());
+
+                // Histograms with distances between the particles and the particles-vertex
+                hDistanceBetweenPrimaryProtonAndKaonPreFit->Fill(vtxFinderPrim->getDistanceBetweenFittedParticles());
+                hDistanceToVertexPrimaryProtonPreFit->Fill(vtxFinderPrim->getDistanceFirstParticleVertex());
+                hDistanceToVertexKaonPreFit->Fill(vtxFinderPrim->getDistanceSecondParticleVertex());
+
+                // Reconstructed track parameters protons
+                hRecoRPrimProtons->Fill(cand1.getR());
+                hRecoZPrimProtons->Fill(cand1.getZ());
+                hRecoThetaPrimProtons->Fill(cand1.Theta());
+                hRecoPhiPrimProtons->Fill(cand1.Phi());
+                hRecoMomentumPrimProtons->Fill(cand1.P());
+
+                // Reconstructed track parameters kaons
+                hRecoRKaons->Fill(cand3.getR());
+                hRecoZKaons->Fill(cand3.getZ());
+                hRecoThetaKaons->Fill(cand3.Theta());
+                hRecoPhiKaons->Fill(cand3.Phi());
+                hRecoMomentumKaons->Fill(cand3.P());
+
+                // Initiating the vertex fitter
+                HVertexFitter vtxFitterPrimCands(candsPrim);
+                
+                // Adding the vertex constraint
+                vtxFitterPrimCands.addVertexConstraint();
+                
+                // Performing the fit
+                vtxFitterPrimCands.fit();
+
+                // FIlling histograms with the chi2 and probability
+                h02->Fill(vtxFitterPrimCands.getChi2());
+                h03->Fill(vtxFitterPrimCands.getProb());
+
+                probPrim = vtxFitterPrimCands.getProb();
+
+                if (probPrim > probPrimVertex_Temp)
+                {
+
+                    // Updating some variables that are saved for the primary vertex with the largest probability 
+                    bestPrimVertexFound = true;
+                    probPrimVertex_Temp = probPrim;
+                    primVertexBestFit = primaryVertex;                    
+                    bestDiffXPrim = primaryVertex.X() - virtualCand3->getGeantxVertex();
+                    bestDiffYPrim = primaryVertex.Y() - virtualCand3->getGeantyVertex();
+                    bestDiffZPrim = primaryVertex.Z() - virtualCand3->getGeantzVertex();
+                    
+                    // Index of the proton. To be compared later to the index of the proton from which the decay vertex was found
+                    indexPrimaryProton = n;
+
+                }
+
+                // Fill histogram with the number of iterations before convergence
+                h11->Fill(vtxFitterPrimCands.getIteration());
+
+                // Example Pull for 1/p of proton
+                h06->Fill(vtxFitterPrimCands.getPull(1));
+
+                // Vertex resolutions
+                hVertexXDiffPrim->Fill(primaryVertex.X() - virtualCand3->getGeantxVertex());
+                hVertexYDiffPrim->Fill(primaryVertex.Y() - virtualCand3->getGeantyVertex());
+                hVertexZDiffPrim->Fill(primaryVertex.Z() - virtualCand3->getGeantzVertex());
+
+                if (probPrim > 0)
+                {
+
+                    // Vertex resolutions
+                    hVertexXDiffPrim_ProbCut->Fill(primaryVertex.X() - virtualCand3->getGeantxVertex());
+                    hVertexYDiffPrim_ProbCut->Fill(primaryVertex.Y() - virtualCand3->getGeantyVertex());
+                    hVertexZDiffPrim_ProbCut->Fill(primaryVertex.Z() - virtualCand3->getGeantzVertex());
+
+                    // Example Pull for 1/p of proton
+                    h13->Fill(vtxFitterPrimCands.getPull(1));
                 }
             }
+        }
+
+        // Testing if both aprimary and decay vertex wa found
+        if (bestPrimVertexFound == true && bestDecayVertexFound == true)
+        {
+            // Making sure that two different protons were used to reconstruct the vertices
+            if (indexDecayProton != indexPrimaryProton)
+            {
+
+                // Calculating the distance between the vertices
+                double distPrimToDecayVertex = sqrt((decayVertexBestFit.X() - primVertexBestFit.X()) * (decayVertexBestFit.X() - primVertexBestFit.X()) + (decayVertexBestFit.Y() - primVertexBestFit.Y()) * (decayVertexBestFit.Y() - primVertexBestFit.Y()) + (decayVertexBestFit.Z() - primVertexBestFit.Z()) * (decayVertexBestFit.Z() - primVertexBestFit.Z()));
+
+                hDistPrimToDecayVertex->Fill(distPrimToDecayVertex);
+
+                // Vertex resolutions
+                hVertexXDiff_BothVerticesFound->Fill(bestDiffXDecay);
+                hVertexYDiff_BothVerticesFound->Fill(bestDiffYDecay);
+                hVertexZDiff_BothVerticesFound->Fill(bestDiffZDecay);
+                hVertexXDiffPrim_BothVerticesFound->Fill(bestDiffXPrim);
+                hVertexYDiffPrim_BothVerticesFound->Fill(bestDiffYPrim);
+                hVertexZDiffPrim_BothVerticesFound->Fill(bestDiffZPrim);
+
+                double R_primaryVertex, R_decayVertex;
+
+                R_primaryVertex = sqrt(primVertexBestFit.X() * primVertexBestFit.X() + primVertexBestFit.Y() * primVertexBestFit.Y());
+                R_decayVertex = sqrt(decayVertexBestFit.X() * decayVertexBestFit.X() + decayVertexBestFit.Y() * decayVertexBestFit.Y());
+
+                // Vertex histograms when a primary and a decay vertex was found in the same event
+                hVertexXPostFit->Fill(decayVertexBestFit.X());
+                hVertexYPostFit->Fill(decayVertexBestFit.Y());
+                hVertexZPostFit->Fill(decayVertexBestFit.Z());
+                hPrimVertexXPostFit->Fill(primVertexBestFit.X());
+                hPrimVertexYPostFit->Fill(primVertexBestFit.Y());
+                hPrimVertexZPostFit->Fill(primVertexBestFit.Z());
+
+                // FInding the neutral mother candidate
+                HNeutralCandFinder lambdaCandFinder(cands3c);
+                
+                // Make sure the primary vertex is used in the calculation of the neutral mother candidate
+                lambdaCandFinder.setUsePrimaryVertexInNeutralMotherCalculation(true);
+                
+                // Calculated the properties of the neutral mother candidate
+                lambdaCandFinder.setNeutralMotherCandFromPrimaryVtxInfo(primaryVertex, decayVertex);
+
+                // Get the neutral mother candidate as a HVritualCand
+                HVirtualCand lambdaCand = lambdaCandFinder.getNeutralMotherCandidate();
+
+                // Creating an HRefitCand object that can be used in the 3C fit
+                HRefitCand lambdaCandRefit(&lambdaCand);
+                lambdaCandRefit.SetXYZM(lambdaCand.getMomentum() * std::sin(lambdaCand.getTheta() * deg2rad) *
+                                            std::cos(lambdaCand.getPhi() * deg2rad),
+                                        lambdaCand.getMomentum() * std::sin(lambdaCand.getTheta() * deg2rad) *
+                                            std::sin(lambdaCand.getPhi() * deg2rad),
+                                        lambdaCand.getMomentum() * std::cos(lambdaCand.getTheta() * deg2rad),
+                                        1115.683);
+                
+                hMomLambda->Fill(lambdaCandRefit.P());
+                
+                // Setting the estimated covariance matrix for the neutral mother candidate
+                TMatrixD lambdaCov(5, 5);
+                lambdaCov = lambdaCandFinder.getCovarianceMatrixNeutralMother();
+                lambdaCandRefit.setCovariance(lambdaCov);
+            
+                // Setting the parameters for the neutral mother candidate
+                lambdaCandRefit.setR(lambdaCand.getR());
+                lambdaCandRefit.setZ(lambdaCand.getZ());
+                lambdaCandRefit.SetTheta(lambdaCand.getTheta() * deg2rad);
+                lambdaCandRefit.SetPhi(lambdaCand.getPhi() * deg2rad);
+
+                // Fill histograms with the neutral mother candidate parameters
+                hRecoRLambda->Fill(lambdaCand.getR());
+                hRecoZLambda->Fill(lambdaCand.getZ());
+                hRecoThetaLambda->Fill(lambdaCand.getTheta() * deg2rad);
+                hRecoPhiLambda->Fill(lambdaCand.getPhi() * deg2rad);
+
+                // Take the lambda mass before the fit
+                TLorentzVector lambdaCandBefore3C = cands3c[0] + cands3c[1];
+                hLambdaMassBeforeFit->Fill(lambdaCandBefore3C.M());
+
+                if (cands3c.size() == 2)
+                {
+                    // Adding the candidates to the 3C fit and the neutral mother candidate
+                    HVertexFitter Fitter3c(cands3c, lambdaCandRefit);
+
+                    // Setting the constraint and the maximum number of iterations
+                    Fitter3c.add3Constraint();
+                    Fitter3c.setNumberOfIterations(20);
+
+                    // Performing the actual fit
+                    Fitter3c.fit();
                     
+                    
+                    if (Fitter3c.isConverged())
+                    {
+                        
+                        // Retrieving the mother candidate from after the fit
+                        HRefitCand flambda = Fitter3c.getMother();
+
+                        // Retrieving the daughter particles after the fit
+                        HRefitCand cand13C = Fitter3c.getDaughter(0); // proton
+                        HRefitCand cand23C = Fitter3c.getDaughter(1); // pion
+                        
+                        // Calculating the invariant mass of the daughter particles
+                        TLorentzVector lambdaCand3C = cand13C + cand23C;
+                        h04->Fill(lambdaCand3C.M());
+                    }
+
+                    // Fill histograms with the chi2 and probability of the 3C fit
+                    h021->Fill(Fitter3c.getChi2());
+                    h031->Fill(Fitter3c.getProb());
+                }
+
+                if (R_primaryVertex < R_decayVertex)
+                {
+
+                    primVertexInsideDecayVertex++;
+                }
+                else
+                {
+                    decayVertexInsidePrimVertex++;
+                }
+
+                // Fill histograms with the neutral mother candidate parameters if the decay vertex is located further downstream than the primary vertex
+                if (primVertexBestFit.Z() < decayVertexBestFit.Z())
+                {
+
+                    hRecoRLambdaZCut->Fill(lambdaCand.getR());
+                    hRecoZLambdaZCut->Fill(lambdaCand.getZ());
+                    hRecoThetaLambdaZCut->Fill(lambdaCand.getTheta() * deg2rad);
+                    hRecoPhiLambdaZCut->Fill(lambdaCand.getPhi() * deg2rad);
+
+                    primVertexBeforeDecayVertex++;
+                }
+                else
+                {
+                    decayVertexBeforePrimVertex++;
+                }
+            }
         }
 
     } // end of the events loop
@@ -791,7 +1024,6 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
     h08->Write();
     h081->Write();
     h08->Write();
-    
 
     hVertexXPreFit->Write();
     hVertexYPreFit->Write();
@@ -859,17 +1091,7 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
     hRecoPhiPions->Write();
     hRecoMomentumPions->Write();
     hRecoBetaPions->Write();
-/*
-    h25->Write();
-    h26->Write();
-    h27->Write();
-    h28->Write();
-    h29->Write();
-    h30->Write();
-    h31->Write();
-    h32->Write();
-    h33->Write();
-*/
+
     hMomLambda->Write();
     hRecoThetaLambda->Write();
     hRecoPhiLambda->Write();
