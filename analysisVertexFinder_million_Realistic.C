@@ -142,7 +142,11 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
     TH1F *h021 = (TH1F *)h02->Clone("hChi2_3c");
     TH1F *h023 = (TH1F *)h02->Clone("hChi2_3cConv");
 
-    TH1F *h03 = new TH1F("hPChi2", "", 1000000, 0, 1);
+    TH1F *h03Zoomed = new TH1F("hPChi2Zoomed", "", 10000, 0, pow(10,-200));
+    h03Zoomed->SetXTitle("P(#chi^{2})");
+    h03Zoomed->SetYTitle(" Counts ");
+
+    TH1F *h03 = new TH1F("hPChi2", "", 1000, 0, 1);
     h03->SetXTitle("P(#chi^{2})");
     h03->SetYTitle(" Counts ");
     TH1F *h031 = (TH1F *)h03->Clone("hPChi2_3c");
@@ -152,9 +156,13 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
     h02SecondaryVtx->SetXTitle("#chi^{2}");
     h02SecondaryVtx->SetYTitle(" Counts ");
 
-    TH1F *h03SecondaryVtx = new TH1F("hPChi2SecondaryVtx", "", 1000000, 0, 1);
+    TH1F *h03SecondaryVtx = new TH1F("hPChi2SecondaryVtx", "", 1000, 0, 1);
     h03SecondaryVtx->SetXTitle("P(#chi^{2})");
     h03SecondaryVtx->SetYTitle(" Counts ");
+
+    TH1F *h03SecondaryVtxZoomed = new TH1F("hPChi2SecondaryVtxZoomed", "", 10000, 0, 0.0001);
+    h03SecondaryVtxZoomed->SetXTitle("P(#chi^{2})");
+    h03SecondaryVtxZoomed->SetYTitle(" Counts ");
 
     TH1F *h04 = new TH1F("hLambdaMassPostFit", "", 100, 1070, 1170);
     h04->SetXTitle(" M_{p#pi^{-}} [MeV/c^{2}]");
@@ -941,7 +949,7 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
                 pions.push_back(candidate);
             }*/
 
-            if (cand->getGeantPID() == 14) //Proton found
+             if (cand->getGeantPID() == 14) //Proton found
             {
                 //std::cout << "Parent ID: " << cand->getGeantParentPID() << std::endl;
                 if (selectHadrons(cand) == true)
@@ -982,9 +990,9 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
             }
             else
                 continue;
-        } // end track loop
+        } // end track loop 
 
-        /* if (cand->getGeantPID() == 14) //Proton found
+         /*if (cand->getGeantPID() == 14) //Proton found
             {
                 virtualCandProtons.push_back(cand);
                 Double_t mom = cand->getGeantTotalMom();
@@ -1023,9 +1031,9 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
                 virtualCandLambdas.push_back(cand);
             }
             else
-                continue;
-        } // end track loop  
- */
+                continue; 
+        } // end track loop  */
+ 
         // -----------------------------------------------------------------------
         // looking at Lambda invariant mass here
         // -----------------------------------------------------------------------
@@ -1069,6 +1077,9 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
         double indexPrimaryProton;
         double indexDecayProton;
 
+        std::vector<HRefitCand> cands3c;
+        cands3c.clear();
+
         for (size_t n = 0; n < protons.size(); n++)
         {
 
@@ -1088,8 +1099,8 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
                 candsSec.push_back(cand2);
                 TLorentzVector lambda = cand1 + cand2;
                 h045->Fill(lambda.M());
-                eventCandidates.push_back(cand1);
-                eventCandidates.push_back(cand2);
+                //eventCandidates.push_back(cand1);
+                //eventCandidates.push_back(cand2);
 
                 HVertexFinder *vtxFinderSec = new HVertexFinder();
                 decayVertex = vtxFinderSec->findVertex(candsSec);
@@ -1108,7 +1119,7 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
                 vtxFitterSecCands.fit();
                 h02SecondaryVtx->Fill(vtxFitterSecCands.getChi2());
                 h03SecondaryVtx->Fill(vtxFitterSecCands.getProb());
-
+                h03Zoomed->Fill(vtxFitterSecCands.getProb());;
                 //if(vtxFitterSecCands.isConverged()){
                 h06SecondaryVtx->Fill(vtxFitterSecCands.getPull(1));
                 h07SecondaryVtx->Fill(vtxFitterSecCands.getPull(2));
@@ -1117,7 +1128,11 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
                 //}
 
                 probSec = vtxFitterSecCands.getProb();
+                //std::cout << "Secondary vertex probability: " << probSec << std::endl;
 
+                eventCandidates.push_back(vtxFitterSecCands.getDaughter(0));
+                eventCandidates.push_back(vtxFitterSecCands.getDaughter(1));
+                
                 if (probSec > probDecayVertex_Temp)
                 {
 
@@ -1127,13 +1142,22 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
                     indexDecayProton=n;
                     bestDiffXDecay=decayVertex.X() - virtualCand2->getGeantxVertex();
                     bestDiffYDecay=decayVertex.Y() - virtualCand2->getGeantyVertex();
-                    bestDiffZDecay=decayVertex.Z() - virtualCand2->getGeantzVertex();
+                    bestDiffZDecay=decayVertex.Z() - virtualCand2->getGeantzVertex();            
+                    
+                    cands3c.clear();
+
+                    // Get the proton daughter and pass it to the 3C fit later
+                    cands3c.push_back(vtxFitterSecCands.getDaughter(0));
+
+                    // Get the pion daughter and pass it to the 3C fit later
+                    cands3c.push_back(vtxFitterSecCands.getDaughter(1));
 
                 }
 
                 h11SecVtx->Fill(vtxFitterSecCands.getIteration());
 
-                if (probSec > 0.000001)
+                //if (probSec > 0.000001)
+                if(probSec > 0)
                 {
 
                     h13SecondaryVtx->Fill(vtxFitterSecCands.getPull(1));
@@ -1144,6 +1168,13 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
                     hVertexXDiff_ProbCut->Fill(decayVertex.X() - virtualCand2->getGeantxVertex());
                     hVertexYDiff_ProbCut->Fill(decayVertex.Y() - virtualCand2->getGeantyVertex());
                     hVertexZDiff_ProbCut->Fill(decayVertex.Z() - virtualCand2->getGeantzVertex());
+                    
+                    if (vtxFitterSecCands.isConverged())
+                    {
+                        TLorentzVector lambdaVtxFit = vtxFitterSecCands.getDaughter(0) + vtxFitterSecCands.getDaughter(1);
+
+                        h040->Fill(lambdaVtxFit.M());
+                    }
                 }
 
                 hGeantVertexXCand1->Fill(virtualCand1->getGeantxVertex());
@@ -1193,8 +1224,8 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
                 candsPrim.push_back(cand1);
                 candsPrim.push_back(cand3);
 
-                eventCandidates.push_back(cand1);
-                eventCandidates.push_back(cand3);
+                //eventCandidates.push_back(cand1);
+                //eventCandidates.push_back(cand3);
 
                 HVertexFinder *vtxFinderPrim = new HVertexFinder();
                 primaryVertex = vtxFinderPrim->findVertex(candsPrim);
@@ -1237,6 +1268,9 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
 
                 probPrim = vtxFitterPrimCands.getProb();                
                 
+                eventCandidates.push_back(vtxFitterPrimCands.getDaughter(0));
+                eventCandidates.push_back(vtxFitterPrimCands.getDaughter(1));
+                
                 if (probPrim > probPrimVertex_Temp)
                 {
 
@@ -1273,7 +1307,8 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
                 hVertexYDiffPrim->Fill(primaryVertex.Y() - virtualCand3->getGeantyVertex());
                 hVertexZDiffPrim->Fill(primaryVertex.Z() - virtualCand3->getGeantzVertex());
 
-                if (probPrim > 0.000001)
+                //if (probPrim > 0.000001)
+                if(probPrim > 0)
                 {
 
                     hVertexXDiffPrim_ProbCut->Fill(primaryVertex.X() - virtualCand3->getGeantxVertex());
@@ -1349,7 +1384,7 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
             hPrimVertexYPostFit->Fill(primVertexBestFit.Y());
             hPrimVertexZPostFit->Fill(primVertexBestFit.Z());
 
-            HNeutralCandFinder lambdaCandFinder(eventCandidates);
+            HNeutralCandFinder lambdaCandFinder(cands3c);
 
             lambdaCandFinder.setUsePrimaryVertexInNeutralMotherCalculation(true);
 
@@ -1380,6 +1415,32 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
             hRecoZLambda->Fill(lambdaCand.getZ());
             hRecoThetaLambda->Fill(lambdaCand.getTheta() * deg2rad);
             hRecoPhiLambda->Fill(lambdaCand.getPhi() * deg2rad);
+
+            // Take the lambda mass before the fit
+            TLorentzVector lambdaCandBefore3C = cands3c[0] + cands3c[1];
+            hLambdaMassBeforeFit->Fill(lambdaCandBefore3C.M());
+            
+            if(cands3c.size()==2){
+            HVertexFitter Fitter3c(cands3c, lambdaCandRefit);
+            Fitter3c.add3Constraint();
+            Fitter3c.setNumberOfIterations(20);
+
+            Fitter3c.fit();
+            if (Fitter3c.isConverged())
+            {
+            //HRefitCand fcand1 = Fitter3c.getDaughter(0); // proton
+            //HRefitCand fcand2 = Fitter3c.getDaughter(1); // pion
+            HRefitCand flambda = Fitter3c.getMother();
+            
+            HRefitCand cand13C = Fitter3c.getDaughter(0); // proton
+            HRefitCand cand23C = Fitter3c.getDaughter(1); // pion
+            TLorentzVector lambdaCand3C = cand13C + cand23C;
+            h04->Fill(lambdaCand3C.M());
+            }
+
+            h021->Fill(Fitter3c.getChi2());
+            h031->Fill(Fitter3c.getProb());
+            }
             
             if (R_primaryVertex < R_decayVertex)
             {
@@ -1418,8 +1479,10 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
     // write histograms to the output file
     outfile->cd();
     h01->Write();
+    h040->Write();
     h02->Write();
     h03->Write();
+    h03Zoomed->Write();
     h021->Write();
     h031->Write();
     h041->Write();

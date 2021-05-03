@@ -142,7 +142,7 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     TH1F *h021 = (TH1F*)h02->Clone("hChi2_3c");
     TH1F *h023 = (TH1F*)h02->Clone("hChi2_3cConv");
 
-    TH1F *h03 = new TH1F("hPChi2", "", 100, 0, 1);
+    TH1F *h03 = new TH1F("hPChi2", "", 1000, 0, 1);
     h03->SetXTitle("P(#chi^{2})");
     h03->SetYTitle(" Counts ");
     TH1F *h031 = (TH1F*)h03->Clone("hPChi2_3c");
@@ -159,6 +159,7 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     TH1F *h04 = new TH1F("hLambdaMassPostFit", "", 100, 1070, 1170);
     h04->SetXTitle(" M_{p#pi^{-}} [MeV/c^{2}]");
     h04->SetYTitle(" Events ");
+    TH1F *hLambdaMassBeforeFit = (TH1F*)h04->Clone("hLambdaMassBeforeFit");
     TH1F *h040 = (TH1F*)h04->Clone("hLambdaMassPostFitCut");
     TH1F *h041 = (TH1F*)h04->Clone("hLambdaMassPostFit_3c");
     TH1F *h044 = (TH1F*)h04->Clone("hLambdaMassPostFit_3cConvCut");    
@@ -693,12 +694,17 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     TH1F *hMomLambda = new TH1F("hMomLambda", "", 1000, 0, 4000);
     hMomLambda->SetXTitle("Momentum / MeV/c");
     hMomLambda->SetYTitle(" Counts ");
+    TH1F *hMomLambda_AfterFit = (TH1F*)hMomLambda->Clone("hMomLambda_AfterFit");
     TH1F *hRecoThetaLambda = new TH1F("hRecoThetaLambda", "", 500, 0, 3);
     hRecoThetaLambda->SetXTitle("#theta / rad");
     hRecoThetaLambda->SetYTitle(" Counts ");
+    TH1F *hRecoThetaLambda_AfterFit = (TH1F*)hRecoThetaLambda->Clone("hRecoThetaLambda_AfterFit");
+    
     TH1F *hRecoPhiLambda = new TH1F("hRecoPhiLambda", "", 500, -4, 4);
     hRecoPhiLambda->SetXTitle("#phi / rad");
     hRecoPhiLambda->SetYTitle(" Counts ");
+    TH1F *hRecoPhiLambda_AfterFit = (TH1F*)hRecoPhiLambda->Clone("hRecoPhiLambda_AfterFit");
+    
     TH1F *hRecoRLambda = new TH1F("hRecoRLambda", "", 1000, -100, 100);
     hRecoRLambda->SetXTitle("R / mm");
     hRecoRLambda->SetYTitle(" Counts ");
@@ -709,15 +715,24 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     TH1F *hErrorRLambda = new TH1F("hErrorRLambda", "", 1000, -100, 100);
     hErrorRLambda->SetXTitle("R / mm");
     hErrorRLambda->SetYTitle(" Counts ");
+    
     TH1F *hErrorZLambda = new TH1F("hErrorZLambda", "", 1000, -100, 100);
     hErrorZLambda->SetXTitle("Z / mm");
     hErrorZLambda->SetYTitle(" Counts ");
     TH1F *hErrorThetaLambda = new TH1F("hErrorThetaLambda", "", 500, 0, 3);
-    hErrorThetaLambda->SetXTitle("#theta / rad");
+    hErrorThetaLambda->SetXTitle("Error #theta / rad");
     hErrorThetaLambda->SetYTitle(" Counts ");
-    TH1F *hErrorPhiLambda = new TH1F("hErrorPhiLambda", "", 500, -4, 4);
-    hErrorPhiLambda->SetXTitle("#phi / rad");
+    //TH1F *hErrorThetaLambda_AfterFit = (TH1F*)hErrorThetaLambda->Clone("hErrorThetaLambda_AfterFit");    
+    TH1F *hErrorThetaLambda_AfterFit = new TH1F("hErrorThetaLambda_AfterFit", "",1000, 0, 0.01);
+    hErrorThetaLambda_AfterFit->SetXTitle("Error #theta / rad");
+    hErrorThetaLambda_AfterFit->SetYTitle(" Counts ");
+    TH1F *hErrorPhiLambda = new TH1F("hErrorPhiLambda", "", 500, 0, 3);
+    hErrorPhiLambda->SetXTitle("Error #phi / rad");
     hErrorPhiLambda->SetYTitle(" Counts ");
+    //TH1F *hErrorPhiLambda_AfterFit = (TH1F*)hErrorPhiLambda->Clone("hErrorPhiLambda_AfterFit");    
+    TH1F *hErrorPhiLambda_AfterFit = new TH1F("hErrorPhiLambda_AfterFit", "",1000, 0, 0.01);
+    hErrorPhiLambda_AfterFit->SetXTitle("Error #phi / rad");
+    hErrorPhiLambda_AfterFit->SetYTitle(" Counts ");
 
     // ---------------- LAMBDA PLOTS CUT --------------------
     TH1F *hMomLambdaCut = new TH1F("hMomLambdaCut", "", 1000, 0, 3000);
@@ -752,6 +767,30 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     TH1F *hvertex_x = new TH1F("hvertex_x", "", 200,-50, 50);
     TH1F *hvertex_y = new TH1F("hvertex_y", "", 200,-50, 50);
     
+    TH1F *hErrorMomProton_AfterFit = new TH1F("hErrorMomProton_AfterFit", "", 1000,0, 0.0001);    
+    hErrorMomProton_AfterFit->SetXTitle("Error Momentum / MeV/c");
+    hErrorMomProton_AfterFit->SetYTitle(" Counts ");
+    
+    TH1F *hErrorMomPion_AfterFit = new TH1F("hErrorMomPion_AfterFit", "", 1000,0, 0.0001);    
+    hErrorMomPion_AfterFit->SetXTitle("Error Momentum / MeV/c");
+    hErrorMomPion_AfterFit->SetYTitle(" Counts ");    
+    
+    TH1F *hErrorThetaProton_AfterFit = new TH1F("hErrorThetaProton_AfterFit", "", 10000,0, 0.01);    
+    hErrorThetaProton_AfterFit->SetXTitle("Error #theta / rad");
+    hErrorThetaProton_AfterFit->SetYTitle(" Counts ");
+    
+    TH1F *hErrorThetaPion_AfterFit = new TH1F("hErrorThetaPion_AfterFit", "", 10000,0, 0.01);    
+    hErrorThetaPion_AfterFit->SetXTitle("Error #theta / rad");
+    hErrorThetaPion_AfterFit->SetYTitle(" Counts ");    
+    
+    TH1F *hErrorPhiProton_AfterFit = new TH1F("hErrorPhiProton_AfterFit", "", 10000,0, 0.01);    
+    hErrorPhiProton_AfterFit->SetXTitle("Error #theta / rad");
+    hErrorPhiProton_AfterFit->SetYTitle(" Counts ");
+    
+    TH1F *hErrorPhiPion_AfterFit = new TH1F("hErrorPhiPion_AfterFit", "", 10000,0, 0.1);    
+    hErrorPhiPion_AfterFit->SetXTitle("Error #theta / rad");
+    hErrorPhiPion_AfterFit->SetYTitle(" Counts ");
+
     HLoop loop(kTRUE);
     Bool_t ret = loop.addFiles(infileList);
     if (ret == 0)
@@ -860,7 +899,7 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
                 pions.push_back(candidate);
             }*/
 
-/*             if (cand->getGeantPID() == 14) //Proton found
+             if (cand->getGeantPID() == 14) //Proton found
             {
                 //std::cout << "Parent ID: " << cand->getGeantParentPID() << std::endl;
                 if (selectHadrons(cand) == true)
@@ -901,9 +940,9 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
             }
             else
                 continue;
-        } // end track loop */
+        } // end track loop 
 
-          if (cand->getGeantPID() == 14) //Proton found
+          /* if (cand->getGeantPID() == 14) //Proton found
             {
                 virtualCandProtons.push_back(cand);
                 Double_t mom = cand->getGeantTotalMom();
@@ -944,7 +983,7 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
             else
                 continue;
         } // end track loop  
-
+ */
         // -----------------------------------------------------------------------
         // looking at Lambda invariant mass here
         // -----------------------------------------------------------------------
@@ -956,6 +995,7 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
         //std::cout << "Number of Pions: " << pions.size() << std::endl;
         primVtxFound=false; 
         secVtxFound=false;
+        std::vector<HRefitCand> candsSec;
         if (protons.size()<2) continue;
         TVector3 primaryVertex, decayVertex;
         std::vector<HRefitCand> eventCandidates;
@@ -963,8 +1003,8 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
         double probPrim=-99999, probSec=-99999;
         
         for (size_t n = 0; n < protons.size(); n++)
+        
         {
-
             HRefitCand cand1 = protons[n];
             HParticleCandSim *virtualCand1 = virtualCandProtons[n];
             
@@ -980,7 +1020,6 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
                     if(virtualCand2->getGeantParentPID() == 18){
                         
                         secVtxFound=true;
-                        std::vector<HRefitCand> candsSec;
                         candsSec.clear();
                         candsSec.push_back(cand1);
                         candsSec.push_back(cand2);
@@ -1161,7 +1200,7 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
         if (primVtxFound == true && secVtxFound == true)
         {
             
-            HNeutralCandFinder lambdaCandFinder(eventCandidates);
+            HNeutralCandFinder lambdaCandFinder(candsSec);
 
             lambdaCandFinder.setUsePrimaryVertexInNeutralMotherCalculation(true);
 
@@ -1249,13 +1288,16 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
             }
             std::vector<HRefitCand> cands3c;
             cands3c.clear();
-            cands3c.push_back(eventCandidates[0]);
-            cands3c.push_back(eventCandidates[1]);
+            cands3c.push_back(candsSec[1]);
+            cands3c.push_back(candsSec[0]);
             
             HVertexFitter Fitter3c(cands3c, lambdaCandRefit);
             Fitter3c.add3Constraint();
-
+            Fitter3c.setNumberOfIterations(20);
             Fitter3c.fit();
+
+            std::cout << "Event candidates: " << eventCandidates.size() << std::endl;
+            std::cout << "Cands3c size: " << cands3c.size() << std::endl;
 
             HRefitCand fcand1 = Fitter3c.getDaughter(0); // proton
             HRefitCand fcand2 = Fitter3c.getDaughter(1); // pion
@@ -1264,6 +1306,12 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
             h021->Fill(Fitter3c.getChi2());
             h031->Fill(Fitter3c.getProb());
             h041->Fill(flambda.M());
+
+            HRefitCand cand1BeforeFit = eventCandidates[0];
+            HRefitCand cand2BeforeFit = eventCandidates[1];
+            
+            TLorentzVector lambdaBeforeFit =cand1BeforeFit+cand2BeforeFit;
+            hLambdaMassBeforeFit->Fill(lambdaBeforeFit.M());
 
             //std::cout << "Masses: " << lambdaCandRefit.M() << " " << fcand1.M() << " " << fcand2.M() << std::endl;
 
@@ -1286,6 +1334,40 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
                 HRefitCand cand13C = Fitter3c.getDaughter(0); // proton
                 HRefitCand cand23C = Fitter3c.getDaughter(1); // pion
                 TLorentzVector lambdaCand3C = cand13C + cand23C;
+
+
+                
+                TMatrixD lambdaCov = flambda.getCovariance();
+                TMatrixD protonCov = cand13C.getCovariance();
+                TMatrixD pionCov = cand23C.getCovariance();
+
+                hErrorMomProton_AfterFit->Fill(sqrt(protonCov(0,0)));
+                hErrorThetaProton_AfterFit->Fill(sqrt(protonCov(1,1)));
+                hErrorPhiProton_AfterFit->Fill(sqrt(protonCov(2,2)));
+
+                hErrorMomPion_AfterFit->Fill(sqrt(pionCov(0,0)));
+                hErrorThetaPion_AfterFit->Fill(sqrt(pionCov(1,1)));
+                hErrorPhiPion_AfterFit->Fill(sqrt(pionCov(2,2)));
+
+                hErrorThetaLambda_AfterFit->Fill(sqrt(lambdaCov(1,1)));
+                hErrorPhiLambda_AfterFit->Fill(sqrt(lambdaCov(2,2)));
+
+                hMomLambda_AfterFit->Fill(flambda.P());
+                hRecoThetaLambda_AfterFit->Fill(flambda.Theta());
+                hRecoPhiLambda_AfterFit->Fill(flambda.Phi());
+                
+                /* std:: cout << "Variables before fit: Pion: theta: " << cand1BeforeFit.Theta() << ", phi: " << cand1BeforeFit.Phi() <<  ", 1/p: "  << 1/cand1BeforeFit.P() << std::endl;
+                std:: cout << "Variables before fit: Proton: theta: " << cand2BeforeFit.Theta() << ", phi: " << cand2BeforeFit.Phi() <<  ", 1/p: "  << 1/cand2BeforeFit.P() << std::endl;
+                std:: cout << "Variables before fit: Lambda: theta: " << lambdaCandRefit.Theta() << ", phi: " << lambdaCandRefit.Phi() <<", 1/p: "  << 1/lambdaCandRefit.P() <<  std::endl;
+                std:: cout << "Errors before fit, Lambda: , theta: " << lambdaRefitCov(1,1) << ", phi: " << lambdaRefitCov(2,2) << std::endl;
+
+                std:: cout << "Variables after fit: Pion: theta: " << cand13C.Theta() << ", phi: " << cand13C.Phi() <<  ", 1/p: "  << 1/cand13C.P() << std::endl;
+                std:: cout << "Variables after fit: Proton: theta: " << cand23C.Theta() << ", phi: " << cand23C.Phi() <<  ", 1/p: "  << 1/cand23C.P() << std::endl;
+                std:: cout << "Variables after fit: Lambda: theta: " << flambda.Theta() << ", phi: " << flambda.Phi() <<", 1/p: "  << 1/flambda.P() <<  std::endl;
+                std:: cout << "Errors after fit: Pion: theta: " << protonCov(1,1) << ", phi: " << protonCov(2,2) <<  ", 1/p: " << protonCov(0,0) << std::endl;
+                std:: cout << "Errors after fit: Pion: theta: " << pionCov(1,1) << ", phi: " << pionCov(2,2) << ", 1/p: " << pionCov(0,0) << std::endl;
+                std:: cout << "Errors after fit, Lambda: , theta: " << lambdaCov(1,1) << ", phi: " << lambdaCov(2,2) << ", 1/p: " << lambdaCov(0,0) <<std::endl; */
+
                 h04->Fill(lambdaCand3C.M());
 
             }
@@ -1314,6 +1396,7 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     h03SecondaryVtx->Write();
     h045->Write();
     h04->Write();
+    hLambdaMassBeforeFit->Write();
     h05->Write();
     h06SecondaryVtx->Write();
     h07SecondaryVtx->Write();
@@ -1470,7 +1553,9 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     hErrorRLambda->Write();
     hErrorZLambda->Write();
     hErrorThetaLambda->Write();
+    hErrorThetaLambda_AfterFit->Write();
     hErrorPhiLambda->Write();
+    hErrorPhiLambda_AfterFit->Write();
 
     hMomLambdaCut->Write();
     hRecoThetaLambdaCut->Write();
@@ -1486,6 +1571,25 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
     hvertex_x->Write();
     hvertex_y->Write();
     hvertex_z->Write();
+
+    hErrorMomProton_AfterFit->Write();
+    hErrorThetaProton_AfterFit->Write();
+    hErrorPhiProton_AfterFit->Write();
+
+    hErrorMomPion_AfterFit->Write();
+    hErrorThetaPion_AfterFit->Write();
+    hErrorPhiPion_AfterFit->Write();
+    
+    hMomLambda_AfterFit->Write();
+    hRecoThetaLambda_AfterFit->Write();
+    hRecoPhiLambda_AfterFit->Write();    
+    
+    // hMomProton_AFterFit->Write();
+    // hRecoThetaProton_AFterFit->Write();
+    // hRecoPhiProton_AFterFit->Write();
+    // hMomPion_AFterFit->Write();
+    // hRecoThetaPion_AFterFit->Write();
+    // hRecoPhiPion_AFterFit->Write();
 
     outfile->Close();
 
