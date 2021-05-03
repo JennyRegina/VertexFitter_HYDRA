@@ -881,7 +881,6 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/Pluto/DST/Output
     int decayVertexBeforePrimVertex = 0;
     int primVertexInsideDecayVertex = 0;
     int decayVertexInsidePrimVertex = 0;
-    bool primVtxFound, secVtxFound;
 
     double deg2rad = TMath::DegToRad();
     
@@ -967,8 +966,8 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/Pluto/DST/Output
         //std::cout << "Number of protons: " << protons.size() << std::endl;
         //std::cout << "Number of Pions: " << pions.size() << std::endl;
 
-        primVtxFound = false;
-        secVtxFound = false;
+        bool primVtxFound = false;
+        bool secVtxFound = false;
 
         //if (protons.size() < 2)
         //  continue;
@@ -977,8 +976,8 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/Pluto/DST/Output
 
         double probPrim = -99999, probSec = -99999;
 
-        bool bestDecayVertexFound = false;
-        bool bestPrimVertexFound = false;
+        //bool bestDecayVertexFound = false;
+        //bool bestPrimVertexFound = false;
 
         TVector3 decayVertex_Temp, primVertex_Temp;
         TVector3 decayVertex_TempUpdated, tempVertex_TempUpdated;
@@ -986,8 +985,6 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/Pluto/DST/Output
 
         double probDecayVertex_Temp = -1;
         double probPrimVertex_Temp = -1;
-        //double probDecayVertex_TempUpdated = -1;
-        //double probPrimVertex_TempUpdated = -1;
 
         double bestDiffXDecay = -1;
         double bestDiffYDecay = -1;
@@ -1084,7 +1081,7 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/Pluto/DST/Output
                 {
 
                     // Updating variables that are used if a best decay vertex was found
-                    bestDecayVertexFound = true;
+                    //bestDecayVertexFound = true;
                     probDecayVertex_Temp = probSec;
                     decayVertexBestFit = decayVertex;
                     bestDiffXDecay = decayVertex.X() - virtualCand2->getGeantxVertex();
@@ -1212,7 +1209,7 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/Pluto/DST/Output
                 {
 
                     // Updating some variables that are saved for the primary vertex with the largest probability 
-                    bestPrimVertexFound = true;
+                    //bestPrimVertexFound = true;
                     probPrimVertex_Temp = probPrim;
                     primVertexBestFit = primaryVertex;                    
                     bestDiffXPrim = primaryVertex.X() - virtualCand3->getGeantxVertex();
@@ -1249,8 +1246,8 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/Pluto/DST/Output
             }
         }
 
-        // Testing if both aprimary and decay vertex wa found
-        if (bestPrimVertexFound == true && bestDecayVertexFound == true)
+        // Testing if both aprimary and decay vertex were found
+        if (primVtxFound == true && secVtxFound == true)
         {
             // Making sure that two different protons were used to reconstruct the vertices
             if (indexDecayProton != indexPrimaryProton)
