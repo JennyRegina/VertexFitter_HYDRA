@@ -39,6 +39,7 @@
 
 #include "hvertexfitter.h"
 #include "hvertexfinder.h"
+#include "hneutralcandfinder.h"
 
 using namespace std;
 using namespace Particle;
@@ -90,7 +91,7 @@ Bool_t selectHadrons(HParticleCand *pcand)
     return test;
 }
 
-Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlambda_100000evts1_dst_apr12.root", Int_t nEvents = -1)
+Int_t analysis(TString infileList = "/lustre/hades/user/jregina/Pluto/DST/OutputFolder/pplpk_million_Hgeant_*1_dst_apr12.root", Int_t nEvents = -1)
 {
 
     // My input: pp_pKlambda_100000evts1_dst_apr12.root
@@ -880,6 +881,7 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
     int decayVertexBeforePrimVertex = 0;
     int primVertexInsideDecayVertex = 0;
     int decayVertexInsidePrimVertex = 0;
+    bool primVtxFound, secVtxFound;
 
     double deg2rad = TMath::DegToRad();
     
@@ -984,8 +986,8 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
 
         double probDecayVertex_Temp = -1;
         double probPrimVertex_Temp = -1;
-        double probDecayVertex_TempUpdated = -1;
-        double probPrimVertex_TempUpdated = -1;
+        //double probDecayVertex_TempUpdated = -1;
+        //double probPrimVertex_TempUpdated = -1;
 
         double bestDiffXDecay = -1;
         double bestDiffYDecay = -1;
@@ -1408,7 +1410,7 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
     h051->Write();
     h054->Write();
     h08->Write();
-    h081->Write();
+    //h081->Write();
     h08->Write();
 
     hVertexXPreFit->Write();
