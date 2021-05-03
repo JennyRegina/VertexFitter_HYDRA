@@ -130,29 +130,50 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
     // -----------------------------------------------------------------------
     // set ouput file
     TFile *outfile = new TFile("testvertexfit.root", "recreate");
-
+    
     TH1F *h01 = new TH1F("hLambdaMassPreFit", "", 100, 1070, 1170);
     h01->SetXTitle(" M_{p#pi^{-}} [MeV/c^{2}]");
     h01->SetYTitle(" events ");
 
-    TH1F *h02 = new TH1F("hChi2", "", 100, 0, 10);
+    TH1F *h02 = new TH1F("hChi2", "", 1000, 0, 10);
     h02->SetXTitle("#chi^{2}");
     h02->SetYTitle(" Counts ");
     TH1F *h021 = (TH1F *)h02->Clone("hChi2_3c");
     TH1F *h023 = (TH1F *)h02->Clone("hChi2_3cConv");
 
-    TH1F *h03 = new TH1F("hPChi2", "", 100, 0, 1);
+    TH1F *h03Zoomed = new TH1F("hPChi2Zoomed", "", 10000, 0, pow(10,-200));
+    h03Zoomed->SetXTitle("P(#chi^{2})");
+    h03Zoomed->SetYTitle(" Counts ");
+
+    TH1F *h03 = new TH1F("hPChi2", "", 1000, 0, 1);
     h03->SetXTitle("P(#chi^{2})");
     h03->SetYTitle(" Counts ");
     TH1F *h031 = (TH1F *)h03->Clone("hPChi2_3c");
     TH1F *h033 = (TH1F *)h03->Clone("hPChi2_3cConv");
 
+    TH1F *h02SecondaryVtx = new TH1F("hChi2SecondaryVtx", "", 1000, 0, 10);
+    h02SecondaryVtx->SetXTitle("#chi^{2}");
+    h02SecondaryVtx->SetYTitle(" Counts ");
+
+    TH1F *h03SecondaryVtx = new TH1F("hPChi2SecondaryVtx", "", 1000, 0, 1);
+    h03SecondaryVtx->SetXTitle("P(#chi^{2})");
+    h03SecondaryVtx->SetYTitle(" Counts ");
+
+    TH1F *h03SecondaryVtxZoomed = new TH1F("hPChi2SecondaryVtxZoomed", "", 10000, 0, 0.0001);
+    h03SecondaryVtxZoomed->SetXTitle("P(#chi^{2})");
+    h03SecondaryVtxZoomed->SetYTitle(" Counts ");
+
     TH1F *h04 = new TH1F("hLambdaMassPostFit", "", 100, 1070, 1170);
     h04->SetXTitle(" M_{p#pi^{-}} [MeV/c^{2}]");
     h04->SetYTitle(" Events ");
+    TH1F *hLambdaMassBeforeFit = (TH1F *)h04->Clone("hLambdaMassBeforeFit");
     TH1F *h040 = (TH1F *)h04->Clone("hLambdaMassPostFitCut");
     TH1F *h041 = (TH1F *)h04->Clone("hLambdaMassPostFit_3c");
     TH1F *h044 = (TH1F *)h04->Clone("hLambdaMassPostFit_3cConvCut");
+    TH1F *h045 = (TH1F *)h04->Clone("hLambdaMassPreFit");
+    //TH1F *h17 = new TH1F("hLambdaMassPostFitCut", "", 100, 1070, 1170);
+    //h17->SetXTitle(" M_{p#pi^{-}} [MeV/c^{2}]");
+    //h17->SetYTitle(" Events ");
 
     TH1F *h05 = new TH1F("hPullPInv", "", 100, -5, 5);
     h05->SetXTitle("Pull(1/P_{p})");
@@ -160,25 +181,184 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
     TH1F *h050 = (TH1F *)h05->Clone("hPullPInvCut");
     TH1F *h051 = (TH1F *)h05->Clone("hPullPInv_3c");
     TH1F *h054 = (TH1F *)h05->Clone("hPullPInv_3cConvCut");
-    /*
-    TH1F* h06 = new TH1F("hTotMomPreFit", "", 100, 3800, 4800);
-    h06->SetXTitle(" p [MeV/c]");
-    h06->SetYTitle(" events ");
 
-    TH1F* h07 = new TH1F("hTotMomPostFitters", "", 100, 3800, 4800);
-    h07->SetXTitle(" p [MeV/c]");
-    h07->SetYTitle(" events ");
-    TH1F *h074 = (TH1F*)h07->Clone("hTotMomPostFit_3cConvCut");
-*/
+    TH1F *h06 = new TH1F("hPullTheta", "", 100, -5, 5);
+    h06->SetXTitle("Pull(#theta)");
+    h06->SetYTitle(" Counts ");
+
+    TH1F *h07 = new TH1F("hPullPhi", "", 100, -5, 5);
+    h07->SetXTitle("Pull(#phi)");
+    h07->SetYTitle(" Counts ");
+
+    TH1F *h08 = new TH1F("hPullR", "", 100, -5, 5);
+    h08->SetXTitle("Pull(R)");
+    h08->SetYTitle(" Counts ");
+
+    TH1F *h09 = new TH1F("hPullZ", "", 100, -5, 5);
+    h09->SetXTitle("Pull(Z)");
+    h09->SetYTitle(" Counts ");
+
+    TH1F *h06SecondaryVtx = new TH1F("hPullThetaSecondaryVtx", "", 100, -5, 5);
+    h06SecondaryVtx->SetXTitle("Pull(#theta)");
+    h06SecondaryVtx->SetYTitle(" Counts ");
+
+    TH1F *h07SecondaryVtx = new TH1F("hPullPhiSecondaryVtx", "", 100, -5, 5);
+    h07SecondaryVtx->SetXTitle("Pull(#phi)");
+    h07SecondaryVtx->SetYTitle(" Counts ");
+
+    TH1F *h08SecondaryVtx = new TH1F("hPullRSecondaryVtx", "", 100, -5, 5);
+    h08SecondaryVtx->SetXTitle("Pull(R)");
+    h08SecondaryVtx->SetYTitle(" Counts ");
+
+    TH1F *h09SecondaryVtx = new TH1F("hPullZSecondaryVtx", "", 100, -5, 5);
+    h09SecondaryVtx->SetXTitle("Pull(Z)");
+    h09SecondaryVtx->SetYTitle(" Counts ");
+
     TH1F *h10 = new TH1F("hSuccessfulConvergence", "", 2, 0, 2);
     h10->SetXTitle("Fit has converged");
     h10->SetYTitle(" Counts ");
 
-    TH1F *h08 = new TH1F("hIterations", "", 10, 0, 10);
-    h08->SetXTitle("Number of Iterations");
-    h08->SetYTitle(" Counts ");
-    TH1F *h081 = (TH1F *)h08->Clone("hNIterations_3c");
-    TH1F *h084 = (TH1F *)h08->Clone("hNIterations_3cCut");
+    TH1F *h11 = new TH1F("hIterations", "", 100, 0, 20);
+    h11->SetXTitle("Number of Iterations");
+    h11->SetYTitle(" Counts ");
+    TH1F *h111 = (TH1F *)h11->Clone("hNIterations_3c");
+    TH1F *h114 = (TH1F *)h11->Clone("hNIterations_3cCut");
+
+    TH1F *h11SecVtx = new TH1F("hIterationsSecVtx", "", 100, 0, 20);
+    h11SecVtx->SetXTitle("Number of Iterations");
+    h11SecVtx->SetYTitle(" Counts ");
+
+    // ------------------------- Histos after probability cut    --------------------
+
+    TH1F *h12 = new TH1F("hPullPInvCut", "", 100, -5, 5);
+    h12->SetXTitle("Pull(1/P_{p})");
+    h12->SetYTitle(" Counts ");
+
+    TH1F *h13 = new TH1F("hPullThetaCut", "", 100, -5, 5);
+    h13->SetXTitle("Pull(#theta)");
+    h13->SetYTitle(" Counts ");
+
+    TH1F *h14 = new TH1F("hPullPhiCut", "", 100, -5, 5);
+    h14->SetXTitle("Pull(#phi)");
+    h14->SetYTitle(" Counts ");
+
+    TH1F *h15 = new TH1F("hPullRCut", "", 100, -5, 5);
+    h15->SetXTitle("Pull(R)");
+    h15->SetYTitle(" Counts ");
+
+    TH1F *h16 = new TH1F("hPullZCut", "", 100, -5, 5);
+    h16->SetXTitle("Pull(Z)");
+    h16->SetYTitle(" Counts ");
+
+    TH1F *h12SecondaryVtx = new TH1F("hPullPInvCutSecondaryVtx", "", 100, -5, 5);
+    h12SecondaryVtx->SetXTitle("Pull(1/P_{p})");
+    h12SecondaryVtx->SetYTitle(" Counts ");
+
+    TH1F *h13SecondaryVtx = new TH1F("hPullThetaCutSecondaryVtx", "", 100, -5, 5);
+    h13SecondaryVtx->SetXTitle("Pull(#theta)");
+    h13SecondaryVtx->SetYTitle(" Counts ");
+
+    TH1F *h14SecondaryVtx = new TH1F("hPullPhiCutSecondaryVtx", "", 100, -5, 5);
+    h14SecondaryVtx->SetXTitle("Pull(#phi)");
+    h14SecondaryVtx->SetYTitle(" Counts ");
+
+    TH1F *h15SecondaryVtx = new TH1F("hPullRCutSecondaryVtx", "", 100, -5, 5);
+    h15SecondaryVtx->SetXTitle("Pull(R)");
+    h15SecondaryVtx->SetYTitle(" Counts ");
+
+    TH1F *h16SecondaryVtx = new TH1F("hPullZCutSecondaryVtx", "", 100, -5, 5);
+    h16SecondaryVtx->SetXTitle("Pull(Z)");
+    h16SecondaryVtx->SetYTitle(" Counts ");
+
+    // -------------------- Pulls Pions -----------------------
+
+    TH1F *h17 = new TH1F("hPullThetaPion", "", 100, -5, 5);
+    h17->SetXTitle("Pull(#theta)");
+    h17->SetYTitle(" Counts ");
+
+    TH1F *h18 = new TH1F("hPullPhiPion", "", 100, -5, 5);
+    h18->SetXTitle("Pull(#phi)");
+    h18->SetYTitle(" Counts ");
+
+    TH1F *h19 = new TH1F("hPullRPion", "", 100, -5, 5);
+    h19->SetXTitle("Pull(R)");
+    h19->SetYTitle(" Counts ");
+
+    TH1F *h20 = new TH1F("hPullZPion", "", 100, -5, 5);
+    h20->SetXTitle("Pull(Z)");
+    h20->SetYTitle(" Counts ");
+
+    // ------------------------- Histos after probability cut    --------------------
+
+    TH1F *h21 = new TH1F("hPullThetaCutPion", "", 100, -5, 5);
+    h21->SetXTitle("Pull(#theta)");
+    h21->SetYTitle(" Counts ");
+
+    TH1F *h22 = new TH1F("hPullPhiCutPion", "", 100, -5, 5);
+    h22->SetXTitle("Pull(#phi)");
+    h22->SetYTitle(" Counts ");
+
+    TH1F *h23 = new TH1F("hPullRCutPion", "", 100, -5, 5);
+    h23->SetXTitle("Pull(R)");
+    h23->SetYTitle(" Counts ");
+
+    TH1F *h24 = new TH1F("hPullZCutPion", "", 100, -5, 5);
+    h24->SetXTitle("Pull(Z)");
+    h24->SetYTitle(" Counts ");
+
+    TH1F *h21SecondaryVtx = new TH1F("hPullThetaCutPionSecondaryVtx", "", 100, -5, 5);
+    h21SecondaryVtx->SetXTitle("Pull(#theta)");
+    h21SecondaryVtx->SetYTitle(" Counts ");
+
+    TH1F *h22SecondaryVtx = new TH1F("hPullPhiCutPionSecondaryVtx", "", 100, -5, 5);
+    h22SecondaryVtx->SetXTitle("Pull(#phi)");
+    h22SecondaryVtx->SetYTitle(" Counts ");
+
+    TH1F *h23SecondaryVtx = new TH1F("hPullRCutPionSecondaryVtx", "", 100, -5, 5);
+    h23SecondaryVtx->SetXTitle("Pull(R)");
+    h23SecondaryVtx->SetYTitle(" Counts ");
+
+    TH1F *h24SecondaryVtx = new TH1F("hPullZCutPionSecondaryVtx", "", 100, -5, 5);
+    h24SecondaryVtx->SetXTitle("Pull(Z)");
+    h24SecondaryVtx->SetYTitle(" Counts ");
+    // -----------------------------------------------------------------------
+    // ------------------------- Histos after convergence    --------------------
+
+    TH1F *h25 = new TH1F("hPullPInvConverged", "", 100, -5, 5);
+    h25->SetXTitle("Pull(1/P_{p})");
+    h25->SetYTitle(" Counts ");
+
+    TH1F *h26 = new TH1F("hPullThetaConverged", "", 100, -5, 5);
+    h26->SetXTitle("Pull(#theta)");
+    h26->SetYTitle(" Counts ");
+
+    TH1F *h27 = new TH1F("hPullPhiConverged", "", 100, -5, 5);
+    h27->SetXTitle("Pull(#phi)");
+    h27->SetYTitle(" Counts ");
+
+    TH1F *h28 = new TH1F("hPullRConverged", "", 100, -5, 5);
+    h28->SetXTitle("Pull(R)");
+    h28->SetYTitle(" Counts ");
+
+    TH1F *h29 = new TH1F("hPullZConverged", "", 100, -5, 5);
+    h29->SetXTitle("Pull(Z)");
+    h29->SetYTitle(" Counts ");
+
+    TH1F *h30 = new TH1F("hPullThetaPionConverged", "", 100, -5, 5);
+    h30->SetXTitle("Pull(#theta)");
+    h30->SetYTitle(" Counts ");
+
+    TH1F *h31 = new TH1F("hPullPhiPioConvergedn", "", 100, -5, 5);
+    h31->SetXTitle("Pull(#phi)");
+    h31->SetYTitle(" Counts ");
+
+    TH1F *h32 = new TH1F("hPullRPionConverged", "", 100, -5, 5);
+    h32->SetXTitle("Pull(R)");
+    h32->SetYTitle(" Counts ");
+
+    TH1F *h33 = new TH1F("hPullZPionConverged", "", 100, -5, 5);
+    h33->SetXTitle("Pull(Z)");
+    h33->SetYTitle(" Counts ");
 
     // -----------------------------------------------------------------------
     // ------- Vertex histograms pre fit -----------------------
@@ -215,6 +395,10 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
     hDistanceBetweenProtonAndPionPreFit->SetXTitle("Distance between particles / mm");
     hDistanceBetweenProtonAndPionPreFit->SetYTitle(" Counts ");
 
+    TH1F *hDistanceBetweenPrimaryProtonAndKaonPreFit = new TH1F("hDistanceBetweenPrimaryProtonAndKaonPreFit", "", 500, 0, 50);
+    hDistanceBetweenPrimaryProtonAndKaonPreFit->SetXTitle("Distance between particles / mm");
+    hDistanceBetweenPrimaryProtonAndKaonPreFit->SetYTitle(" Counts ");
+
     TH1F *hDistanceToVertexProtonPreFit = new TH1F("hDistanceToVertexProtonPreFit", "", 1000, 0, 100);
     hDistanceToVertexProtonPreFit->SetXTitle("Distance to vertex / mm");
     hDistanceToVertexProtonPreFit->SetYTitle(" Counts ");
@@ -222,6 +406,14 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
     TH1F *hDistanceToVertexPionPreFit = new TH1F("hDistanceToVertexPionPreFit", "", 1000, 0, 100);
     hDistanceToVertexPionPreFit->SetXTitle("Distance to vertex / mm");
     hDistanceToVertexPionPreFit->SetYTitle(" Counts ");
+
+    TH1F *hDistanceToVertexPrimaryProtonPreFit = new TH1F("hDistanceToVertexPrimaryProtonPreFit", "", 1000, 0, 100);
+    hDistanceToVertexPrimaryProtonPreFit->SetXTitle("Distance to vertex / mm");
+    hDistanceToVertexPrimaryProtonPreFit->SetYTitle(" Counts ");
+
+    TH1F *hDistanceToVertexKaonPreFit = new TH1F("hDistanceToVertexKaonPreFit", "", 1000, 0, 100);
+    hDistanceToVertexKaonPreFit->SetXTitle("Distance to vertex / mm");
+    hDistanceToVertexKaonPreFit->SetYTitle(" Counts ");
 
     TH1F *hDistanceToOriginProtonPreFit = new TH1F("hDistanceToOriginProtonPreFit", "", 1000, 0, 100);
     hDistanceToOriginProtonPreFit->SetXTitle("Distance to origin / mm");
@@ -252,6 +444,18 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
     TH2F *hVertexPostFit = new TH2F("hVertexPostFit", "", 1000, -100, 100, 1000, -100, 100);
     hVertexPostFit->SetXTitle("Vertex, Z / mm");
     hVertexPostFit->SetYTitle("Vertex, R /mm");
+
+    TH1F *hPrimVertexXPostFit = new TH1F("hPrimVertexXPostFit", "", 1000, -100, 100);
+    hPrimVertexXPostFit->SetXTitle("Vertex, X / mm");
+    hPrimVertexXPostFit->SetYTitle(" Counts ");
+
+    TH1F *hPrimVertexYPostFit = new TH1F("hPrimVertexYPostFit", "", 1000, -100, 100);
+    hPrimVertexYPostFit->SetXTitle("Vertex, Y / mm");
+    hPrimVertexYPostFit->SetYTitle(" Counts ");
+
+    TH1F *hPrimVertexZPostFit = new TH1F("hPrimVertexZPostFit", "", 1000, -100, 100);
+    hPrimVertexZPostFit->SetXTitle("Vertex, Z / mm");
+    hPrimVertexZPostFit->SetYTitle(" Counts ");
 
     TH1F *hDistanceBetweenProtonAndPionPostFit = new TH1F("hDistanceBetweenProtonAndPionPostFit", "", 1000, 0, 100);
     hDistanceBetweenProtonAndPionPostFit->SetXTitle("Distance between particles / mm");
@@ -315,6 +519,30 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
     hGeantVertexZCand2->SetXTitle("Geant Vertex, Z / mm");
     hGeantVertexZCand2->SetYTitle(" Counts ");
 
+    TH1F *hGeantVertexXCand1Prim = new TH1F("hGeantVertexXCand1Prim", "", 1000, -100, 100);
+    hGeantVertexXCand1Prim->SetXTitle("Geant Vertex, X / mm");
+    hGeantVertexXCand1Prim->SetYTitle(" Counts ");
+
+    TH1F *hGeantVertexYCand1Prim = new TH1F("hGeantVertexYCand1Prim", "", 1000, -100, 100);
+    hGeantVertexYCand1Prim->SetXTitle("Geant Vertex, Y / mm");
+    hGeantVertexYCand1Prim->SetYTitle(" Counts ");
+
+    TH1F *hGeantVertexZCand1Prim = new TH1F("hGeantVertexZCand1Prim", "", 1000, -60, 1000);
+    hGeantVertexZCand1Prim->SetXTitle("Geant Vertex, Z / mm");
+    hGeantVertexZCand1Prim->SetYTitle(" Counts ");
+
+    TH1F *hGeantVertexXCand3 = new TH1F("hGeantVertexXCand3", "", 1000, -100, 100);
+    hGeantVertexXCand3->SetXTitle("Geant Vertex, X / mm");
+    hGeantVertexXCand3->SetYTitle(" Counts ");
+
+    TH1F *hGeantVertexYCand3 = new TH1F("hGeantVertexYCand3", "", 1000, -100, 100);
+    hGeantVertexYCand3->SetXTitle("Geant Vertex, Y / mm");
+    hGeantVertexYCand3->SetYTitle(" Counts ");
+
+    TH1F *hGeantVertexZCand3 = new TH1F("hGeantVertexZCand3", "", 1000, -60, 1000);
+    hGeantVertexZCand3->SetXTitle("Geant Vertex, Z / mm");
+    hGeantVertexZCand3->SetYTitle(" Counts ");
+
     TH2F *hGeantVertex = new TH2F("hGeantVertex", "", 1000, -100, 100, 1000, -100, 100);
     hGeantVertex->SetXTitle("Geant Vertex, Z / mm");
     hGeantVertex->SetYTitle("Geant Vertex, R / mm");
@@ -331,8 +559,49 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
     hVertexZDiff->SetXTitle("Difference Vertex, Z / mm");
     hVertexZDiff->SetYTitle(" Counts ");
 
-    // -------------- Geant Hitograms --------------------
+    TH1F *hVertexXDiffPrim = new TH1F("hVertexXDiffPrim", "", 1000, -100, 100);
+    hVertexXDiffPrim->SetXTitle("Difference Vertex, X / mm");
+    hVertexXDiffPrim->SetYTitle(" Counts ");
 
+    TH1F *hVertexYDiffPrim = new TH1F("hVertexYDiffPrim", "", 1000, -100, 100);
+    hVertexYDiffPrim->SetXTitle("Difference Vertex, Y / mm");
+    hVertexYDiffPrim->SetYTitle(" Counts ");
+
+    TH1F *hVertexZDiffPrim = new TH1F("hVertexZDiffPrim", "", 1000, -100, 100);
+    hVertexZDiffPrim->SetXTitle("Difference Vertex, Z / mm");
+    hVertexZDiffPrim->SetYTitle(" Counts ");
+
+    TH1F *hVertexXDiff_ProbCut = (TH1F *)hVertexXDiff->Clone("hVertexXDiff_ProbCut");
+    TH1F *hVertexYDiff_ProbCut = (TH1F *)hVertexYDiff->Clone("hVertexYDiff_ProbCut");
+    TH1F *hVertexZDiff_ProbCut = (TH1F *)hVertexZDiff->Clone("hVertexZDiff_ProbCut");
+    TH1F *hVertexXDiffPrim_ProbCut = (TH1F *)hVertexXDiffPrim->Clone("hVertexXDiffPrim_ProbCut");
+    TH1F *hVertexYDiffPrim_ProbCut = (TH1F *)hVertexYDiffPrim->Clone("hVertexYDiffPrim_ProbCut");
+    TH1F *hVertexZDiffPrim_ProbCut = (TH1F *)hVertexZDiffPrim->Clone("hVertexZDiffPrim_ProbCut");
+
+    TH1F *hVertexXDiff_BestComb = (TH1F *)hVertexXDiff->Clone("hVertexXDiff_BestComb");
+    TH1F *hVertexYDiff_BestComb = (TH1F *)hVertexYDiff->Clone("hVertexYDiff_BestComb");
+    TH1F *hVertexZDiff_BestComb = (TH1F *)hVertexZDiff->Clone("hVertexZDiff_BestComb");
+
+    TH1F *hVertexXDiffPrim_BestComb = (TH1F *)hVertexXDiffPrim->Clone("hVertexXDiffPrim_BestComb");
+    TH1F *hVertexYDiffPrim_BestComb = (TH1F *)hVertexYDiffPrim->Clone("hVertexYDiffPrim_BestComb");
+    TH1F *hVertexZDiffPrim_BestComb = (TH1F *)hVertexZDiffPrim->Clone("hVertexZDiffPrim_BestComb");
+    
+    TH1F *hVertexXDiff_ProbCut_BestComb = (TH1F *)hVertexXDiff->Clone("hVertexXDiff_ProbCut_BestComb");
+    TH1F *hVertexYDiff_ProbCut_BestComb = (TH1F *)hVertexYDiff->Clone("hVertexYDiff_ProbCut_BestComb");
+    TH1F *hVertexZDiff_ProbCut_BestComb = (TH1F *)hVertexZDiff->Clone("hVertexZDiff_ProbCut_BestComb");
+
+    TH1F *hVertexXDiffPrim_ProbCut_BestComb = (TH1F *)hVertexXDiffPrim->Clone("hVertexXDiffPrim_ProbCut_BestComb");
+    TH1F *hVertexYDiffPrim_ProbCut_BestComb = (TH1F *)hVertexYDiffPrim->Clone("hVertexYDiffPrim_ProbCut_BestComb");
+    TH1F *hVertexZDiffPrim_ProbCut_BestComb = (TH1F *)hVertexZDiffPrim->Clone("hVertexZDiffPrim_ProbCut_BestComb");
+
+    TH1F *hVertexXDiff_BothVerticesFound = (TH1F *)hVertexXDiff->Clone("hVertexXDiff_BothVerticesFound");
+    TH1F *hVertexYDiff_BothVerticesFound = (TH1F *)hVertexYDiff->Clone("hVertexYDiff_BothVerticesFound");
+    TH1F *hVertexZDiff_BothVerticesFound = (TH1F *)hVertexZDiff->Clone("hVertexZDiff_BothVerticesFound");
+    
+    TH1F *hVertexXDiffPrim_BothVerticesFound = (TH1F *)hVertexXDiffPrim->Clone("hVertexXDiffPrim_BothVerticesFound");
+    TH1F *hVertexYDiffPrim_BothVerticesFound = (TH1F *)hVertexYDiffPrim->Clone("hVertexYDiffPrim_BothVerticesFound");
+    TH1F *hVertexZDiffPrim_BothVerticesFound = (TH1F *)hVertexZDiffPrim->Clone("hVertexZDiffPrim_BothVerticesFound");
+    
     // ---- Momentum -----
     TH1F *hGeantTotMomentumProtons = new TH1F("hGeantTotMomentumProtons", "", 1000, 0, 3000);
     hGeantTotMomentumProtons->SetXTitle("Momentum, X / MeV/c");
@@ -360,7 +629,33 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
     hGeantZMomentumPions->SetXTitle("Momentum, Z / MeV/c");
     hGeantZMomentumPions->SetYTitle(" Counts ");
 
-    // ------- Reconstructed quantities -----------
+    TH1F *hGeantTotMomentumPrimProtons = new TH1F("hGeantTotMomentumPrimProtons", "", 1000, 0, 3000);
+    hGeantTotMomentumPrimProtons->SetXTitle("Momentum, X / MeV/c");
+    hGeantTotMomentumPrimProtons->SetYTitle(" Counts ");
+    TH1F *hGeantXMomentumPrimProtons = new TH1F("hGeantXMomentumPrimProtons", "", 1000, -1000, 1000);
+    hGeantXMomentumPrimProtons->SetXTitle("Momentum, X / MeV/c");
+    hGeantXMomentumPrimProtons->SetYTitle(" Counts ");
+    TH1F *hGeantYMomentumPrimProtons = new TH1F("hGeantYMomentumPrimProtons", "", 1000, -1000, 1000);
+    hGeantYMomentumPrimProtons->SetXTitle("Momentum, Y / MeV/c");
+    hGeantYMomentumPrimProtons->SetYTitle(" Counts ");
+    TH1F *hGeantZMomentumPrimProtons = new TH1F("hGeantZMomentumPrimProtons", "", 1000, -100, 3000);
+    hGeantZMomentumPrimProtons->SetXTitle("Momentum, Z / MeV/c");
+    hGeantZMomentumPrimProtons->SetYTitle(" Counts ");
+
+    TH1F *hGeantTotMomentumKaons = new TH1F("hGeantTotMomentumKaons", "", 1000, 0, 3000);
+    hGeantTotMomentumKaons->SetXTitle("Momentum, X / MeV/c");
+    hGeantTotMomentumKaons->SetYTitle(" Counts ");
+    TH1F *hGeantXMomentumKaons = new TH1F("hGeantXMomentumKaons", "", 1000, -1000, 1000);
+    hGeantXMomentumKaons->SetXTitle("Momentum, X / MeV/c");
+    hGeantXMomentumKaons->SetYTitle(" Counts ");
+    TH1F *hGeantYMomentumKaons = new TH1F("hGeantYMomentumKaons", "", 1000, -1000, 1000);
+    hGeantYMomentumKaons->SetXTitle("Momentum, Y / MeV/c");
+    hGeantYMomentumKaons->SetYTitle(" Counts ");
+    TH1F *hGeantZMomentumKaons = new TH1F("hGeantZMomentumKaons", "", 1000, -100, 3000);
+    hGeantZMomentumKaons->SetXTitle("Momentum, Z / MeV/c");
+    hGeantZMomentumKaons->SetYTitle(" Counts ");
+
+    // ------- Reconstructed quantities -------
     TH1F *hRecoRProtons = new TH1F("hRecoRProtons", "", 1000, -100, 100);
     hRecoRProtons->SetXTitle("R / mm");
     hRecoRProtons->SetYTitle(" Counts ");
@@ -399,29 +694,94 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
     hRecoBetaPions->SetXTitle("#beta");
     hRecoBetaPions->SetYTitle(" Counts ");
 
+    // ------- Reconstructed quantities Primaries -----------
+    TH1F *hRecoRPrimProtons = new TH1F("hRecoRPrimProtons", "", 1000, -100, 100);
+    hRecoRPrimProtons->SetXTitle("R / mm");
+    hRecoRPrimProtons->SetYTitle(" Counts ");
+    TH1F *hRecoZPrimProtons = new TH1F("hRecoZPrimProtons", "", 1000, -100, 100);
+    hRecoZPrimProtons->SetXTitle("Z / mm");
+    hRecoZPrimProtons->SetYTitle(" Counts ");
+    TH1F *hRecoThetaPrimProtons = new TH1F("hRecoThetaPrimProtons", "", 500, 0, 3);
+    hRecoThetaPrimProtons->SetXTitle("#theta / rad");
+    hRecoThetaPrimProtons->SetYTitle(" Counts ");
+    TH1F *hRecoPhiPrimProtons = new TH1F("hRecoPhiPrimProtons", "", 500, -4, 4);
+    hRecoPhiPrimProtons->SetXTitle("#phi / rad");
+    hRecoPhiPrimProtons->SetYTitle(" Counts ");
+    TH1F *hRecoMomentumPrimProtons = new TH1F("hRecoMomentumPrimProtons", "", 1000, 0, 3000);
+    hRecoMomentumPrimProtons->SetXTitle("Momentum / MeV/c");
+    hRecoMomentumPrimProtons->SetYTitle(" Counts ");
+
+    TH1F *hRecoRKaons = new TH1F("hRecoRKaons", "", 1000, -100, 100);
+    hRecoRKaons->SetXTitle("R / mm");
+    hRecoRKaons->SetYTitle(" Counts ");
+    TH1F *hRecoZKaons = new TH1F("hRecoZKaons", "", 1000, -100, 100);
+    hRecoZKaons->SetXTitle("Z / mm");
+    hRecoZKaons->SetYTitle(" Counts ");
+    TH1F *hRecoThetaKaons = new TH1F("hRecoThetaKaons", "", 500, 0, 3);
+    hRecoThetaKaons->SetXTitle("#theta / rad");
+    hRecoThetaKaons->SetYTitle(" Counts ");
+    TH1F *hRecoPhiKaons = new TH1F("hRecoPhiKaons", "", 500, -4, 4);
+    hRecoPhiKaons->SetXTitle("#phi / rad");
+    hRecoPhiKaons->SetYTitle(" Counts ");
+    TH1F *hRecoMomentumKaons = new TH1F("hRecoMomentumKoans", "", 1000, 0, 3000);
+    hRecoMomentumKaons->SetXTitle("Momentum / MeV/c");
+    hRecoMomentumKaons->SetYTitle(" Counts ");
+
     // ---------------- LAMBDA PLOTS --------------------
-    TH1F *hMomLambda = new TH1F("hMomLambda", "", 1000, 0, 3000);
+    TH1F *hMomLambda = new TH1F("hMomLambda", "", 1000, 0, 4000);
     hMomLambda->SetXTitle("Momentum / MeV/c");
     hMomLambda->SetYTitle(" Counts ");
+    TH1F *hMomLambda_AfterFit = (TH1F *)hMomLambda->Clone("hMomLambda_AfterFit");
     TH1F *hRecoThetaLambda = new TH1F("hRecoThetaLambda", "", 500, 0, 3);
     hRecoThetaLambda->SetXTitle("#theta / rad");
     hRecoThetaLambda->SetYTitle(" Counts ");
+    TH1F *hRecoThetaLambda_AfterFit = (TH1F *)hRecoThetaLambda->Clone("hRecoThetaLambda_AfterFit");
+    TH1F *hRecoThetaLambdaZCut = new TH1F("hRecoThetaLambdaZCut", "", 500, 0, 3);
+    hRecoThetaLambdaZCut->SetXTitle("#theta / rad");
+    hRecoThetaLambdaZCut->SetYTitle(" Counts ");
+
     TH1F *hRecoPhiLambda = new TH1F("hRecoPhiLambda", "", 500, -4, 4);
     hRecoPhiLambda->SetXTitle("#phi / rad");
     hRecoPhiLambda->SetYTitle(" Counts ");
+    TH1F *hRecoPhiLambda_AfterFit = (TH1F *)hRecoPhiLambda->Clone("hRecoPhiLambda_AfterFit");
+    TH1F *hRecoPhiLambdaZCut = new TH1F("hRecoPhiLambdaZCut", "", 500, -4, 4);
+    hRecoPhiLambdaZCut->SetXTitle("#phi / rad");
+    hRecoPhiLambdaZCut->SetYTitle(" Counts ");
+
+    TH1F *hRecoRLambda = new TH1F("hRecoRLambda", "", 1000, -100, 100);
+    hRecoRLambda->SetXTitle("R / mm");
+    hRecoRLambda->SetYTitle(" Counts ");
+    TH1F *hRecoZLambda = new TH1F("hRecoZLambda", "", 1000, -100, 100);
+    hRecoZLambda->SetXTitle("Z / mm");
+    hRecoZLambda->SetYTitle(" Counts ");
+    TH1F *hRecoRLambdaZCut = new TH1F("hRecoRLambdaZCut", "", 1000, -100, 100);
+    hRecoRLambdaZCut->SetXTitle("R / mm");
+    hRecoRLambdaZCut->SetYTitle(" Counts ");
+    TH1F *hRecoZLambdaZCut = new TH1F("hRecoZLambdaZCut", "", 1000, -100, 100);
+    hRecoZLambdaZCut->SetXTitle("Z / mm");
+    hRecoZLambdaZCut->SetYTitle(" Counts ");
 
     TH1F *hErrorRLambda = new TH1F("hErrorRLambda", "", 1000, -100, 100);
     hErrorRLambda->SetXTitle("R / mm");
     hErrorRLambda->SetYTitle(" Counts ");
+
     TH1F *hErrorZLambda = new TH1F("hErrorZLambda", "", 1000, -100, 100);
     hErrorZLambda->SetXTitle("Z / mm");
     hErrorZLambda->SetYTitle(" Counts ");
     TH1F *hErrorThetaLambda = new TH1F("hErrorThetaLambda", "", 500, 0, 3);
-    hErrorThetaLambda->SetXTitle("#theta / rad");
+    hErrorThetaLambda->SetXTitle("Error #theta / rad");
     hErrorThetaLambda->SetYTitle(" Counts ");
-    TH1F *hErrorPhiLambda = new TH1F("hErrorPhiLambda", "", 500, -4, 4);
-    hErrorPhiLambda->SetXTitle("#phi / rad");
+    //TH1F *hErrorThetaLambda_AfterFit = (TH1F*)hErrorThetaLambda->Clone("hErrorThetaLambda_AfterFit");
+    TH1F *hErrorThetaLambda_AfterFit = new TH1F("hErrorThetaLambda_AfterFit", "", 1000, 0, 0.01);
+    hErrorThetaLambda_AfterFit->SetXTitle("Error #theta / rad");
+    hErrorThetaLambda_AfterFit->SetYTitle(" Counts ");
+    TH1F *hErrorPhiLambda = new TH1F("hErrorPhiLambda", "", 500, 0, 3);
+    hErrorPhiLambda->SetXTitle("Error #phi / rad");
     hErrorPhiLambda->SetYTitle(" Counts ");
+    //TH1F *hErrorPhiLambda_AfterFit = (TH1F*)hErrorPhiLambda->Clone("hErrorPhiLambda_AfterFit");
+    TH1F *hErrorPhiLambda_AfterFit = new TH1F("hErrorPhiLambda_AfterFit", "", 1000, 0, 0.01);
+    hErrorPhiLambda_AfterFit->SetXTitle("Error #phi / rad");
+    hErrorPhiLambda_AfterFit->SetYTitle(" Counts ");
 
     // ---------------- LAMBDA PLOTS CUT --------------------
     TH1F *hMomLambdaCut = new TH1F("hMomLambdaCut", "", 1000, 0, 3000);
@@ -448,9 +808,37 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
     hErrorPhiLambdaCut->SetYTitle(" Counts ");
 
     // Vertex prim and decay info
-    TH1F *hDistPrimToDecayVertex = new TH1F("hDistPrimToDecayVertex", "", 500, 0, 100);
+    TH1F *hDistPrimToDecayVertex = new TH1F("hDistPrimToDecayVertex", "", 100, 0, 150);
     hDistPrimToDecayVertex->SetXTitle(" Distance Between Primary and Decay Vertex ");
     hDistPrimToDecayVertex->SetYTitle(" Counts ");
+
+    TH1F *hvertex_z = new TH1F("hvertex_z", "", 200, -100, 100);
+    TH1F *hvertex_x = new TH1F("hvertex_x", "", 200, -50, 50);
+    TH1F *hvertex_y = new TH1F("hvertex_y", "", 200, -50, 50);
+
+    TH1F *hErrorMomProton_AfterFit = new TH1F("hErrorMomProton_AfterFit", "", 1000, 0, 0.0001);
+    hErrorMomProton_AfterFit->SetXTitle("Error Momentum / MeV/c");
+    hErrorMomProton_AfterFit->SetYTitle(" Counts ");
+
+    TH1F *hErrorMomPion_AfterFit = new TH1F("hErrorMomPion_AfterFit", "", 1000, 0, 0.0001);
+    hErrorMomPion_AfterFit->SetXTitle("Error Momentum / MeV/c");
+    hErrorMomPion_AfterFit->SetYTitle(" Counts ");
+
+    TH1F *hErrorThetaProton_AfterFit = new TH1F("hErrorThetaProton_AfterFit", "", 10000, 0, 0.01);
+    hErrorThetaProton_AfterFit->SetXTitle("Error #theta / rad");
+    hErrorThetaProton_AfterFit->SetYTitle(" Counts ");
+
+    TH1F *hErrorThetaPion_AfterFit = new TH1F("hErrorThetaPion_AfterFit", "", 10000, 0, 0.01);
+    hErrorThetaPion_AfterFit->SetXTitle("Error #theta / rad");
+    hErrorThetaPion_AfterFit->SetYTitle(" Counts ");
+
+    TH1F *hErrorPhiProton_AfterFit = new TH1F("hErrorPhiProton_AfterFit", "", 10000, 0, 0.01);
+    hErrorPhiProton_AfterFit->SetXTitle("Error #theta / rad");
+    hErrorPhiProton_AfterFit->SetYTitle(" Counts ");
+
+    TH1F *hErrorPhiPion_AfterFit = new TH1F("hErrorPhiPion_AfterFit", "", 10000, 0, 0.1);
+    hErrorPhiPion_AfterFit->SetXTitle("Error #theta / rad");
+    hErrorPhiPion_AfterFit->SetYTitle(" Counts ");
 
     HLoop loop(kTRUE);
     Bool_t ret = loop.addFiles(infileList);
@@ -493,6 +881,8 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
     int primVertexInsideDecayVertex = 0;
     int decayVertexInsidePrimVertex = 0;
 
+    double deg2rad = TMath::DegToRad();
+    
     // start of the event loop
     for (Int_t i = 1; i < nEvents; i++)
     {
@@ -520,10 +910,6 @@ Int_t analysis(TString infileList = "/lustre/hades/user/jregina/DstTest/pp_pKlam
             // select "good" tracks
             if (!cand->isFlagBit(Particle::kIsUsed))
                 continue;
-
-            hGeantVertexXAll->Fill(cand->getGeantxVertex());
-            hGeantVertexYAll->Fill(cand->getGeantyVertex());
-            hGeantVertexZAll->Fill(cand->getGeantzVertex());
 
             HRefitCand candidate(cand);
 
