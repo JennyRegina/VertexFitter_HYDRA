@@ -250,7 +250,7 @@ bool HMissPartFitter::fit(double lr, Int_t maxItr)
 
         double d_const = fabs(d(0,0));
         */
-        if(fabs(chi2-chisqrd(0,0))<1){
+        if(fabs(chi2-chisqrd(0,0))<0.01){
             fIteration = q;
             fConverged = true;
             chi2 = chisqrd(0,0);
