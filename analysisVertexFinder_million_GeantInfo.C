@@ -899,7 +899,7 @@ Int_t analysisVertexFinder_million_GeantInfo(TString infileList = "/lustre/hades
                 pions.push_back(candidate);
             }*/
 
-             if (cand->getGeantPID() == 14) //Proton found
+            if (cand->getGeantPID() == 14) //Proton found
             {
                 //std::cout << "Parent ID: " << cand->getGeantParentPID() << std::endl;
                 if (selectHadrons(cand) == true)
