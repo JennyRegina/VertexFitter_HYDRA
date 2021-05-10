@@ -398,7 +398,7 @@ TMatrixD HVertexFitter::Fxi_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter
         H(0, 0) = 1. / pow(xi_iter(0, 0), 2) * sin(m_iter(0 + fN * cov_dim, 0)) * cos(m_iter(1 + fN * cov_dim, 0));
         H(1, 0) = 1. / pow(xi_iter(0, 0), 2) * sin(m_iter(0 + fN * cov_dim, 0)) * sin(m_iter(1 + fN * cov_dim, 0));
         H(2, 0) = 1. / pow(xi_iter(0, 0), 2) * cos(m_iter(0 + fN * cov_dim, 0));
-        H(3, 0) = 1. / pow(xi_iter(0, 0), 3) * 1. / sqrt(pow(xi_iter(0, 0), 2) + pow(fM[fN], 2));
+        H(3, 0) = 1. / pow(xi_iter(0, 0), 3) * 1. / sqrt(pow(1. / xi_iter(0, 0), 2) + pow(fM[fN], 2));
     }
 
     return H;
