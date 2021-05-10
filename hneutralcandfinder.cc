@@ -1,7 +1,10 @@
 #include "hneutralcandfinder.h"
 
-HNeutralCandFinder::HNeutralCandFinder(const std::vector<HRefitCand> &cands) : fCands(cands), fVerbose(0), fPrimaryVertexFound(false), fUsePrimaryVertexInNeutralCandidateCalculation(false)
+HNeutralCandFinder::HNeutralCandFinder(const std::vector<HRefitCand> &cands) : fCands(cands),  fVerbose(0), fMomentumAfterDecay(-1.), fNeutralCandMass(1115.683), fPrimaryVertexFound(false), fUsePrimaryVertexInNeutralCandidateCalculation(false)
 {
+    if(fVerbose>0){
+    std::cout << "--------------- HNeutralCandFinder -----------------" << std::endl;
+    }
     double param_p1, param_p2;
     
     HRefitCand cand1 = cands[0];
@@ -13,10 +16,15 @@ HNeutralCandFinder::HNeutralCandFinder(const std::vector<HRefitCand> &cands) : f
     param_p2 = cand2.P(); // Not the inverse, this momentum is used for estimating the momentum of the Lambda Candidate
     
     double energy_cand1, energy_cand2;
-    energy_cand1 = sqrt(param_p1 * param_p1 + 983.272 * 983.272);
-    energy_cand2 = sqrt(param_p2 * param_p2 + 139.570 * 139.570);
+    energy_cand1 = sqrt(param_p1 * param_p1 + cand1.M() * cand1.M());
+    energy_cand2 = sqrt(param_p2 * param_p2 + cand2.M() * cand2.M());
+    //std::cout << "Energy cand 1: " << energy_cand1 << std::endl; 
+    //std::cout << "Energy cand 1: " << energy_cand1 << std::endl;
 
-    double fMomentumAfterDecay = sqrt(energy_cand1 * energy_cand1 + 2 * energy_cand1 * energy_cand2 + energy_cand2 * energy_cand2 - 1115.683 * 1115.683);
+    fMomentumAfterDecay = sqrt(energy_cand1 * energy_cand1 + 2 * energy_cand1 * energy_cand2 + energy_cand2 * energy_cand2 - fNeutralCandMass*fNeutralCandMass);
+    
+    //std::cout << "Momentum after decay : " << fMomentumAfterDecay << std::endl;
+    
     // If the primary vertex was found, the neutral mother candidate is created from the primary and decay vertex info
 
     /* if (fPrimaryVertexFound == false || fUsePrimaryVertexInNeutralCandidateCalculation == false)
@@ -109,9 +117,6 @@ void HNeutralCandFinder::setNeutralMotherCandFromPrimaryVtxInfo(TVector3 primary
         std::cout << "" << std::endl;
     }
 
-    // TODO: Set the other track parameters and the covariance matrix
-
-
     TVector3 vecPrimToDecayVertex = decayVertex - primaryVertex;
 
     HGeomVector geom_dir_Z, vtx_geom_dir, geom_base_Z, vtx_geom_base;
@@ -163,6 +168,8 @@ void HNeutralCandFinder::setNeutralMotherCandFromPrimaryVtxInfo(TVector3 primary
     fNeutralMotherCandidate.setZ(valZ); 
     
     fNeutralMotherCandidate.setMomentum(fMomentumAfterDecay);
+
+    //std::cout << "Momentum after decay: " << fMomentumAfterDecay << std::endl;
     /*fNeutralMotherCandidate.SetTheta(valTheta);
     fNeutralMotherCandidate.SetPhi(valPhi);*/
     
@@ -180,10 +187,10 @@ void HNeutralCandFinder::setNeutralMotherCandFromPrimaryVtxInfo(TVector3 primary
     double z_vertex = decayVertex.Z();
 
     // the errors below are estimated from difference distributions between reconstructed - MC truth for the vertex
-
-    double sigma_x = 1.349; //old value: 33.39; // In mm
-    double sigma_y = 1.322; //old value: 26.70; // In mm
-    double sigma_z = 3.22; //old value: 44.92; // In mm
+    // The errors are estimated from the histograms where both vertices were found in an event
+    double sigma_x = sqrt(16.97*16.97+14.56*14.56); //old value: 33.39; // In mm
+    double sigma_y = sqrt(16.80*16.80+14.59*14.59); //1.322; //old value: 26.70; // In mm
+    double sigma_z = sqrt(25.81*25.81+19.84*19.84); //3.22; //old value: 44.92; // In mm
 
     // Use coordinate transformation cartesian->polar to estimate error in theta and phi
 
