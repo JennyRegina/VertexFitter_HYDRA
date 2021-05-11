@@ -5,7 +5,8 @@ const size_t cov_dim = 5;
 HVertexFitter::HVertexFitter(const std::vector<HRefitCand> &cands) : fCands(cands),
                                                                      fVerbose(0),
                                                                      fLearningRate(1),
-                                                                     fNumIterations(10)
+                                                                     fNumIterations(10),
+                                                                     fConvergenceCriteria(1)
 {
     // fN is the number of daughters e.g. (L->ppi-) n=2
     fN = cands.size();
@@ -49,7 +50,8 @@ HVertexFitter::HVertexFitter(const std::vector<HRefitCand> &cands, HRefitCand &m
                                                                                          fMother(mother),
                                                                                          fVerbose(0),
                                                                                          fLearningRate(1),
-                                                                                         fNumIterations(10)
+                                                                                         fNumIterations(10),
+                                                                                         fConvergenceCriteria(1)
 {
     // fN is the number of daughters e.g. (L->ppi-) n=2
     fN = cands.size();
@@ -535,7 +537,7 @@ bool HVertexFitter::fit()
         //chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * d;
         chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * f_eval(neu_alpha, neu_xi);
         //for checking convergence
-        if (fabs(chi2 - chisqrd(0, 0)) < 0.01)
+        if (fabs(chi2 - chisqrd(0, 0)) < fConvergenceCriteria)
         {
             fIteration = q;
             fConverged = true;

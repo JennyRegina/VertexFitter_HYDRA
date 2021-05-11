@@ -55,7 +55,8 @@ private:
     TMatrixD y, x, V, Vx, fPull;
     double fChi2, fProb;
     bool fConverged;
-    int fIteration, fN, fyDim;
+    int fIteration, fN, fyDim;    
+    double fConvergenceCriteria;
     std::vector<HRefitCand> fCands;
     HRefitCand fMother;
 
@@ -85,6 +86,7 @@ public:
 
     void setLearningRate(double val) { fLearningRate = val; }
     void setNumberOfIterations(int val) { fNumIterations = val; }
+    void setConvergenceCriteria(double val) { fConvergenceCriteria = val; }
 
     double getChi2() const { return fChi2; }
     double getProb() const { return fProb; }
