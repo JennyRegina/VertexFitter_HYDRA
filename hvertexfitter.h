@@ -61,12 +61,11 @@ private:
     HRefitCand fMother;
 
     // data members for constraints
-    //double fMass;
     int fNdf;
     std::vector<double> fM;
-    //TLorentzVector fInit;
+    TLorentzVector fLv4C;
 
-    bool fVtxConstraint, f3Constraint;
+    bool fVtxConstraint, f3Constraint, f4Constraint;
     int fVerbose;
 
     double fLearningRate;
@@ -82,6 +81,7 @@ public:
     TMatrixD Fxi_eval(const TMatrixD &miter, const TMatrixD &xi_iter);
 
     void add3Constraint();
+    void add4Constraint();
     void addVertexConstraint();
 
     void setLearningRate(double val) { fLearningRate = val; }
