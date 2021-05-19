@@ -46,9 +46,6 @@ void HNeutralCandFinder::setNeutralMotherCand(double valMomentum, double valThet
         std::cout << "" << std::endl;
     }
 
-    //TODO make sure that all properties of the virtual cand is set properly
-    //TODO use matrix notation to include the correlations in the errors
-
     fNeutralMotherCandidate.setMomentum(valMomentum);
     fNeutralMotherCandidate.setTheta(TMath::RadToDeg() * valTheta);
     fNeutralMotherCandidate.setPhi(TMath::RadToDeg() * valPhi);
@@ -182,9 +179,13 @@ void HNeutralCandFinder::setNeutralMotherCandFromPrimaryVtxInfo(TVector3 primary
 
     // Calculate the covariance matrix for the Lambda Candidate
 
-    double x_vertex = decayVertex.X();
-    double y_vertex = decayVertex.Y();
-    double z_vertex = decayVertex.Z();
+    //double x_vertex = decayVertex.X();
+    //double y_vertex = decayVertex.Y();
+    //double z_vertex = decayVertex.Z();
+
+    double x_vertex = vecPrimToDecayVertex.X();
+    double y_vertex = vecPrimToDecayVertex.Y();
+    double z_vertex = vecPrimToDecayVertex.Z();
 
     // the errors below are estimated from difference distributions between reconstructed - MC truth for the vertex
     // The errors are estimated from the histograms where both vertices were found in an event
@@ -197,6 +198,10 @@ void HNeutralCandFinder::setNeutralMotherCandFromPrimaryVtxInfo(TVector3 primary
     // Calculate the error in theta
     double r = sqrt(x_vertex * x_vertex + y_vertex * y_vertex + z_vertex * z_vertex);
 
+    double dr_dx=x_vertex/r;
+    double dr_dy=y_vertex/r;
+    double dr_dz=z_vertex/r;
+
     double dtheta_dx = x_vertex * z_vertex / (r * r * r * sqrt(1 - z_vertex / (r * r)));
     double dtheta_dy = y_vertex * z_vertex / (r * r * r * sqrt(1 - z_vertex / (r * r)));
     double dtheta_dz = (1 / r - z_vertex * z_vertex / (r * r * r)) / sqrt(1 - z_vertex * z_vertex / (r * r));
@@ -208,7 +213,8 @@ void HNeutralCandFinder::setNeutralMotherCandFromPrimaryVtxInfo(TVector3 primary
 
     double dphi_dx = -x_vertex * y_vertex / (sqrt(x_vertex * x_vertex / (r_2D * r_2D)) * r_2D * r_2D * r_2D);
     double dphi_dy = sqrt(x_vertex * x_vertex / (r_2D * r_2D)) / r_2D;
-    // dphi_dz=0;
+
+    double dphi_dz=0;
 
     double sigma_phi = sqrt(dphi_dx * dphi_dx * sigma_x * sigma_x + dphi_dy * dphi_dy * sigma_y * sigma_y);
 
@@ -217,13 +223,57 @@ void HNeutralCandFinder::setNeutralMotherCandFromPrimaryVtxInfo(TVector3 primary
     double dR_dy = y_vertex / r_2D;
 
     double sigma_R = sqrt(dR_dx * dR_dx * sigma_x * sigma_x + dR_dy * dR_dy * sigma_y * sigma_y);
+    
+    TMatrixD covarianceDetectorSystem;
+    covarianceDetectorSystem.ResizeTo(3, 3);
+    covarianceDetectorSystem.Zero();
+
+    covarianceDetectorSystem(0,0)= sigma_x * sigma_x;
+    covarianceDetectorSystem(1,1)= sigma_y * sigma_y;
+    covarianceDetectorSystem(2,2)= sigma_z * sigma_z;
+    
+    TMatrixD derivativeMatrix;
+    derivativeMatrix.ResizeTo(3, 3);
+    derivativeMatrix.Zero();
+    
+    // First row derivatives of r
+    derivativeMatrix(0,0)=dr_dx;
+    derivativeMatrix(0,1)=dr_dy;
+    derivativeMatrix(0,2)=dr_dz;
+
+    // Second row derivative of theta
+    derivativeMatrix(1,0)=dtheta_dx;
+    derivativeMatrix(1,1)=dtheta_dy;
+    derivativeMatrix(1,2)=dtheta_dz;
+
+    // Last row, derviatives of phi
+    derivativeMatrix(2,0)=dphi_dx;
+    derivativeMatrix(2,1)=dphi_dy;
+    derivativeMatrix(2,2)=dphi_dz;
+
+    TMatrixD derivativeMatrixTranspose;
+    derivativeMatrixTranspose.ResizeTo(3, 3);
+    derivativeMatrixTranspose.Zero();
+    derivativeMatrixTranspose.Transpose(derivativeMatrix);
+
+    TMatrixD covarianceNeutralMother;
+    covarianceNeutralMother.ResizeTo(3, 3);
+    covarianceNeutralMother=derivativeMatrix*covarianceDetectorSystem*derivativeMatrixTranspose;
 
     fCovarianceNeutralMother.ResizeTo(5, 5);
     fCovarianceNeutralMother(0, 0) = 9999999;
-    fCovarianceNeutralMother(1, 1) = sigma_theta * sigma_theta;
-    fCovarianceNeutralMother(2, 2) = sigma_phi * sigma_phi;
+    //fCovarianceNeutralMother(1, 1) = sigma_theta * sigma_theta;
+    //fCovarianceNeutralMother(2, 2) = sigma_phi * sigma_phi;
+    fCovarianceNeutralMother(1, 1) = covarianceNeutralMother(1,1);
+    fCovarianceNeutralMother(2, 2) = covarianceNeutralMother(2,2);
+    fCovarianceNeutralMother(1, 2) = covarianceNeutralMother(1,2);
+    fCovarianceNeutralMother(2, 1) = covarianceNeutralMother(2,1);
     fCovarianceNeutralMother(3, 3) = sigma_R * sigma_R;
     fCovarianceNeutralMother(4, 4) = sigma_z * sigma_z;
 
+    // Jenny: Comments below are for testing so that the covariance matrix is read in correctly
+    // std::cout << "Nautral Cand FInder" << std::endl;
+    // std::cout << "Diag elements: " << fCovarianceNeutralMother(1, 1) << " " << fCovarianceNeutralMother(2, 2) << std::endl;
+    // std::cout << "Off diag elements: " << fCovarianceNeutralMother(1,2) << " " <<  fCovarianceNeutralMother(2,1) << std::endl;
 
 }
