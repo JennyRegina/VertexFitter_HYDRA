@@ -359,7 +359,7 @@ TMatrixD HVertexFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_ite
         {
             //d(1/p)
             H(0, q * cov_dim) = -1. / pow(m_iter(0 + q * cov_dim, 0), 2) * sin(m_iter(1 + q * cov_dim, 0)) * cos(m_iter(2 + q * cov_dim, 0));
-            H(1, q * cov_dim) = -1. / pow(m_iter(0 + q * cov_dim, 0), 2) * sin(m_iter(1 + q * cov_dim, 0)) * cos(m_iter(2 + q * cov_dim, 0));
+            H(1, q * cov_dim) = -1. / pow(m_iter(0 + q * cov_dim, 0), 2) * sin(m_iter(1 + q * cov_dim, 0)) * sin(m_iter(2 + q * cov_dim, 0));
             H(2, q * cov_dim) = -1. / pow(m_iter(0 + q * cov_dim, 0), 2) * cos(m_iter(1 + q * cov_dim, 0));
             H(3, q * cov_dim) = -1. / pow(m_iter(0 + q * cov_dim, 0), 3) * 1. / sqrt(pow(1. / (m_iter(0 + q * cov_dim, 0)), 2) + pow(fM[q], 2));
 
