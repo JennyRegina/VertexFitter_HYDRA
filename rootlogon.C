@@ -86,7 +86,7 @@ void rootlogon(TString additional_libs           = "",
    common_libs += "EventDisplay ";
    common_libs += "Alignment ";
    //common_libs +="KineRefit";
-   common_libs += "VertexFit";
+   common_libs += "KinFit";
 
    ////// here we go ...
 
