@@ -23,7 +23,9 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands) : fCands(cands),
     fIteration = 0;
     fNdf = 0;
     f3Constraint = false;
+    f4Constraint = false;
     fVtxConstraint = false;
+    fMomConstraint = false;
 
     // set 'y=alpha' measurements
     // and the covariance
@@ -73,7 +75,9 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, HRefitCand &mother)
     fIteration = 0;
     fNdf = 0;
     f3Constraint = false;
+    f4Constraint = false;
     fVtxConstraint = false;
+    fMomConstraint = false;
 
     // set y to measurements and the covariance, set mass
     for (int ix = 0; ix < fN; ix++) //for daughters
@@ -150,6 +154,7 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, TLorentzVector& lv)
     f3Constraint = false;
     f4Constraint = false;
     fVtxConstraint = false;
+    fMomConstraint = false;
 
     // set y to measurements and the covariance, set mass
     for (int ix = 0; ix < fN; ix++) //for daughters
@@ -202,6 +207,7 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, TLorentzVector& lv,
     f3Constraint = false;
     f4Constraint = false;
     fVtxConstraint = false;
+    fMomConstraint = false;
 
     // set y to measurements and the covariance, set mass
     for (int ix = 0; ix < fN; ix++) //for daughters
