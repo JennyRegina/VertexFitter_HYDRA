@@ -8,14 +8,15 @@
 ##############################################################################
 
 
-LIB_NAME := VertexFit
+LIB_NAME := KinFit
 
 USES_ORACLE= : no
 
-SOURCE_FILES := hrefitcand.cc \
-		hvertexfitter.cc \
+SOURCE_FILES := hdecaybuilder.cc \
+        hrefitcand.cc \
+		hkinfitter.cc \
 		hvertexfinder.cc \
-        hneutralcandfinder.cc
+        hneutralcandfinder.cc   
 
 
 include $(HADDIR)/hades.def.mk

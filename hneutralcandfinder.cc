@@ -8,6 +8,7 @@ HNeutralCandFinder::HNeutralCandFinder(const std::vector<HRefitCand> &cands) : f
     double param_p1, param_p2;
     
     HRefitCand cand1 = cands[0];
+    
 
     param_p1 = cand1.P(); // Not the inverse, this momentum is used for estimating the momentum of the Lambda Candidate
 
