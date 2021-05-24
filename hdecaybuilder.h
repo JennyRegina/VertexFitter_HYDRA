@@ -21,8 +21,14 @@
 #include "hparticletool.h"
 #include "hgeomvertexfit.h"
 
+#include "hkinfitter.h"
+#include "hvertexfinder.h"
+#include "hneutralcandfinder.h"
+
 using std::cout;
 using std::endl;
+
+double deg2rad = TMath::DegToRad();
 
 class HDecayBuilder
 {

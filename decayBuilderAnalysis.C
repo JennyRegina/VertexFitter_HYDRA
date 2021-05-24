@@ -6,7 +6,7 @@
 #include "hparticleanglecor.h"
 #include "hparticlepairmaker.h"
 #include "hparticletool.h"
-#include "hparticletracksorter.h"   
+#include "hparticletracksorter.h"
 #include "hphysicsconstants.h"
 #include "htool.h"
 
@@ -37,7 +37,8 @@
 #include <map>
 #include <vector>
 
-#include "hvertexfitter.h"
+#include "hdecaybuilder.h"
+#include "hkinfitter.h"
 #include "hvertexfinder.h"
 #include "hneutralcandfinder.h"
 
@@ -91,7 +92,7 @@ Bool_t selectHadrons(HParticleCand *pcand)
     return test;
 }
 
-Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades/user/jregina/Pluto/DST/OutputFolder/pplpk_million_Hgeant_*1_dst_apr12.root", Int_t nEvents = 1500000)
+Int_t decayBuilderAnalysis(TString infileList = "/lustre/hades/user/jregina/Pluto/DST/OutputFolder/pplpk_million_Hgeant_*1_dst_apr12.root", Int_t nEvents = 1500000)
 {
 
     // Original input: pp_pKlambda_100000evts1_dst_apr12.root
@@ -142,7 +143,7 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
     TH1F *h021 = (TH1F *)h02->Clone("hChi2_3c");
     TH1F *h023 = (TH1F *)h02->Clone("hChi2_3cConv");
 
-    TH1F *h03Zoomed = new TH1F("hPChi2Zoomed", "", 10000, 0, pow(10,-200));
+    TH1F *h03Zoomed = new TH1F("hPChi2Zoomed", "", 10000, 0, pow(10, -200));
     h03Zoomed->SetXTitle("P(#chi^{2})");
     h03Zoomed->SetYTitle(" Counts ");
 
@@ -586,7 +587,7 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
     TH1F *hVertexXDiffPrim_BestComb = (TH1F *)hVertexXDiffPrim->Clone("hVertexXDiffPrim_BestComb");
     TH1F *hVertexYDiffPrim_BestComb = (TH1F *)hVertexYDiffPrim->Clone("hVertexYDiffPrim_BestComb");
     TH1F *hVertexZDiffPrim_BestComb = (TH1F *)hVertexZDiffPrim->Clone("hVertexZDiffPrim_BestComb");
-    
+
     TH1F *hVertexXDiff_ProbCut_BestComb = (TH1F *)hVertexXDiff->Clone("hVertexXDiff_ProbCut_BestComb");
     TH1F *hVertexYDiff_ProbCut_BestComb = (TH1F *)hVertexYDiff->Clone("hVertexYDiff_ProbCut_BestComb");
     TH1F *hVertexZDiff_ProbCut_BestComb = (TH1F *)hVertexZDiff->Clone("hVertexZDiff_ProbCut_BestComb");
@@ -598,11 +599,11 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
     TH1F *hVertexXDiff_BothVerticesFound = (TH1F *)hVertexXDiff->Clone("hVertexXDiff_BothVerticesFound");
     TH1F *hVertexYDiff_BothVerticesFound = (TH1F *)hVertexYDiff->Clone("hVertexYDiff_BothVerticesFound");
     TH1F *hVertexZDiff_BothVerticesFound = (TH1F *)hVertexZDiff->Clone("hVertexZDiff_BothVerticesFound");
-    
+
     TH1F *hVertexXDiffPrim_BothVerticesFound = (TH1F *)hVertexXDiffPrim->Clone("hVertexXDiffPrim_BothVerticesFound");
     TH1F *hVertexYDiffPrim_BothVerticesFound = (TH1F *)hVertexYDiffPrim->Clone("hVertexYDiffPrim_BothVerticesFound");
     TH1F *hVertexZDiffPrim_BothVerticesFound = (TH1F *)hVertexZDiffPrim->Clone("hVertexZDiffPrim_BothVerticesFound");
-    
+
     // ---- Momentum -----
     TH1F *hGeantTotMomentumProtons = new TH1F("hGeantTotMomentumProtons", "", 1000, 0, 3000);
     hGeantTotMomentumProtons->SetXTitle("Momentum, X / MeV/c");
@@ -908,6 +909,25 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
         hvertex_y->Fill(evtVertex.getY());
         hvertex_z->Fill(evtVertex.getZ());
 
+        std::vector<HParticleCandSim *> candVector;
+        candVector.clear();
+
+        for (Int_t k = 0; k < ntracks; k++)
+        {
+            HParticleCandSim *cand =
+                HCategoryManager::getObject(cand, catParticle, k);
+
+            if (cand->isGhostTrack())
+                continue;
+            // select "good" tracks
+            if (!cand->isFlagBit(Particle::kIsUsed))
+                continue;
+
+            candVector.push_back(cand);
+        }
+
+        HDecayBuilder decayBuilder(candVector);
+
         for (Int_t j = 0; j < ntracks; j++)
         {
             HParticleCandSim *cand =
@@ -949,7 +969,7 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
                 pions.push_back(candidate);
             }*/
 
-             if (cand->getGeantPID() == 14) //Proton found
+            if (cand->getGeantPID() == 14) //Proton found
             {
                 //std::cout << "Parent ID: " << cand->getGeantParentPID() << std::endl;
                 if (selectHadrons(cand) == true)
@@ -990,9 +1010,9 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
             }
             else
                 continue;
-        } // end track loop 
+        } // end track loop
 
-         /*if (cand->getGeantPID() == 14) //Proton found
+        /*if (cand->getGeantPID() == 14) //Proton found
             {
                 virtualCandProtons.push_back(cand);
                 Double_t mom = cand->getGeantTotalMom();
@@ -1033,7 +1053,7 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
             else
                 continue; 
         } // end track loop  */
- 
+
         // -----------------------------------------------------------------------
         // looking at Lambda invariant mass here
         // -----------------------------------------------------------------------
@@ -1055,8 +1075,8 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
         eventCandidates.clear();
         double probPrim = -99999, probSec = -99999;
 
-        bool bestDecayVertexFound=false;
-        bool bestPrimVertexFound=false;
+        bool bestDecayVertexFound = false;
+        bool bestPrimVertexFound = false;
 
         TVector3 decayVertex_Temp, primVertex_Temp;
         TVector3 decayVertex_TempUpdated, tempVertex_TempUpdated;
@@ -1067,12 +1087,12 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
         double probDecayVertex_TempUpdated = -1;
         double probPrimVertex_TempUpdated = -1;
 
-        double bestDiffXDecay=-1;
-        double bestDiffYDecay=-1;
-        double bestDiffZDecay=-1;
-        double bestDiffXPrim=-1;
-        double bestDiffYPrim=-1;
-        double bestDiffZPrim=-1;
+        double bestDiffXDecay = -1;
+        double bestDiffYDecay = -1;
+        double bestDiffZDecay = -1;
+        double bestDiffXPrim = -1;
+        double bestDiffYPrim = -1;
+        double bestDiffZPrim = -1;
 
         double indexPrimaryProton;
         double indexDecayProton;
@@ -1104,7 +1124,8 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
 
                 HVertexFinder *vtxFinderSec = new HVertexFinder();
                 decayVertex = vtxFinderSec->findVertex(candsSec);
-
+                std::cout << "vertex position, old way: " << decayVertex.X() << " " << decayVertex.Y() << " " << decayVertex.Z() << std::endl;
+                
                 //decayVertex_Temp = decayVertex;
 
                 hVertexXPreFit->Fill(decayVertex.X());
@@ -1114,12 +1135,13 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
                 hDistanceToVertexPionPreFit->Fill(vtxFinderSec->getDistanceSecondParticleVertex());
                 hDistanceBetweenProtonAndPionPreFit->Fill(vtxFinderSec->getDistanceBetweenFittedParticles());
                 // Perform fitting of secondary vertex
-                HVertexFitter vtxFitterSecCands(candsSec);
+                HKinFitter vtxFitterSecCands(candsSec);
                 vtxFitterSecCands.addVertexConstraint();
                 vtxFitterSecCands.fit();
                 h02SecondaryVtx->Fill(vtxFitterSecCands.getChi2());
                 h03SecondaryVtx->Fill(vtxFitterSecCands.getProb());
-                h03Zoomed->Fill(vtxFitterSecCands.getProb());;
+                h03Zoomed->Fill(vtxFitterSecCands.getProb());
+                
                 //if(vtxFitterSecCands.isConverged()){
                 h06SecondaryVtx->Fill(vtxFitterSecCands.getPull(1));
                 h07SecondaryVtx->Fill(vtxFitterSecCands.getPull(2));
@@ -1132,18 +1154,18 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
 
                 eventCandidates.push_back(vtxFitterSecCands.getDaughter(0));
                 eventCandidates.push_back(vtxFitterSecCands.getDaughter(1));
-                
+
                 if (probSec > probDecayVertex_Temp)
                 {
 
-                    bestDecayVertexFound=true;
+                    bestDecayVertexFound = true;
                     probDecayVertex_Temp = probSec;
-                    decayVertexBestFit=decayVertex;
-                    indexDecayProton=n;
-                    bestDiffXDecay=decayVertex.X() - virtualCand2->getGeantxVertex();
-                    bestDiffYDecay=decayVertex.Y() - virtualCand2->getGeantyVertex();
-                    bestDiffZDecay=decayVertex.Z() - virtualCand2->getGeantzVertex();            
-                    
+                    decayVertexBestFit = decayVertex;
+                    indexDecayProton = n;
+                    bestDiffXDecay = decayVertex.X() - virtualCand2->getGeantxVertex();
+                    bestDiffYDecay = decayVertex.Y() - virtualCand2->getGeantyVertex();
+                    bestDiffZDecay = decayVertex.Z() - virtualCand2->getGeantzVertex();
+
                     cands3c.clear();
 
                     // Get the proton daughter and pass it to the 3C fit later
@@ -1151,13 +1173,12 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
 
                     // Get the pion daughter and pass it to the 3C fit later
                     cands3c.push_back(vtxFitterSecCands.getDaughter(1));
-
                 }
 
                 h11SecVtx->Fill(vtxFitterSecCands.getIteration());
 
                 //if (probSec > 0.000001)
-                if(probSec > 0)
+                if (probSec > 0)
                 {
 
                     h13SecondaryVtx->Fill(vtxFitterSecCands.getPull(1));
@@ -1168,7 +1189,7 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
                     hVertexXDiff_ProbCut->Fill(decayVertex.X() - virtualCand2->getGeantxVertex());
                     hVertexYDiff_ProbCut->Fill(decayVertex.Y() - virtualCand2->getGeantyVertex());
                     hVertexZDiff_ProbCut->Fill(decayVertex.Z() - virtualCand2->getGeantzVertex());
-                    
+
                     if (vtxFitterSecCands.isConverged())
                     {
                         TLorentzVector lambdaVtxFit = vtxFitterSecCands.getDaughter(0) + vtxFitterSecCands.getDaughter(1);
@@ -1258,7 +1279,7 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
                 hRecoPhiKaons->Fill(cand3.Phi());
                 hRecoMomentumKaons->Fill(cand3.P());
                 // Perform fitting of primary vertex
-                HVertexFitter vtxFitterPrimCands(candsPrim);
+                HKinFitter vtxFitterPrimCands(candsPrim);
                 //vtxFitterPrimCands.setNumberOfIterations(1);
                 vtxFitterPrimCands.addVertexConstraint();
                 vtxFitterPrimCands.fit();
@@ -1266,22 +1287,21 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
                 h02->Fill(vtxFitterPrimCands.getChi2());
                 h03->Fill(vtxFitterPrimCands.getProb());
 
-                probPrim = vtxFitterPrimCands.getProb();                
-                
+                probPrim = vtxFitterPrimCands.getProb();
+
                 eventCandidates.push_back(vtxFitterPrimCands.getDaughter(0));
                 eventCandidates.push_back(vtxFitterPrimCands.getDaughter(1));
-                
+
                 if (probPrim > probPrimVertex_Temp)
                 {
 
-                    bestPrimVertexFound=true;
+                    bestPrimVertexFound = true;
                     probPrimVertex_Temp = probPrim;
-                    primVertexBestFit=primaryVertex;
-                    indexPrimaryProton=n;
-                    bestDiffXPrim=primaryVertex.X() - virtualCand3->getGeantxVertex();
-                    bestDiffYPrim=primaryVertex.Y() - virtualCand3->getGeantyVertex();
-                    bestDiffZPrim=primaryVertex.Z() - virtualCand3->getGeantzVertex();
-
+                    primVertexBestFit = primaryVertex;
+                    indexPrimaryProton = n;
+                    bestDiffXPrim = primaryVertex.X() - virtualCand3->getGeantxVertex();
+                    bestDiffYPrim = primaryVertex.Y() - virtualCand3->getGeantyVertex();
+                    bestDiffZPrim = primaryVertex.Z() - virtualCand3->getGeantzVertex();
                 }
 
                 h11->Fill(vtxFitterPrimCands.getIteration());
@@ -1308,7 +1328,7 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
                 hVertexZDiffPrim->Fill(primaryVertex.Z() - virtualCand3->getGeantzVertex());
 
                 //if (probPrim > 0.000001)
-                if(probPrim > 0)
+                if (probPrim > 0)
                 {
 
                     hVertexXDiffPrim_ProbCut->Fill(primaryVertex.X() - virtualCand3->getGeantxVertex());
@@ -1323,152 +1343,152 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
             }
         }
 
-        if(bestDecayVertexFound==true){
+        if (bestDecayVertexFound == true)
+        {
 
             hVertexXDiff_BestComb->Fill(bestDiffXDecay);
             hVertexYDiff_BestComb->Fill(bestDiffYDecay);
             hVertexZDiff_BestComb->Fill(bestDiffZDecay);
-            
-            if (probDecayVertex_Temp > 0.000001){
+
+            if (probDecayVertex_Temp > 0.000001)
+            {
 
                 hVertexXDiff_ProbCut_BestComb->Fill(bestDiffXDecay);
                 hVertexYDiff_ProbCut_BestComb->Fill(bestDiffYDecay);
                 hVertexZDiff_ProbCut_BestComb->Fill(bestDiffZDecay);
-            
             }
+        }
 
-        }        
-        
-        if(bestPrimVertexFound==true){
+        if (bestPrimVertexFound == true)
+        {
 
             hVertexXDiffPrim_BestComb->Fill(bestDiffXPrim);
             hVertexYDiffPrim_BestComb->Fill(bestDiffYPrim);
             hVertexZDiffPrim_BestComb->Fill(bestDiffZPrim);
-            
-            if (probPrimVertex_Temp > 0.000001){
+
+            if (probPrimVertex_Temp > 0.000001)
+            {
 
                 hVertexXDiffPrim_ProbCut_BestComb->Fill(bestDiffXPrim);
                 hVertexYDiffPrim_ProbCut_BestComb->Fill(bestDiffYPrim);
                 hVertexZDiffPrim_ProbCut_BestComb->Fill(bestDiffZPrim);
-            
             }
-
         }
 
         if (bestPrimVertexFound == true && bestDecayVertexFound == true)
         {
-            if(indexDecayProton!=indexPrimaryProton){
-
-            double distPrimToDecayVertex = sqrt((decayVertexBestFit.X() - primVertexBestFit.X()) * (decayVertexBestFit.X() - primVertexBestFit.X()) + (decayVertexBestFit.Y() - primVertexBestFit.Y()) * (decayVertexBestFit.Y() - primVertexBestFit.Y()) + (decayVertexBestFit.Z() - primVertexBestFit.Z()) * (decayVertexBestFit.Z() - primVertexBestFit.Z()));
-            
-            hDistPrimToDecayVertex->Fill(distPrimToDecayVertex);
-
-            hVertexXDiff_BothVerticesFound->Fill(bestDiffXDecay);
-            hVertexYDiff_BothVerticesFound->Fill(bestDiffYDecay);
-            hVertexZDiff_BothVerticesFound->Fill(bestDiffZDecay);
-
-            hVertexXDiffPrim_BothVerticesFound->Fill(bestDiffXPrim);
-            hVertexYDiffPrim_BothVerticesFound->Fill(bestDiffYPrim);
-            hVertexZDiffPrim_BothVerticesFound->Fill(bestDiffZPrim);
-
-            double R_primaryVertex, R_decayVertex;
-
-            R_primaryVertex = sqrt(primVertexBestFit.X() * primVertexBestFit.X() + primVertexBestFit.Y() * primVertexBestFit.Y());
-            R_decayVertex = sqrt(decayVertexBestFit.X() * decayVertexBestFit.X() + decayVertexBestFit.Y() * decayVertexBestFit.Y());
-                        
-            hVertexXPostFit->Fill(decayVertexBestFit.X());
-            hVertexYPostFit->Fill(decayVertexBestFit.Y());
-            hVertexZPostFit->Fill(decayVertexBestFit.Z());
-
-            hPrimVertexXPostFit->Fill(primVertexBestFit.X());
-            hPrimVertexYPostFit->Fill(primVertexBestFit.Y());
-            hPrimVertexZPostFit->Fill(primVertexBestFit.Z());
-
-            HNeutralCandFinder lambdaCandFinder(cands3c);
-
-            lambdaCandFinder.setUsePrimaryVertexInNeutralMotherCalculation(true);
-
-            lambdaCandFinder.setNeutralMotherCandFromPrimaryVtxInfo(primaryVertex,decayVertex);
-
-            HVirtualCand lambdaCand = lambdaCandFinder.getNeutralMotherCandidate();
-
-            HRefitCand lambdaCandRefit(&lambdaCand);
-            lambdaCandRefit.SetXYZM(lambdaCand.getMomentum() * std::sin(lambdaCand.getTheta() * deg2rad) *
-                                        std::cos(lambdaCand.getPhi() * deg2rad),
-                                    lambdaCand.getMomentum() * std::sin(lambdaCand.getTheta() * deg2rad) *
-                                        std::sin(lambdaCand.getPhi() * deg2rad),
-                                    lambdaCand.getMomentum() * std::cos(lambdaCand.getTheta() * deg2rad),
-                                    1115.683);
-            
-            TMatrixD lambdaCov(5, 5);
-            lambdaCov=lambdaCandFinder.getCovarianceMatrixNeutralMother();
-            lambdaCandRefit.setCovariance(lambdaCov);                     
-            hMomLambda->Fill(lambdaCandRefit.P());
-            
-            lambdaCandRefit.setR(lambdaCand.getR());
-            lambdaCandRefit.setZ(lambdaCand.getZ());
-
-            lambdaCandRefit.SetTheta(lambdaCand.getTheta() * deg2rad);
-            lambdaCandRefit.SetPhi(lambdaCand.getPhi() * deg2rad);
-
-            hRecoRLambda->Fill(lambdaCand.getR());
-            hRecoZLambda->Fill(lambdaCand.getZ());
-            hRecoThetaLambda->Fill(lambdaCand.getTheta() * deg2rad);
-            hRecoPhiLambda->Fill(lambdaCand.getPhi() * deg2rad);
-
-            // Take the lambda mass before the fit
-            TLorentzVector lambdaCandBefore3C = cands3c[0] + cands3c[1];
-            hLambdaMassBeforeFit->Fill(lambdaCandBefore3C.M());
-            
-            if(cands3c.size()==2){
-            HVertexFitter Fitter3c(cands3c, lambdaCandRefit);
-            Fitter3c.add3Constraint();
-            Fitter3c.setNumberOfIterations(20);
-
-            Fitter3c.fit();
-            if (Fitter3c.isConverged())
-            {
-            //HRefitCand fcand1 = Fitter3c.getDaughter(0); // proton
-            //HRefitCand fcand2 = Fitter3c.getDaughter(1); // pion
-            HRefitCand flambda = Fitter3c.getMother();
-            
-            HRefitCand cand13C = Fitter3c.getDaughter(0); // proton
-            HRefitCand cand23C = Fitter3c.getDaughter(1); // pion
-            TLorentzVector lambdaCand3C = cand13C + cand23C;
-            h04->Fill(lambdaCand3C.M());
-            }
-
-            h021->Fill(Fitter3c.getChi2());
-            h031->Fill(Fitter3c.getProb());
-            }
-            
-            if (R_primaryVertex < R_decayVertex)
+            if (indexDecayProton != indexPrimaryProton)
             {
 
-                primVertexInsideDecayVertex++;
-            }
-            else
-            {
-                decayVertexInsidePrimVertex++;
-            }
+                double distPrimToDecayVertex = sqrt((decayVertexBestFit.X() - primVertexBestFit.X()) * (decayVertexBestFit.X() - primVertexBestFit.X()) + (decayVertexBestFit.Y() - primVertexBestFit.Y()) * (decayVertexBestFit.Y() - primVertexBestFit.Y()) + (decayVertexBestFit.Z() - primVertexBestFit.Z()) * (decayVertexBestFit.Z() - primVertexBestFit.Z()));
 
-            if (primVertexBestFit.Z() < decayVertexBestFit.Z())
-            {
+                hDistPrimToDecayVertex->Fill(distPrimToDecayVertex);
 
-                hRecoRLambdaZCut->Fill(lambdaCand.getR());
-                hRecoZLambdaZCut->Fill(lambdaCand.getZ());
-                hRecoThetaLambdaZCut->Fill(lambdaCand.getTheta() * deg2rad);
-                hRecoPhiLambdaZCut->Fill(lambdaCand.getPhi() * deg2rad);
+                hVertexXDiff_BothVerticesFound->Fill(bestDiffXDecay);
+                hVertexYDiff_BothVerticesFound->Fill(bestDiffYDecay);
+                hVertexZDiff_BothVerticesFound->Fill(bestDiffZDecay);
 
-                primVertexBeforeDecayVertex++;
+                hVertexXDiffPrim_BothVerticesFound->Fill(bestDiffXPrim);
+                hVertexYDiffPrim_BothVerticesFound->Fill(bestDiffYPrim);
+                hVertexZDiffPrim_BothVerticesFound->Fill(bestDiffZPrim);
+
+                double R_primaryVertex, R_decayVertex;
+
+                R_primaryVertex = sqrt(primVertexBestFit.X() * primVertexBestFit.X() + primVertexBestFit.Y() * primVertexBestFit.Y());
+                R_decayVertex = sqrt(decayVertexBestFit.X() * decayVertexBestFit.X() + decayVertexBestFit.Y() * decayVertexBestFit.Y());
+
+                hVertexXPostFit->Fill(decayVertexBestFit.X());
+                hVertexYPostFit->Fill(decayVertexBestFit.Y());
+                hVertexZPostFit->Fill(decayVertexBestFit.Z());
+
+                hPrimVertexXPostFit->Fill(primVertexBestFit.X());
+                hPrimVertexYPostFit->Fill(primVertexBestFit.Y());
+                hPrimVertexZPostFit->Fill(primVertexBestFit.Z());
+
+                HNeutralCandFinder lambdaCandFinder(cands3c);
+
+                lambdaCandFinder.setUsePrimaryVertexInNeutralMotherCalculation(true);
+
+                lambdaCandFinder.setNeutralMotherCandFromPrimaryVtxInfo(primaryVertex, decayVertex);
+
+                HVirtualCand lambdaCand = lambdaCandFinder.getNeutralMotherCandidate();
+
+                HRefitCand lambdaCandRefit(&lambdaCand);
+                lambdaCandRefit.SetXYZM(lambdaCand.getMomentum() * std::sin(lambdaCand.getTheta() * deg2rad) *
+                                            std::cos(lambdaCand.getPhi() * deg2rad),
+                                        lambdaCand.getMomentum() * std::sin(lambdaCand.getTheta() * deg2rad) *
+                                            std::sin(lambdaCand.getPhi() * deg2rad),
+                                        lambdaCand.getMomentum() * std::cos(lambdaCand.getTheta() * deg2rad),
+                                        1115.683);
+
+                TMatrixD lambdaCov(5, 5);
+                lambdaCov = lambdaCandFinder.getCovarianceMatrixNeutralMother();
+                lambdaCandRefit.setCovariance(lambdaCov);
+                hMomLambda->Fill(lambdaCandRefit.P());
+
+                lambdaCandRefit.setR(lambdaCand.getR());
+                lambdaCandRefit.setZ(lambdaCand.getZ());
+
+                lambdaCandRefit.SetTheta(lambdaCand.getTheta() * deg2rad);
+                lambdaCandRefit.SetPhi(lambdaCand.getPhi() * deg2rad);
+
+                hRecoRLambda->Fill(lambdaCand.getR());
+                hRecoZLambda->Fill(lambdaCand.getZ());
+                hRecoThetaLambda->Fill(lambdaCand.getTheta() * deg2rad);
+                hRecoPhiLambda->Fill(lambdaCand.getPhi() * deg2rad);
+
+                // Take the lambda mass before the fit
+                TLorentzVector lambdaCandBefore3C = cands3c[0] + cands3c[1];
+                hLambdaMassBeforeFit->Fill(lambdaCandBefore3C.M());
+
+                if (cands3c.size() == 2)
+                {
+                    HKinFitter Fitter3c(cands3c, lambdaCandRefit);
+                    Fitter3c.add3Constraint();
+                    Fitter3c.setNumberOfIterations(20);
+
+                    Fitter3c.fit();
+                    if (Fitter3c.isConverged())
+                    {
+                        //HRefitCand fcand1 = Fitter3c.getDaughter(0); // proton
+                        //HRefitCand fcand2 = Fitter3c.getDaughter(1); // pion
+                        HRefitCand flambda = Fitter3c.getMother();
+
+                        HRefitCand cand13C = Fitter3c.getDaughter(0); // proton
+                        HRefitCand cand23C = Fitter3c.getDaughter(1); // pion
+                        TLorentzVector lambdaCand3C = cand13C + cand23C;
+                        h04->Fill(lambdaCand3C.M());
+                    }
+
+                    h021->Fill(Fitter3c.getChi2());
+                    h031->Fill(Fitter3c.getProb());
+                }
+
+                if (R_primaryVertex < R_decayVertex)
+                {
+
+                    primVertexInsideDecayVertex++;
+                }
+                else
+                {
+                    decayVertexInsidePrimVertex++;
+                }
+
+                if (primVertexBestFit.Z() < decayVertexBestFit.Z())
+                {
+
+                    hRecoRLambdaZCut->Fill(lambdaCand.getR());
+                    hRecoZLambdaZCut->Fill(lambdaCand.getZ());
+                    hRecoThetaLambdaZCut->Fill(lambdaCand.getTheta() * deg2rad);
+                    hRecoPhiLambdaZCut->Fill(lambdaCand.getPhi() * deg2rad);
+
+                    primVertexBeforeDecayVertex++;
+                }
+                else
+                {
+                    decayVertexBeforePrimVertex++;
+                }
             }
-            else
-            {
-                decayVertexBeforePrimVertex++;
-            }
-
-            }
-
         }
 
     } // end of the events loop
@@ -1580,16 +1600,16 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
 
     hVertexXDiff_ProbCut->Write();
     hVertexYDiff_ProbCut->Write();
-    hVertexZDiff_ProbCut->Write(); 
+    hVertexZDiff_ProbCut->Write();
 
     hVertexXDiff_BestComb->Write();
     hVertexYDiff_BestComb->Write();
-    hVertexZDiff_BestComb->Write();    
-    
+    hVertexZDiff_BestComb->Write();
+
     hVertexXDiff_ProbCut_BestComb->Write();
     hVertexYDiff_ProbCut_BestComb->Write();
     hVertexZDiff_ProbCut_BestComb->Write();
-            
+
     hVertexXDiff_BothVerticesFound->Write();
     hVertexYDiff_BothVerticesFound->Write();
     hVertexZDiff_BothVerticesFound->Write();
@@ -1605,15 +1625,15 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
     hVertexXDiffPrim->Write();
     hVertexYDiffPrim->Write();
     hVertexZDiffPrim->Write();
-    
+
     hVertexXDiffPrim_ProbCut->Write();
     hVertexYDiffPrim_ProbCut->Write();
-    hVertexZDiffPrim_ProbCut->Write();    
+    hVertexZDiffPrim_ProbCut->Write();
 
     hVertexXDiffPrim_BestComb->Write();
     hVertexYDiffPrim_BestComb->Write();
-    hVertexZDiffPrim_BestComb->Write();    
-    
+    hVertexZDiffPrim_BestComb->Write();
+
     hVertexXDiffPrim_ProbCut_BestComb->Write();
     hVertexYDiffPrim_ProbCut_BestComb->Write();
     hVertexZDiffPrim_ProbCut_BestComb->Write();
@@ -1621,7 +1641,7 @@ Int_t analysisVertexFinder_million_Realistic(TString infileList = "/lustre/hades
     hVertexXDiffPrim_BothVerticesFound->Write();
     hVertexYDiffPrim_BothVerticesFound->Write();
     hVertexZDiffPrim_BothVerticesFound->Write();
-    
+
     hGeantTotMomentumProtons->Write();
     hGeantXMomentumProtons->Write();
     hGeantYMomentumProtons->Write();

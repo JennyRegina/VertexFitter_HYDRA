@@ -1,24 +1,118 @@
 #include "hdecaybuilder.h"
 
-HDecayBuilder::HDecayBuilder(std::vector<HParticleCandSim*> particleCands) : fParticleCands(particleCands),
-                                                                                 fVerbose(0)
-{        
+HDecayBuilder::HDecayBuilder(std::vector<HParticleCandSim *> particleCands) : fParticleCands(particleCands),
+                                                                              fVerbose(0)
+{
+    std::cout << "Decay Builder" << std::endl;
     fProtons.clear();
     fPions.clear();
     fKaons.clear();
-    
+
     // Loop over all input tracks
-    for (int numInputCands = 0; numInputCands < (int) fParticleCands.size(); numInputCands++)
+    for (int numInputCands = 0; numInputCands < (int)fParticleCands.size(); numInputCands++)
     {
 
-       
         HParticleCandSim *inputParticleCand = particleCands[numInputCands];
-        HRefitCand *refitCand =new HRefitCand(inputParticleCand);
+        HRefitCand *refitCand = new HRefitCand(inputParticleCand);
 
         estimateCovarianceMatrix(inputParticleCand, refitCand);
     }
+    
+    bool bestPrimVertexFound=false;
+    bool bestDecayVertexFound=false;
 
+    TVector3 decayVertex;
+    TVector3 primVertex;
+    
+    std::vector<HRefitCand> cands3c;
+    cands3c.clear();
+    
     // Perform the analysis
+    for (size_t n = 0; n < fProtons.size(); n++)
+    {
+        HRefitCand* cand1Ptr = fProtons[n];
+        HRefitCand cand1= *cand1Ptr;
+        
+        for (size_t m = 0; m < fPions.size(); m++)
+        {
+            HRefitCand* cand2Ptr = fPions[m]; 
+            HRefitCand cand2= *cand2Ptr;               
+            
+            std::vector<HRefitCand> candsSec;
+            candsSec.clear();
+            candsSec.push_back(cand1);
+            candsSec.push_back(cand2);
+            HVertexFinder *vtxFinderSec = new HVertexFinder();
+            decayVertex = vtxFinderSec->findVertex(candsSec);
+            
+            // Kinematic fitting with vertex constraint
+            HKinFitter vtxFitterSecCands(candsSec); 
+            bestDecayVertexFound=true;   
+            vtxFitterSecCands.addVertexConstraint();
+            vtxFitterSecCands.fit();
+                   
+            cands3c.clear();
+            // Get the proton daughter and pass it to the 3C fit later
+            cands3c.push_back(vtxFitterSecCands.getDaughter(0));
+            // Get the pion daughter and pass it to the 3C fit later
+            cands3c.push_back(vtxFitterSecCands.getDaughter(1));
+            //std::cout << "vertex position: " << decayVertex.X() << " " << decayVertex.Y() << " " << decayVertex.Z() << std::endl;
+
+        }
+
+        for (size_t p = 0; p < fKaons.size(); p++)
+        {
+            HRefitCand* cand3Ptr = fKaons[p];
+            HRefitCand cand3= *cand3Ptr;
+
+            std::vector<HRefitCand> candsPrim;
+            candsPrim.clear();
+            candsPrim.push_back(cand1);
+            candsPrim.push_back(cand3);
+            HVertexFinder *vtxFinderPrim = new HVertexFinder();
+            primVertex = vtxFinderPrim->findVertex(candsPrim);            
+            
+            HKinFitter vtxFitterPrimCands(candsPrim);
+            bestPrimVertexFound=true; 
+            vtxFitterPrimCands.addVertexConstraint();
+            vtxFitterPrimCands.fit();
+
+        }
+
+    }
+
+    if (bestPrimVertexFound == true && bestDecayVertexFound == true)
+    {
+        HNeutralCandFinder lambdaCandFinder(cands3c);
+
+        lambdaCandFinder.setUsePrimaryVertexInNeutralMotherCalculation(true);
+
+        lambdaCandFinder.setNeutralMotherCandFromPrimaryVtxInfo(primVertex, decayVertex);
+
+        HVirtualCand lambdaCand = lambdaCandFinder.getNeutralMotherCandidate();
+
+        HRefitCand lambdaCandRefit(&lambdaCand);
+        lambdaCandRefit.SetXYZM(lambdaCand.getMomentum() * std::sin(lambdaCand.getTheta() * deg2rad) *
+                                    std::cos(lambdaCand.getPhi() * deg2rad),
+                                lambdaCand.getMomentum() * std::sin(lambdaCand.getTheta() * deg2rad) *
+                                    std::sin(lambdaCand.getPhi() * deg2rad),
+                                lambdaCand.getMomentum() * std::cos(lambdaCand.getTheta() * deg2rad),
+                                1115.683);  
+
+        TMatrixD lambdaCov(5, 5);
+        lambdaCov = lambdaCandFinder.getCovarianceMatrixNeutralMother();
+        lambdaCandRefit.setCovariance(lambdaCov);
+        lambdaCandRefit.setR(lambdaCand.getR());
+        lambdaCandRefit.setZ(lambdaCand.getZ());
+        lambdaCandRefit.SetTheta(lambdaCand.getTheta() * deg2rad);
+        lambdaCandRefit.SetPhi(lambdaCand.getPhi() * deg2rad);
+
+        HKinFitter Fitter3c(cands3c, lambdaCandRefit);
+        Fitter3c.add3Constraint();
+        Fitter3c.setNumberOfIterations(20);
+
+        Fitter3c.fit();
+    }
 }
 
 void HDecayBuilder::estimateCovarianceMatrix(HParticleCandSim * cand, HRefitCand *refitCand)
