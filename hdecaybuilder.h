@@ -14,6 +14,7 @@
 #include <cmath>
 
 // framework includes
+#include "hcategorymanager.h"
 #include "hparticlecand.h"
 #include "hparticlecandsim.h"
 #include "hrefitcand.h"
@@ -34,12 +35,15 @@ class HDecayBuilder
 {
 private:
     std::vector<HRefitCand> fCands;
+    // Input particles
     std::vector<HParticleCandSim *> fParticleCands;
+    // Output particles after fitting
+    std::vector<HParticleCand *> fOutputCands;
     int fVerbose;
 
     // Variables used for setting the covariance matrix
-    bool fFixedErrors;
-    bool fMomDepErrors;
+    bool fFixedErrors=true;
+    bool fMomDepErrors=false;
 
     // Containers for the protons, kaons and pions in the event
     std::vector<HRefitCand*> fProtons;
@@ -47,8 +51,8 @@ private:
     std::vector<HRefitCand*> fKaons;
 
     // Variables used for the vertex finding
-    bool fFindPrimaryVertex;
-    bool fFindDecayVertex;
+    bool fFindPrimaryVertex=true;
+    bool fFindDecayVertex=true;
 
 public:
     HDecayBuilder(std::vector<HParticleCandSim*> particleCands);
@@ -72,9 +76,16 @@ public:
 
     };
 
-    void addVertexFitting();
-
+    // Functions for the user to choose which fits to use
+    void addVertexFit();
     void add3CFit();
+    void add4CFit();
+    void addMomentumFit();
+
+    void createOutputParticle(HRefitCand);
+    std::vector<HParticleCandSim> getOutput();
+
+    void createOutputCategory();
 
 };
 

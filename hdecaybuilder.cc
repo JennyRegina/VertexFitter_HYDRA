@@ -26,6 +26,7 @@ HDecayBuilder::HDecayBuilder(std::vector<HParticleCandSim *> particleCands) : fP
     
     std::vector<HRefitCand> cands3c;
     cands3c.clear();
+    fOutputCands.clear();
     
     // Perform the analysis
     for (size_t n = 0; n < fProtons.size(); n++)
@@ -112,6 +113,11 @@ HDecayBuilder::HDecayBuilder(std::vector<HParticleCandSim *> particleCands) : fP
         Fitter3c.setNumberOfIterations(20);
 
         Fitter3c.fit();
+
+        HRefitCand cand13C = Fitter3c.getDaughter(0); // proton
+        createOutputParticle(cand13C);
+        HRefitCand cand23C = Fitter3c.getDaughter(1); // pion
+        createOutputParticle(cand23C);
     }
 }
 
@@ -233,4 +239,27 @@ void HDecayBuilder::FillData(HParticleCandSim* cand, HRefitCand *outcand, double
     outcand->setZ(cand->getZ());
     outcand->setCovariance(cov);
     
+}
+
+void HDecayBuilder::createOutputParticle(HRefitCand refitCand){
+
+    HParticleCand* newParticle;
+
+    newParticle->setPhi(refitCand.Theta());
+    newParticle->setR(refitCand.getR());
+    newParticle->setZ(refitCand.getZ());
+    newParticle->setMomentum(refitCand.P()); 
+
+    fOutputCands.push_back(newParticle);
+
+}
+
+void HDecayBuilder::createOutputCategory()
+{
+
+    // Function to fill the output category
+
+    HCategoryManager catManager;
+    HCategory* cat = catManager.addCategory(1, "HParticleCandSimAfterFit");
+
 }
