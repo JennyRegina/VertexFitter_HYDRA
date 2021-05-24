@@ -14,10 +14,14 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands) : fCands(cands),
     fyDim = fN * cov_dim; //Dimension of full covariance matrix (number of measured variables x cov_dim)
 
     y.ResizeTo(fyDim, 1);
+    x.ResizeTo(1, 1);
     V.ResizeTo(fyDim, fyDim);
+    Vx.ResizeTo(1, 1);
 
     y.Zero();
+    x.Zero();
     V.Zero();
+    Vx.Zero();
 
     fConverged = false;
     fIteration = 0;
@@ -576,7 +580,8 @@ TMatrixD HKinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
 
     if (f4Constraint || fMomConstraint)
     {
-        H.ResizeTo(4, fN * cov_dim);
+        //H.ResizeTo(4, fN * cov_dim);
+        H.ResizeTo(4, fyDim);
         H.Zero();
 
         for(int q=0; q<fN; q++){
@@ -643,6 +648,7 @@ bool HKinFitter::fit()
         std::cout << "Vertex constraint set: " << fVtxConstraint << std::endl;
         std::cout << "3C set: " << f3Constraint << std::endl;
         std::cout << "4C set: " << f4Constraint << std::endl;
+        std::cout << "Momentum constraint set: " << fMomConstraint << std::endl;
         std::cout << "" << std::endl;
     }
 
@@ -656,14 +662,14 @@ bool HKinFitter::fit()
     // Calculating the inverse of the original covariance matrix that is not changed in the iterations
     TMatrixD V0_inv(V);
     V0_inv.Invert();
-
+/*
     xi0.Zero();
     xi.Zero();
     neu_xi.Zero();
-
-    if (f4Constraint == false && f3Constraint == false && fVtxConstraint == false)
+*/
+    if (f4Constraint == false && f3Constraint == false && fVtxConstraint == false && fMomConstraint == false)
     {
-        Error("fit()", Form("No constraint is chosen, use add3Constraint() or addVertexConstraint()"));
+        Error("fit()", Form("No constraint is chosen, please add constraint"));
         abort();
     }
 
@@ -691,15 +697,17 @@ bool HKinFitter::fit()
         cout << " calc f" << endl;
     }
     TMatrixD d = f_eval(alpha, xi);
-    TMatrixD D_xi(d.GetNrows(), 1), DT_xi(1, d.GetNrows()); //check dimension if other fitters are added
+    TMatrixD D_xi(d.GetNrows(), 1), DT_xi(1, d.GetNrows());
+    if (d.GetNrows()-fNdf>0) D_xi.ResizeTo(d.GetNrows(), d.GetNrows()-fNdf); DT_xi.ResizeTo(d.GetNrows()-fNdf, d.GetNrows()); //check dimension if other fitters are added
     D_xi.Zero();
     DT_xi.Zero();
-    if (fVerbose > 1)
-    {
-        cout << " calc Fxi" << endl;
-    }
-    if (f3Constraint)
+    if (f3Constraint || fMomConstraint){
+        if (fVerbose > 1)
+        {
+            cout << " calc Fxi" << endl;
+        }
         D_xi = Fxi_eval(alpha, xi);
+    }
     TMatrixD VD(D.GetNrows(), D.GetNrows());
     VD.Zero();
     TMatrixD VDD(D_xi.GetNcols(), D_xi.GetNcols());
@@ -722,7 +730,7 @@ bool HKinFitter::fit()
         }
         VD = D * V0 * DT;
         VD.Invert();
-        if (f3Constraint)
+        if (f3Constraint || fMomConstraint)
         {
             DT_xi.Transpose(D_xi);
             if (fVerbose > 1)
@@ -736,7 +744,7 @@ bool HKinFitter::fit()
         //calculate values for next iteration
         TMatrixD lambda(d); //Lagrange multiplier
         lambda.Zero();
-        if (f3Constraint)
+        if (f3Constraint || fMomConstraint)
         {
             if (fVerbose > 1)
             {
