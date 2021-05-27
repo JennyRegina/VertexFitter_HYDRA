@@ -3,11 +3,21 @@
 HDecayBuilder::HDecayBuilder(std::vector<HParticleCandSim *> particleCands) : fParticleCands(particleCands),
                                                                               fVerbose(0)
 {
-    //std::cout << "Decay Builder" << std::endl;
+    if (fVerbose > 0)
+    {
+        std::cout << "--------------- HDecayBuilder() -----------------" << std::endl;
+    }
+
     fProtons.clear();
     fPions.clear();
     fKaons.clear();
+    fPosPions.clear();
+    fNegKaons.clear();
+    fElectrons.clear();
+    fPositrons.clear();
 
+    fCandsMissPos.clear();
+    
     // Loop over all input tracks
     for (int numInputCands = 0; numInputCands < (int)fParticleCands.size(); numInputCands++)
     {
@@ -18,6 +28,24 @@ HDecayBuilder::HDecayBuilder(std::vector<HParticleCandSim *> particleCands) : fP
         estimateCovarianceMatrix(inputParticleCand, refitCand);
     }
     
+    // Performs the loop over the particles in the event and findx vertices and the fit
+    createNeutralCandidate();
+
+    // Finds electrons and fits them
+    if(fFitElectrons == true){
+        
+        fitElectrons();
+    
+    }
+}
+
+void HDecayBuilder::createNeutralCandidate(){    
+    
+    if (fVerbose > 0)
+    {
+        std::cout << "--------------- HDecayBuilder::createNeutralCandidate() -----------------" << std::endl;
+    }
+
     bool bestPrimVertexFound=false;
     bool bestDecayVertexFound=false;
 
@@ -59,7 +87,6 @@ HDecayBuilder::HDecayBuilder(std::vector<HParticleCandSim *> particleCands) : fP
 
             vtxFitterSecCands.addVertexConstraint();
             vtxFitterSecCands.fit();
-            
             probSecondBestDecay=probSec;
             probSec = vtxFitterSecCands.getProb();
 
@@ -103,7 +130,10 @@ HDecayBuilder::HDecayBuilder(std::vector<HParticleCandSim *> particleCands) : fP
                 bestPrimVertexFound = true;
                 probPrimVertex_Temp = probPrim;
                 indexSecondBestPrimaryProton = indexPrimaryProton;
-                indexPrimaryProton = n;
+                indexPrimaryProton = n;                    
+                
+                fCandsMissPos.push_back(cand1);
+                fCandsMissPos.push_back(cand3);
             }
         }
     }
@@ -147,8 +177,46 @@ HDecayBuilder::HDecayBuilder(std::vector<HParticleCandSim *> particleCands) : fP
             createOutputParticle(cand13C);
             HRefitCand cand23C = Fitter3c.getDaughter(1); // pion
             createOutputParticle(cand23C);
+            
+            HRefitCand lambdaCand3C = Fitter3c.getMother();
+            fCandsMissPos.push_back(lambdaCand3C);
+
         }
     }
+}
+
+void HDecayBuilder::fitElectrons()
+{
+
+    for (size_t o = 0; o < fElectrons.size(); o++)
+    {
+        HRefitCand* cand5Ptr = fElectrons[o];
+        HRefitCand cand5 = *cand5Ptr;
+
+        std::vector<HRefitCand> cands = fCandsMissPos;
+        cands.push_back(cand5);
+
+        // TODO: adjust so the user can set the ppSystem
+        TLorentzVector ppSystem(0, 0, 5356.7199, 2 * 938.272 + 4500); //initial system
+        HKinFitter fitter(cands, ppSystem, 0.51099892);
+        //fitter.setVerbosity(verb);
+        fitter.addMomConstraint();
+
+        if (fitter.fit() == true)
+        {
+
+            // get fitted objects fittedcand1 and fittedcand2
+            HRefitCand fcand1 = fitter.getDaughter(0);           // proton
+            HRefitCand fcand2 = fitter.getDaughter(1);           // kaon
+            HRefitCand fcand3 = fitter.getDaughter(2);           // lambda
+            HRefitCand fcand4 = fitter.getDaughter(3);           // electron
+            TLorentzVector fcand5 = fitter.getMissingDaughter(); // positron
+
+            //sigma mass after fits
+            TLorentzVector sigma = fcand3 + fcand4 + fcand5;
+        }
+
+    } //electron loop
 }
 
 void HDecayBuilder::estimateCovarianceMatrix(HParticleCandSim * cand, HRefitCand *refitCand)
@@ -159,61 +227,92 @@ void HDecayBuilder::estimateCovarianceMatrix(HParticleCandSim * cand, HRefitCand
         std::cout << "" << std::endl;
     }
 
-    // if (fMomDepErrors == true)
-    // {
-    //     //Momentum dependent uncertainty estimation input
-    //     TFile *momErr = new TFile("/lustre/hades/user/jrieger/pp_pKLambda/sim/ana/pp_pKLambda_p3500p_momDepMomErrors_allParticles_errFunc.root", "read");
-    //     TF1 *momErrP = (TF1 *)momErr->Get("f_pP");
-    //     TF1 *momErrPi = (TF1 *)momErr->Get("f_pPi");
-    //     TF1 *momErrK = (TF1 *)momErr->Get("f_pK");
-
-    //     TFile *thtErr = new TFile("/lustre/hades/user/jrieger/pp_pKLambda/sim/ana/pp_pKLambda_p3500p_momDepThtErrors_allParticles_errFunc.root", "read");
-    //     TFile *thtErr_PK = new TFile("/lustre/hades/user/jrieger/pp_pKLambda/sim/ana/pp_pKLambda_p3500p_momDepThtErrors_PK_errFunc.root", "read");
-    //     TF1 *thtErrP = (TF1 *)thtErr->Get("f_thtP");
-    //     TF1 *thtErrPi = (TF1 *)thtErr->Get("f_thtPi");
-    //     TF1 *thtErrK = (TF1 *)thtErr_PK->Get("f_thtK");
-
-    //     TFile *phiErr = new TFile("/lustre/hades/user/jrieger/pp_pKLambda/sim/ana/pp_pKLambda_p4500p_momDepPhiErrors_PPi_errFunc.root", "read"); //if 4500 in name this is just a name issue
-    //     TFile *phiErr_PK = new TFile("/lustre/hades/user/jrieger/pp_pKLambda/sim/ana/pp_pKLambda_p4500p_momDepPhiErrors_PK_errFunc.root", "read");
-    //     TF1 *phiErrP = (TF1 *)phiErr->Get("f_phiP");
-    //     TF1 *phiErrPi = (TF1 *)phiErr->Get("f_phiPi");
-    //     TF1 *phiErrK = (TF1 *)phiErr_PK->Get("f_phiK");
-
-    //     TFile *RZErr_PPi = new TFile("/lustre/hades/user/jrieger/pp_pKLambda/sim/ana/pp_pKLambda_p4500p_momDepRZErrors_PPi_errFunc.root", "read");
-    //     TFile *RZErr_PK = new TFile("/lustre/hades/user/jrieger/pp_pKLambda/sim/ana/pp_pKLambda_p4500p_momDepRZErrors_PK_errFunc.root", "read");
-    //     TF1 *RErrP = (TF1 *)RZErr_PPi->Get("f_RP");
-    //     TF1 *RErrPi = (TF1 *)RZErr_PPi->Get("f_RPi");
-    //     TF1 *RErrK = (TF1 *)RZErr_PK->Get("f_RK");
-    //     TF1 *ZErrP = (TF1 *)RZErr_PPi->Get("f_ZP");
-    //     TF1 *ZErrPi = (TF1 *)RZErr_PPi->Get("f_ZPi");
-    //     TF1 *ZErrK = (TF1 *)RZErr_PK->Get("f_ZK");
-    //     if (cand->getGeantPID() == 14) //Proton found
-    //     {
-    //         Double_t mom = cand->getGeantTotalMom();
-    //         double errors[] = {momErrP->Eval(mom), thtErrP->Eval(mom), phiErrP->Eval(mom),
-    //                            RErrP->Eval(mom), ZErrP->Eval(mom)}; //momentum dependent error estimates
-    //         FillData(cand, candidate, errors, 938.272);
-    //         fProtons.push_back(candidate);
-    //     }
-    //     else if (cand->getGeantPID() == 9) // Pion found
-    //     {
-    //         Double_t mom = cand->getGeantTotalMom();
-    //         double errors[] = {momErrPi->Eval(mom), thtErrPi->Eval(mom), phiErrPi->Eval(mom),
-    //                            RErrPi->Eval(mom), ZErrPi->Eval(mom)}; //momentum dependent error estimates
-    //         FillData(cand, candidate, errors, 139.570);
-    //         fPions.push_back(candidate);
-    //     }
-    //     else if (cand->getGeantPID() == 11) // Kaon found
-    //     {
-    //         Double_t mom = cand->getGeantTotalMom();
-    //         double errors[] = {momErrK->Eval(mom), thtErrK->Eval(mom), phiErrK->Eval(mom),
-    //                            RErrK->Eval(mom), ZErrK->Eval(mom)}; //momentum dependent error estimates
-    //         FillData(cand, candidate, errors, 493.7);
-    //         fKaons.push_back(candidate);
-    //     }
-    // }
-
+    // If both the momentum dependent and fixed errors have been chosen
+    // the momentum dependent errors are used since this is more general
+    // and needs to be used for the electron fitting 
     
+    if(fMomDepErrors == true && fFixedErrors == true){
+
+        fFixedErrors = false;
+    }
+
+    if (fMomDepErrors == true)
+    {
+        //Momentum dependent uncertainty estimation input for HADES particle candidates
+        TFile *momErr = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepMomErrors_allParticles_recoMom_errFunc.root", "read");
+        TF1 *momErrP = (TF1 *)momErr->Get("f_pP");
+        TF1 *momErrPi = (TF1 *)momErr->Get("f_pPi");
+        TF1 *momErrK = (TF1 *)momErr->Get("f_pK");
+        TF1 *momErrEm = (TF1 *)momErr->Get("f_pEm");
+
+        TFile *thtErr = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepThtErrors_recoMom_errFunc.root", "read");
+        TF1 *thtErrP = (TF1 *)thtErr->Get("f_thtP");
+        TF1 *thtErrPi = (TF1 *)thtErr->Get("f_thtPi");
+        TF1 *thtErrK = (TF1 *)thtErr->Get("f_thtK");
+        TF1 *thtErrEm = (TF1 *)thtErr->Get("f_thtEm");
+
+        TFile *phiErr = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepPhiErrors_recoMom_errFunc.root", "read");
+        TF1 *phiErrP = (TF1 *)phiErr->Get("f_phiP");
+        TF1 *phiErrPi = (TF1 *)phiErr->Get("f_phiPi");
+        TF1 *phiErrK = (TF1 *)phiErr->Get("f_phiK");
+        TF1 *phiErrEm = (TF1 *)phiErr->Get("f_phiEm");
+
+        TFile *RZErr_PPi = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepRZErrors_PPi_errFunc.root", "read");
+        TFile *RZErr_PK = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepRZErrors_PK_errFunc.root", "read");
+        TFile *RZErr_PEm = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepRZErrors_recoMom_PEm_errFunc.root", "read");
+        TF1 *RErrP = (TF1 *)RZErr_PEm->Get("f_RP");
+        TF1 *RErrPi = (TF1 *)RZErr_PPi->Get("f_RPi");
+        TF1 *RErrK = (TF1 *)RZErr_PK->Get("f_RK");
+        TF1 *RErrEm = (TF1 *)RZErr_PEm->Get("f_REm");
+        TF1 *ZErrP = (TF1 *)RZErr_PEm->Get("f_ZP");
+        TF1 *ZErrPi = (TF1 *)RZErr_PPi->Get("f_ZPi");
+        TF1 *ZErrK = (TF1 *)RZErr_PK->Get("f_ZK");
+        TF1 *ZErrEm = (TF1 *)RZErr_PEm->Get("f_ZEm");
+
+        // FwDet protons
+        TFile *momErr_fw = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepMomErrors_fw_recoMom_errFunc.root", "read");
+        TF1 *momErrP_fw = (TF1 *)momErr_fw->Get("f_pP");
+        TFile *thtErr_fw = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepThtErrors_fw_recoMom_errFunc.root", "read");
+        TF1 *thtErrP_fw = (TF1 *)thtErr_fw->Get("f_thtP");
+        TFile *phiErr_fw = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepPhiErrors_fw_recoMom_errFunc.root", "read");
+        TF1 *phiErrP_fw = (TF1 *)phiErr_fw->Get("f_phiP");
+        TFile *RZErr_fw = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepRZErrors_fw_recoMom_errFunc.root", "read");
+        TF1 *RErrP_fw = (TF1 *)RZErr_fw->Get("f_RP");
+        TF1 *ZErrP_fw = (TF1 *)RZErr_fw->Get("f_ZP");
+
+        if (cand->getGeantPID() == 14) //Proton found
+        {
+            Double_t mom = cand->getGeantTotalMom();
+            double errors[] = {momErrP->Eval(mom), thtErrP->Eval(mom), phiErrP->Eval(mom),
+                               RErrP->Eval(mom), ZErrP->Eval(mom)}; //momentum dependent error estimates
+            FillData(cand, refitCand, errors, 938.272);
+            fProtons.push_back(refitCand);
+        }
+        else if (cand->getGeantPID() == 9) // Pion found
+        {
+            Double_t mom = cand->getGeantTotalMom();
+            double errors[] = {momErrPi->Eval(mom), thtErrPi->Eval(mom), phiErrPi->Eval(mom),
+                               RErrPi->Eval(mom), ZErrPi->Eval(mom)}; //momentum dependent error estimates
+            FillData(cand, refitCand, errors, 139.570);
+            fPions.push_back(refitCand);
+        }
+        else if (cand->getGeantPID() == 11) // Kaon found
+        {
+            Double_t mom = cand->getGeantTotalMom();
+            double errors[] = {momErrK->Eval(mom), thtErrK->Eval(mom), phiErrK->Eval(mom),
+                               RErrK->Eval(mom), ZErrK->Eval(mom)}; //momentum dependent error estimates
+            FillData(cand, refitCand, errors, 493.7);
+            fKaons.push_back(refitCand);
+        }
+        else if (cand->getGeantPID() == 3)
+        {
+            Double_t mom = cand->P();
+            double errors[] = {momErrEm->Eval(mom), thtErrEm->Eval(mom), phiErrEm->Eval(mom),
+                               RErrEm->Eval(mom), ZErrEm->Eval(mom)};
+            FillData(cand, refitCand, errors, 0.51099892);
+            fElectrons.push_back(refitCand);
+        }
+    }
 
     if (fFixedErrors == true)
     {
@@ -271,25 +370,29 @@ void HDecayBuilder::FillData(HParticleCandSim* cand, HRefitCand *outcand, double
     
 }
 
-void HDecayBuilder::createOutputParticle(HRefitCand refitCand){
-
-    HParticleCand* newParticle;
+void HDecayBuilder::createOutputParticle(HRefitCand refitCand)
+{
+    if (fVerbose > 0)
+    {
+        std::cout << "--------------- HDecayBuilder::createOutputParticle() -----------------" << std::endl;
+    }
+    HParticleCand *newParticle;
 
     newParticle->setPhi(refitCand.Theta());
     newParticle->setR(refitCand.getR());
     newParticle->setZ(refitCand.getZ());
-    newParticle->setMomentum(refitCand.P()); 
+    newParticle->setMomentum(refitCand.P());
 
     fOutputCands.push_back(newParticle);
-
 }
 
 void HDecayBuilder::createOutputCategory()
 {
-
-    // Function to fill the output category
+    if (fVerbose > 0)
+    {
+        std::cout << "--------------- HDecayBuilder::createOutputCategory() -----------------" << std::endl;
+    }
 
     HCategoryManager catManager;
-    HCategory* cat = catManager.addCategory(1, "HParticleCandSimAfterFit");
-
+    HCategory *cat = catManager.addCategory(1, "HParticleCandSimAfterFit");
 }
