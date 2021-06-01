@@ -50,6 +50,7 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands) : fCands(cands),
         V(2 + ix * cov_dim, 2 + ix * cov_dim) = covariance(2, 2);
         V(3 + ix * cov_dim, 3 + ix * cov_dim) = covariance(3, 3);
         V(4 + ix * cov_dim, 4 + ix * cov_dim) = covariance(4, 4);
+
     }
 }
 
@@ -121,7 +122,6 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, HRefitCand &mother)
 
     V(0 + fN * cov_dim, 1 + fN * cov_dim)=covariance(1, 2);
     V(1 + fN * cov_dim, 0 + fN * cov_dim)=covariance(2, 1);
-
     // Jenny: Comments below are for testing so that the covariance matrix is read in correctly
     //std::cout << "Fitter" << std::endl;
     //std::cout << "Diag elements: " << V(0 + fN * cov_dim, 0 + fN * cov_dim) << " " << V(1 + fN * cov_dim, 1 + fN * cov_dim) << std::endl;
