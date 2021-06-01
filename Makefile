@@ -8,12 +8,12 @@
 ##############################################################################
 
 
-LIB_NAME := VertexFit
+LIB_NAME := KinFit
 
 USES_ORACLE= : no
 
 SOURCE_FILES := hrefitcand.cc \
-		hvertexfitter.cc \
+		hkinfitter.cc \
 		hvertexfinder.cc \
         hneutralcandfinder.cc
 

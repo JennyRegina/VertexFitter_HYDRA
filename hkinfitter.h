@@ -1,11 +1,11 @@
 /**
- * HVertexFitter.h
+ * hkinfitter.h
  *
  *
  */
 
-#ifndef HVERTEXFITTER_H
-#define HVERTEXFITTER_H
+#ifndef HKINFITTER_H
+#define HKINFITTER_H
 
 // system includes
 #include <iostream>
@@ -49,7 +49,7 @@ void Print(T const &matrix)
     cout << endl;
 }
 
-class HVertexFitter
+class HKinFitter
 {
 private:
     TMatrixD y, x, V, Vx, fPull;
@@ -59,30 +59,37 @@ private:
     double fConvergenceCriteria;
     std::vector<HRefitCand> fCands;
     HRefitCand fMother;
+    TLorentzVector fMissDaughter;
 
     // data members for constraints
-    //double fMass;
     int fNdf;
     std::vector<double> fM;
-    //TLorentzVector fInit;
+    TLorentzVector fInit;
+    Double_t fMass;
 
-    bool fVtxConstraint, f3Constraint;
+    bool fVtxConstraint, f3Constraint, f4Constraint, fMomConstraint;
     int fVerbose;
 
     double fLearningRate;
     int fNumIterations;
 
 public:
-    HVertexFitter(const std::vector<HRefitCand> &cands);
-    HVertexFitter(const std::vector<HRefitCand> &cands, HRefitCand &mother);
-    ~HVertexFitter(){};
+    HKinFitter(const std::vector<HRefitCand> &cands);
+    HKinFitter(const std::vector<HRefitCand> &cands, HRefitCand &mother);
+    HKinFitter(const std::vector<HRefitCand> &cands, TLorentzVector &lv);
+    HKinFitter(const std::vector<HRefitCand> &cands, TLorentzVector &lv, Double_t mass);
+    ~HKinFitter(){};
+
+    TMatrixD calcMissingMom(const TMatrixD &m_iter);
 
     TMatrixD f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter);
     TMatrixD Feta_eval(const TMatrixD &miter, const TMatrixD &xi_iter);
     TMatrixD Fxi_eval(const TMatrixD &miter, const TMatrixD &xi_iter);
 
     void add3Constraint();
+    void add4Constraint();
     void addVertexConstraint();
+    void addMomConstraint();
 
     void setLearningRate(double val) { fLearningRate = val; }
     void setNumberOfIterations(int val) { fNumIterations = val; }
@@ -103,6 +110,7 @@ public:
 
     HRefitCand getDaughter(int val);
     HRefitCand getMother();
+    TLorentzVector getMissingDaughter();
 
     void update();
 
@@ -111,4 +119,4 @@ protected:
     void updateMother();
 };
 
-#endif /* HVERTEXFITTER_H */
+#endif /* HKINFITTER_H */
