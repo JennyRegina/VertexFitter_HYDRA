@@ -12,8 +12,8 @@ TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
         std::cout << "" << std::endl;
     }
 
-    double param_p1, param_theta1, param_phi1, param_R1, param_Z1;
-    double param_p2, param_theta2, param_phi2, param_R2, param_Z2;
+    double param_theta1, param_phi1, param_R1, param_Z1;
+    double param_theta2, param_phi2, param_R2, param_Z2;
 
     if (cands.size() < 2)
     {
@@ -25,7 +25,6 @@ TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
 
     HRefitCand cand1 = cands[0];
 
-    param_p1 = cand1.P(); // Not the inverse, this momentum is used for estimating the momentum of the Lambda Candidate
     param_theta1 = cand1.Theta();
     param_phi1 = cand1.Phi();
     param_R1 = cand1.getR();
@@ -33,17 +32,10 @@ TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
 
     HRefitCand cand2 = cands[1];
 
-    param_p2 = cand2.P(); // Not the inverse, this momentum is used for estimating the momentum of the Lambda Candidate
     param_theta2 = cand2.Theta();
     param_phi2 = cand2.Phi();
     param_R2 = cand2.getR();
     param_Z2 = cand2.getZ();
-
-    double energy_cand1, energy_cand2;
-    energy_cand1 = sqrt(param_p1 * param_p1 + 983.272 * 983.272);
-    energy_cand2 = sqrt(param_p2 * param_p2 + 139.570 * 139.570);
-
-    double momentumAfterDecay = sqrt(energy_cand1 * energy_cand1 + 2 * energy_cand1 * energy_cand2 + energy_cand2 * energy_cand2 - 1115.683 * 1115.683);
 
     // Calculate the base and direction vectors of the two candidates
     TVector3 vtx_base_1, vtx_base_2, vtx_dir_1, vtx_dir_2;
