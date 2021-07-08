@@ -1,6 +1,6 @@
 #include "hdecaybuilder.h"
 
-HDecayBuilder::HDecayBuilder(std::vector<HParticleCandSim *> particleCands) : fParticleCands(particleCands),
+HDecayBuilder::HDecayBuilder(std::vector<KParticleCand *> particleCands, std::vector<int> pids) : fParticleCands(particleCands),
                                                                               fVerbose(0)
 {
     if (fVerbose > 0)
@@ -22,10 +22,11 @@ HDecayBuilder::HDecayBuilder(std::vector<HParticleCandSim *> particleCands) : fP
     for (int numInputCands = 0; numInputCands < (int)fParticleCands.size(); numInputCands++)
     {
 
-        HParticleCandSim *inputParticleCand = particleCands[numInputCands];
+        KParticleCand *inputParticleCand = particleCands[numInputCands];
         HRefitCand *refitCand = new HRefitCand(inputParticleCand);
+        int myPid = pids[numInputCands];
 
-        estimateCovarianceMatrix(inputParticleCand, refitCand);
+        estimateCovarianceMatrix(inputParticleCand, refitCand, myPid);
     }
     
     // Performs the loop over the particles in the event and findx vertices and the fit
@@ -149,7 +150,7 @@ void HDecayBuilder::createNeutralCandidate(){
 
             lambdaCandFinder.setNeutralMotherCandFromPrimaryVtxInfo(primVertex, decayVertex);
 
-            HVirtualCand lambdaCand = lambdaCandFinder.getNeutralMotherCandidate();
+            KParticleCand lambdaCand = lambdaCandFinder.getNeutralMotherCandidate();
 
             HRefitCand lambdaCandRefit(&lambdaCand);
             lambdaCandRefit.SetXYZM(lambdaCand.getMomentum() * std::sin(lambdaCand.getTheta() * deg2rad) *
@@ -219,7 +220,7 @@ void HDecayBuilder::fitElectrons()
     } //electron loop
 }
 
-void HDecayBuilder::estimateCovarianceMatrix(HParticleCandSim * cand, HRefitCand *refitCand)
+void HDecayBuilder::estimateCovarianceMatrix(KParticleCand * cand, HRefitCand *refitCand, int myPid)
 {
     if (fVerbose > 0)
     {
@@ -280,33 +281,33 @@ void HDecayBuilder::estimateCovarianceMatrix(HParticleCandSim * cand, HRefitCand
         TF1 *RErrP_fw = (TF1 *)RZErr_fw->Get("f_RP");
         TF1 *ZErrP_fw = (TF1 *)RZErr_fw->Get("f_ZP");
 
-        if (cand->getGeantPID() == 14) //Proton found
+        if (myPid == 14) //Proton found
         {
-            Double_t mom = cand->getGeantTotalMom();
+            Double_t mom = cand->getMomentum();
             double errors[] = {momErrP->Eval(mom), thtErrP->Eval(mom), phiErrP->Eval(mom),
                                RErrP->Eval(mom), ZErrP->Eval(mom)}; //momentum dependent error estimates
             FillData(cand, refitCand, errors, 938.272);
             fProtons.push_back(refitCand);
         }
-        else if (cand->getGeantPID() == 9) // Pion found
+        else if (myPid == 9) // Pion found
         {
-            Double_t mom = cand->getGeantTotalMom();
+            Double_t mom = cand->getMomentum();
             double errors[] = {momErrPi->Eval(mom), thtErrPi->Eval(mom), phiErrPi->Eval(mom),
                                RErrPi->Eval(mom), ZErrPi->Eval(mom)}; //momentum dependent error estimates
             FillData(cand, refitCand, errors, 139.570);
             fPions.push_back(refitCand);
         }
-        else if (cand->getGeantPID() == 11) // Kaon found
+        else if (myPid == 11) // Kaon found
         {
-            Double_t mom = cand->getGeantTotalMom();
+            Double_t mom = cand->getMomentum();
             double errors[] = {momErrK->Eval(mom), thtErrK->Eval(mom), phiErrK->Eval(mom),
                                RErrK->Eval(mom), ZErrK->Eval(mom)}; //momentum dependent error estimates
             FillData(cand, refitCand, errors, 493.7);
             fKaons.push_back(refitCand);
         }
-        else if (cand->getGeantPID() == 3)
+        else if (myPid == 3)
         {
-            Double_t mom = cand->P();
+            Double_t mom = cand->getMomentum();
             double errors[] = {momErrEm->Eval(mom), thtErrEm->Eval(mom), phiErrEm->Eval(mom),
                                RErrEm->Eval(mom), ZErrEm->Eval(mom)};
             FillData(cand, refitCand, errors, 0.51099892);
@@ -316,21 +317,21 @@ void HDecayBuilder::estimateCovarianceMatrix(HParticleCandSim * cand, HRefitCand
 
     if (fFixedErrors == true)
     {
-        if (cand->getGeantPID() == 14) //Proton found
+        if (myPid == 14) //Proton found
         {
             double errors[] = {1.469 * 1e-5, 2.410 * 1e-3, 5.895 * 1e-3,
                                1.188, 2.652};
             FillData(cand, refitCand, errors, 938.272);
             fProtons.push_back(refitCand);
         }
-        else if (cand->getGeantPID() == 9) // Pion found
+        else if (myPid == 9) // Pion found
         {
             double errors[] = {5.959 * 1e-5, 9.316 * 1e-3, 1.991 * 1e-2,
                                4.006, 7.629};
             FillData(cand, refitCand, errors, 139.570);
             fPions.push_back(refitCand);
         }
-        else if (cand->getGeantPID() == 11) // Kaon found
+        else if (myPid == 11) // Kaon found
         {
             double errors[] = {1.947 * 1e-5, 2.296 * 1e-3, 6.312 * 1e-3,
                                1.404, 2.723};
@@ -340,7 +341,7 @@ void HDecayBuilder::estimateCovarianceMatrix(HParticleCandSim * cand, HRefitCand
     }
 }
 
-void HDecayBuilder::FillData(HParticleCandSim* cand, HRefitCand *outcand, double arr[], double mass)
+void HDecayBuilder::FillData(KParticleCand* cand, HRefitCand *outcand, double arr[], double mass)
 {
 
     if (fVerbose > 0)
@@ -376,7 +377,7 @@ void HDecayBuilder::createOutputParticle(HRefitCand refitCand)
     {
         std::cout << "--------------- HDecayBuilder::createOutputParticle() -----------------" << std::endl;
     }
-    HParticleCand *newParticle;
+    KParticleCand *newParticle;
 
     newParticle->setPhi(refitCand.Theta());
     newParticle->setR(refitCand.getR());

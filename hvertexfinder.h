@@ -23,6 +23,8 @@ using std::cout;
 using std::endl;
 
 class HVertexFinder
+
+ 
 {
 private:
     std::vector<HRefitCand> fCands;

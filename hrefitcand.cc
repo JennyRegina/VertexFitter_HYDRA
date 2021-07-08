@@ -3,7 +3,7 @@
 
 //: TLorentzVector(*cand), fR(cand->getR()), fZ(cand->getZ()), fTheta(cand->Theta()), fPhi(cand->Phi()), cand(cand)
 
-HRefitCand::HRefitCand(HVirtualCand* cand)
+HRefitCand::HRefitCand(KParticleCand* cand)
     : TLorentzVector(*cand), cand(cand), fR(cand->getR()), fZ(cand->getZ())
 {
 }
@@ -11,7 +11,7 @@ HRefitCand::HRefitCand(HVirtualCand* cand)
 HRefitCand::HRefitCand()
     : TLorentzVector()
 {
-    cand = new HVirtualCand();
+    cand = new KParticleCand();
     fR = cand->getR();
     fZ = cand->getZ();
 }

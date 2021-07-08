@@ -15,8 +15,7 @@
 
 // framework includes
 #include "hcategorymanager.h"
-#include "hparticlecand.h"
-#include "hparticlecandsim.h"
+//#include "hparticlecandsim.h"
 #include "hrefitcand.h"
 #include "hgeomvector.h"
 #include "hparticletool.h"
@@ -26,6 +25,8 @@
 #include "hvertexfinder.h"
 #include "hneutralcandfinder.h"
 
+//#include "/lustre/hades/user/jrieger/pp35_data_4charged/forJana/KParticleCand.h"
+
 using std::cout;
 using std::endl;
 
@@ -33,12 +34,13 @@ double deg2rad = TMath::DegToRad();
 
 class HDecayBuilder
 {
+     
 private:
     std::vector<HRefitCand> fCands;
     // Input particles
-    std::vector<HParticleCandSim *> fParticleCands;
+    std::vector<KParticleCand *> fParticleCands;
     // Output particles after fitting
-    std::vector<HParticleCand *> fOutputCands;
+    std::vector<KParticleCand *> fOutputCands;
     int fVerbose;
 
     // Variables used for setting the covariance matrix
@@ -119,18 +121,19 @@ private:
     bool fMomentumFitIsConverged = false;
 
 public:
-    HDecayBuilder(std::vector<HParticleCandSim *> particleCands);
+    HDecayBuilder(std::vector<KParticleCand *> particleCands, std::vector<int> pids);
+     
     ~HDecayBuilder(){};
 
     void setVerbosity(int val) { fVerbose = val; }
 
     // Method to fill the data from a HRefitCand for simulations
-    void FillData(HParticleCandSim *cand, HRefitCand *outcand, double arr[], double mass);
+    void FillData(KParticleCand *cand, HRefitCand *outcand, double arr[], double mass);
 
     // Method to fill the data from a KParticleCand from old data
     //void FillData(KParticleCand * cand, HRefitCand & outcand, double arr[], double mass);
 
-    void estimateCovarianceMatrix(HParticleCandSim *cand, HRefitCand *refitCand);
+    void estimateCovarianceMatrix(KParticleCand *cand, HRefitCand *refitCand, int pid);
 
     void createNeutralCandidate();
 
@@ -214,7 +217,7 @@ public:
     // Functions for getting the pulls
 
     void createOutputParticle(HRefitCand);
-    std::vector<HParticleCandSim> getOutput();
+    std::vector<KParticleCand> getOutput();
 
     void createOutputCategory();
 };
