@@ -34,20 +34,21 @@ double deg2rad = TMath::DegToRad();
 class HDecayBuilder
 {
 private:
+    // Working Particles
     std::vector<HRefitCand> fCands;
     // Input particles
-    std::vector<HParticleCandSim *> fParticleCands;
+    std::vector<HParticleCand *> fParticleCands;
     // Output particles after fitting
-    std::vector<HParticleCand *> fOutputCands;
+    std::vector<HFitParticleCand *> fOutputCands;
     int fVerbose;
 
     // Variables used for setting the covariance matrix
     bool fFixedErrors = true;
     bool fMomDepErrors = false;
 
-    bool fFitElectrons = false;
+    //bool fFitElectrons = false;
 
-    // Containers for the particles in the event
+    // Containers for the particles in the event -- better solution? Is that needed?
     std::vector<HRefitCand *> fProtons;
     std::vector<HRefitCand *> fPions;
     std::vector<HRefitCand *> fKaons;
@@ -56,8 +57,8 @@ private:
     std::vector<HRefitCand *> fElectrons;
     std::vector<HRefitCand *> fPositrons;
 
-    std::vector<HRefitCand> fCandsMissPos;
-
+    //std::vector<HRefitCand> fCandsMissPos;
+/*
     // Variables used for the vertex finding
     bool fFindPrimaryVertex = true;
     bool fFindDecayVertex = true;
@@ -117,15 +118,14 @@ private:
     bool f3CFitIsConverged = false;
     bool f4CFitIsConverged = false;
     bool fMomentumFitIsConverged = false;
+    */
 
 public:
-    HDecayBuilder(std::vector<HParticleCandSim *> particleCands);
+    HDecayBuilder(std::vector<HRefitCand *> particleCands);
     ~HDecayBuilder(){};
 
     void setVerbosity(int val) { fVerbose = val; }
 
-    // Method to fill the data from a HRefitCand for simulations
-    void FillData(HParticleCandSim *cand, HRefitCand *outcand, double arr[], double mass);
 
     // Method to fill the data from a KParticleCand from old data
     //void FillData(KParticleCand * cand, HRefitCand & outcand, double arr[], double mass);
@@ -134,17 +134,13 @@ public:
 
     void createNeutralCandidate();
 
-    void fitElectrons();
+    void do4cFit();
+    void do3cFit();
+    void doMissMomentumFit();
 
-    void setFitElectrons(bool val)
-    {
-        fFitElectrons = val;
-        if (val == true)
-        {
-            fMomDepErrors = true;
-        }
-    }
+    void buildDecay();
 
+/*
     // Adds a vertex to the set of functions
     void addVertexFinding(bool valFindPrimaryVertex, bool valFindDecayVertex)
     {
@@ -210,7 +206,7 @@ public:
     bool threeCFitIsConverged() { return f3CFitIsConverged; }
     bool fourCFitIsConverged() { return f4CFitIsConverged; }
     bool momentumFitIsConverged() { return fMomentumFitIsConverged; }
-
+*/
     // Functions for getting the pulls
 
     void createOutputParticle(HRefitCand);
