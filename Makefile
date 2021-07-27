@@ -13,11 +13,9 @@ LIB_NAME := KinFit
 USES_ORACLE= : no
 
 SOURCE_FILES := hrefitcand.cc \
-        hdecaybuilder.cc \
 		hkinfitter.cc \
 		hvertexfinder.cc \
-        hneutralcandfinder.cc \  
-
+        hneutralcandfinder.cc   
 
 include $(HADDIR)/hades.def.mk
 

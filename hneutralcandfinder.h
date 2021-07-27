@@ -12,14 +12,11 @@
 #include <iomanip>
 #include <vector>
 #include <cmath>
-
 // framework includes
 #include "hrefitcand.h"
 #include "hvertexfinder.h"
 #include "hgeomvector.h"
 #include "hparticletool.h"
-
-//#include "/lustre/hades/user/jrieger/pp35_data_4charged/forJana/KParticleCand.h"
 
 using std::cout;
 using std::endl;
@@ -36,7 +33,7 @@ private:
     double fMomentumAfterDecay;
     double fNeutralCandMass;
     
-    KParticleCand fNeutralMotherCandidate;
+    HRefitCand fNeutralMotherCandidate;
 
     double fDistParticle1Vertex;
     double fDistParticle2Vertex;
@@ -60,7 +57,7 @@ public:
     void setNeutralMotherCandFromPrimaryVtxInfo(TVector3 primVtx, TVector3 decayVtx);
     void setUsePrimaryVertexInNeutralMotherCalculation(bool val){ fUsePrimaryVertexInNeutralCandidateCalculation = val; }
 
-    KParticleCand getNeutralMotherCandidate() { return fNeutralMotherCandidate; }
+    HRefitCand getNeutralMotherCandidate() { return fNeutralMotherCandidate; }
 
     TMatrixD getCovarianceMatrixNeutralMother() { return fCovarianceNeutralMother; }
 
