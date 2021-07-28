@@ -1,11 +1,14 @@
 #include "hdstfitter.h"
 
-HDSTFitter::HDSTFitter(std::vector<HParticleCandSim *> particleCands) : fParticleCands(particleCands),
-                                                                              fVerbose(0)
+HDSTFitter::HDSTFitter(bool includeFw = false, bool momDepErrors=false) : fPIncludeFw(includeFw),
+                                                                            fMomDepErrors(momDepErrors),
+                                                                            fVerbose(0)
 {
 }
 
-void HDSTFitter::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzVector lv = (0,0,0,0)){
+
+void HDSTFitter::selectCandidates()
+{
     TStopwatch timer;
     timer.Start();
 
@@ -73,38 +76,55 @@ void HDSTFitter::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzVe
                     vector<double> errors;
                     getErrors(pids[it], mom, errors);
                     FillData(cand, candidate, errors, cand->getMass());
-                    cands_fit[it].push_back(candidate);
+                    fCandsFit[it].push_back(candidate);
                 } 
             }
         }   // end of HADES track loop
 
         if(fIncludeFw){ //find correct index of proton HRefitCand vector
-        for(Int_t j=0; j<nFwTracks; j++){
-            HFwDetCandSim *cand = HCategoryManager::getObject(cand,catFwParticle,j);
-            cand->calc4vectorProperties(938.272);
+            for(Int_t j=0; j<nFwTracks; j++){
+                HFwDetCandSim *cand = HCategoryManager::getObject(cand,catFwParticle,j);
+                cand->calc4vectorProperties(938.272);
+                    
+                HRefitCand candidate(cand);
                 
-            HRefitCand candidate(cand);
-            
-            // select particles based on MC info
-            if (cand->getGeantPID()==14){
-                protons_fw.push_back(cand);
-                Double_t mom = cand->P();
-                double errors[] = {momErrP_fw->Eval(mom), thtErrP_fw->Eval(mom), phiErrP_fw->Eval(mom),
-                                   RErrP_fw->Eval(mom), ZErrP_fw->Eval(mom)};
-                FillDataFw(cand, candidate, errors, 938.272);
-                protons_fit.push_back(candidate);
+                // select particles based on MC info
+                if (cand->getGeantPID()==14){
+                    protons_fw.push_back(cand);
+                    Double_t mom = cand->P();
+                    double errors[] = {momErrP_fw->Eval(mom), thtErrP_fw->Eval(mom), phiErrP_fw->Eval(mom),
+                                    RErrP_fw->Eval(mom), ZErrP_fw->Eval(mom)};
+                    FillDataFw(cand, candidate, errors, 938.272);
+                    fCandsFit[it that is 14].push_back(candidate);
+                }
+                else continue;
             }
-            else continue;
+        } // end fwTrack loop
+}
 
-        }} // end fwTrack loop
+void HDSTFitter::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzVector lv = (0,0,0,0)){
 
-        //initialize DecayBuilder
+    fCandsFit.Clear();
+    selectCandidates();
+
+    //initialize DecayBuilder
+
+    //Write output category
+
+    } //end of the event loop
+}
+
+void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv = (0,0,0,0), Double_t mm=0){
+    
+    fCandsFit.Clear();
+    selectCandidates();
+
+    //initialize DecayBuilder
+    HDecayBuilder builder(fCandsFit, task, pids, lv, mm);
+    builder.buildDecay();
 
         //Write output category
 }
-
-
-void HDSTFitter::addFitterTask()
 
 
 
@@ -137,7 +157,7 @@ void HDSTFitter::FillData(HParticleCand* cand, HRefitCand *outcand, double arr[]
     outcand->setCovariance(cov);   
 }
 
-void FillDataFw(HFwDetCandSim* cand, HRefitCand& outcand, double arr[], double mass)
+void HDSTFitter::FillDataFw(HFwDetCandSim* cand, HRefitCand& outcand, double arr[], double mass)
 {
     double deg2rad = TMath::DegToRad();
 

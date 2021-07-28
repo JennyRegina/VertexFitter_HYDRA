@@ -1,44 +1,41 @@
 #include "hdecaybuilder.h"
 
-HDecayBuilder::HDecayBuilder(std::vector<HParticleCandSim *> particleCands) : fParticleCands(particleCands),
-                                                                              fVerbose(0)
+HDecayBuilder::HDecayBuilder(std::vector<HRefitCand[]> fitCands, TString task, std::vector<Int_t> pids, TLorentzVector lv = (0,0,0,0), HRefitCand mother, Double_t mass=0) : fCands(fitCands), 
+                                                                                                                                                            fPids(pids),
+                                                                                                                                                            fIniSys(lv),
+                                                                                                                                                            fMother(mother),
+                                                                                                                                                            fMass(mass),
+                                                                                                                                                            fVerbose(0),
+
 {
     if (fVerbose > 0)
     {
         std::cout << "--------------- HDecayBuilder() -----------------" << std::endl;
     }
-
-    fProtons.clear();
-    fPions.clear();
-    fKaons.clear();
-    fPosPions.clear();
-    fNegKaons.clear();
-    fElectrons.clear();
-    fPositrons.clear();
-
-    
-    // Loop over all input tracks
-    for (int numInputCands = 0; numInputCands < (int)fParticleCands.size(); numInputCands++)
-    {
-
-        HParticleCandSim *inputParticleCand = particleCands[numInputCands];
-        HRefitCand *refitCand = new HRefitCand(inputParticleCand);
-
-        estimateCovarianceMatrix(inputParticleCand, refitCand);
-    }
-    
-    // Performs the loop over the particles in the event and findx vertices and the fit
-    createNeutralCandidate();
-
-    // Finds electrons and fits them
-    if(fFitElectrons == true){
-        
-        fitElectrons();
-    
-    }
 }
 
-void HDecayBuilder::createNeutralCandidate(){    
+void HDecaBuilder::buildDecay(){
+    
+    while(combicounter[0]>0){
+        fillFitCands();
+        if(task = "createNeutral"){
+            createNeutralCandidate();
+        }else if(task = "3C"){
+            do3cFit();
+        }else if(task = "4C"){
+            do4cFit();
+        }else if(task = "missMom"){
+            doMissMomentumFit();
+        }else{
+            cout<<"Task not available"<<endl;
+        }
+    }
+    
+
+}
+
+void HDecayBuilder::createNeutralCandidate()
+{    
     
     if (fVerbose > 0)
     {
@@ -184,38 +181,42 @@ void HDecayBuilder::createNeutralCandidate(){
     }
 }
 
-void HDecayBuilder::fitElectrons()
+void HDecayBuilder::do4cFit()
 {
+    HKinFitter Fitter(fCandsFit);
+    HKinFitter.add4Constraint();
+    HKinFitter.fit();
+}
 
-    for (size_t o = 0; o < fElectrons.size(); o++)
-    {
-        HRefitCand* cand5Ptr = fElectrons[o];
-        HRefitCand cand5 = *cand5Ptr;
+void HDecayBuilder::do3cFit()
+{
+    HKinFitter Fitter(fCandsFit, fMotherFit);
+    HKinFitter.add3Constraint();
+    HKinFitter.fit();
+}
 
-        std::vector<HRefitCand> cands = fCandsMissPos;
-        cands.push_back(cand5);
+void HDecayBuilder::doMissMomFit()
+{
+    HKinFitter Fitter(fCandsFit, fIniSystem, fMass);
+    HKinFitter.addMomConstraint();
+    HKinFitter.fit();
+}
 
-        // TODO: adjust so the user can set the ppSystem
-        TLorentzVector ppSystem(0, 0, 5356.7199, 2 * 938.272 + 4500); //initial system
-        HKinFitter fitter(cands, ppSystem, 0.51099892);
-        //fitter.setVerbosity(verb);
-        fitter.addMomConstraint();
-
-        if (fitter.fit() == true)
-        {
-
-            // get fitted objects fittedcand1 and fittedcand2
-            HRefitCand fcand1 = fitter.getDaughter(0);           // proton
-            HRefitCand fcand2 = fitter.getDaughter(1);           // kaon
-            HRefitCand fcand3 = fitter.getDaughter(2);           // lambda
-            HRefitCand fcand4 = fitter.getDaughter(3);           // electron
-            TLorentzVector fcand5 = fitter.getMissingDaughter(); // positron
-
-            //sigma mass after fits
-            TLorentzVector sigma = fcand3 + fcand4 + fcand5;
+void HDecayBuilder::fillFitCands()
+{
+    fCandsFit.clear();
+    for (size_t i=0; i<pids.size(); i++){
+        fCandsFit.push_back(cands_fit[i][combicounter[i]]);
+        if(i+1 == pids.size()){
+            bool counted = false;
+            while(i>=0 && !counted){
+                if(combicounter[i]<cands:fit[i].size()) combicounter[i]++;
+                else combicounter[i]=0; i--;
+            }
+            if(i<0) combicounter[0]=-1;
         }
-
-    } //electron loop
+    }
+    
 }
 
 void HDecayBuilder::estimateCovarianceMatrix(HParticleCandSim * cand, HRefitCand *refitCand)
