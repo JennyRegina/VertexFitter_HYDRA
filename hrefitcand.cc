@@ -1,7 +1,7 @@
 // ROOT includes
 #include "hrefitcand.h"
 
-//: TLorentzVector(*cand), fR(cand->getR()), fZ(cand->getZ()), fTheta(cand->Theta()), fPhi(cand->Phi()), cand(cand)
+TLorentzVector(*cand), fR(cand->getR()), fZ(cand->getZ()), fTheta(cand->Theta()), fPhi(cand->Phi()), cand(cand)
 
 HRefitCand::HRefitCand(HVirtualCand* cand)
     : TLorentzVector(*cand), cand(cand), fR(cand->getR()), fZ(cand->getZ())

@@ -35,7 +35,7 @@ class HDecayBuilder
 {
 private:
     // Working Particles
-    std::vector<HRefitCand[]> fCands;
+    std::vector< std::vector<HRefitCand> > fCands;
     // Output particles after fitting
     std::vector<HFitParticleCand *> fOutputCands;
     int fVerbose;

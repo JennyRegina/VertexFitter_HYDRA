@@ -23,8 +23,10 @@ using std::endl;
 class HDSTFitter
 {
 private:
+    TString fInfileList;
     bool fIncludeFw = false;
-    std::vector<HRefitCand[]> fCandsFit;
+    std::vector< std::vector<HRefitCand> > fCandsFit;
+    std:vector<Int_t> fPids;
 
     // Variables used for setting the covariance matrix
     bool fFixedErrors = true;
@@ -36,7 +38,7 @@ private:
     Int_t getErrors(Int_t pid,, Double_t mom, vector<double*>& v);
 
 public:
-    HDSTFitter(bool includeFw, bool momDepErrors);
+    HDSTFitter(TString infilelist, bool includeFw, bool momDepErrors);
     ~HDSTFitter(){};
 
     //User functions
@@ -45,6 +47,9 @@ public:
 
     void setIncludeFw(bool val){ fIncludeFw = val; }
     void setErrors();
+    void setPids(std:vector<Int_t> val){ fPids = val; }
+    std:vector<Int_t> getPids(){ return fPids; }
+
 
     void selectCandidates();
 }

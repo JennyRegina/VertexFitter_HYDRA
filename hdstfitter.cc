@@ -1,6 +1,7 @@
 #include "hdstfitter.h"
 
-HDSTFitter::HDSTFitter(bool includeFw = false, bool momDepErrors=false) : fPIncludeFw(includeFw),
+HDSTFitter::HDSTFitter(TString infileList, bool includeFw = false, bool momDepErrors=false) : fInfilelist(infileList),
+                                                                            fIncludeFw(includeFw),
                                                                             fMomDepErrors(momDepErrors),
                                                                             fVerbose(0)
 {
@@ -9,11 +10,74 @@ HDSTFitter::HDSTFitter(bool includeFw = false, bool momDepErrors=false) : fPIncl
 
 void HDSTFitter::selectCandidates()
 {
+    // for each event there are a number of tracks
+    Int_t ntracks = catParticle->getEntries();
+    if(fIncludeFw) Int_t nFwTracks = catFwParticle->getEntries();
+
+    std::vector<HRefitCand> cands_fit[];
+    
+    for (Int_t j = 0; j < ntracks; j++)
+    {
+        HParticleCand* cand = HCategoryManager::getObject(cand, catParticle, j);
+        // skip ghost tracks (only avalible for MC events)
+        if (cand->isGhostTrack()) continue;
+        // select "good" tracks
+        if (!cand->isFlagBit(Particle::kIsUsed)) continue;
+
+        HRefitCand candidate(cand);
+
+        for(auto it = std::begin(fPids); it != std::end(fPids); ++it) {
+            if (cand->getGeantPID()==fPids[it]){
+                Double_t mom = cand->P();
+                vector<double> errors;
+                getErrors(fPids[it], mom, errors);
+                FillData(cand, candidate, errors, cand->getMass());
+                fCandsFit[it].push_back(candidate);
+            } 
+        }
+    }   // end of HADES track loop
+
+    if(fIncludeFw){ //find correct index of proton HRefitCand vector
+        for(Int_t j=0; j<nFwTracks; j++){
+            HFwDetCandSim *cand = HCategoryManager::getObject(cand,catFwParticle,j);
+            cand->calc4vectorProperties(938.272);
+                
+            HRefitCand candidate(cand);
+            
+            // select particles based on MC info
+            if (cand->getGeantPID()==14){
+                Double_t mom = cand->P();
+                double errors[] = {momErrP_fw->Eval(mom), thtErrP_fw->Eval(mom), phiErrP_fw->Eval(mom),
+                                RErrP_fw->Eval(mom), ZErrP_fw->Eval(mom)};
+                FillDataFw(cand, candidate, errors, 938.272);
+                fCandsFit[it that is 14].push_back(candidate);
+            }
+            else continue;
+        }
+    } // end fwTrack loop
+}
+
+void HDSTFitter::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzVector lv = (0,0,0,0)){
+
+    fCandsFit.Clear();
+    selectCandidates();
+
+    //initialize DecayBuilder
+
+    //Write output category
+
+    } //end of the event loop
+}
+
+void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv = (0,0,0,0), Double_t mm=0){
+    
+    setPids(pids);
+    
     TStopwatch timer;
     timer.Start();
 
     HLoop loop(kTrue);
-    Bool:t ret = loop.addFiles(infileList);
+    Bool:t ret = loop.addFiles(fInfileList);
     if (ret == 0)
     {
         cout << "READBACK: ERROR : cannot find inputfiles : "
@@ -54,76 +118,17 @@ void HDSTFitter::selectCandidates()
         if(loop.nextEvent(i) <= 0) { cout<<" end recieved "<<endl; break; } // last event reached
         HTool::printProgress(i,nEvents,1,"Analysing evt# :");
 
-        // for each event there are a number of tracks
-        Int_t ntracks = catParticle->getEntries();
-        if(fIncludeFw) Int_t nFwTracks = catFwParticle->getEntries();
+        fCandsFit.Clear();
+        selectCandidates();
 
-        std::vector<HRefitCand> cands_fit[];
-        
-        for (Int_t j = 0; j < ntracks; j++)
-        {
-            HParticleCand* cand = HCategoryManager::getObject(cand, catParticle, j);
-            // skip ghost tracks (only avalible for MC events)
-            if (cand->isGhostTrack()) continue;
-            // select "good" tracks
-            if (!cand->isFlagBit(Particle::kIsUsed)) continue;
+        //initialize DecayBuilder
+        HDecayBuilder builder(fCandsFit, task, pids, lv, mm);
+        builder.buildDecay();
 
-            HRefitCand candidate(cand);
-
-            for(auto it = std::begin(pids); it != std::end(pids); ++it) {
-                if (cand->getGeantPID()==pids[it]){
-                    Double_t mom = cand->P();
-                    vector<double> errors;
-                    getErrors(pids[it], mom, errors);
-                    FillData(cand, candidate, errors, cand->getMass());
-                    fCandsFit[it].push_back(candidate);
-                } 
-            }
-        }   // end of HADES track loop
-
-        if(fIncludeFw){ //find correct index of proton HRefitCand vector
-            for(Int_t j=0; j<nFwTracks; j++){
-                HFwDetCandSim *cand = HCategoryManager::getObject(cand,catFwParticle,j);
-                cand->calc4vectorProperties(938.272);
-                    
-                HRefitCand candidate(cand);
-                
-                // select particles based on MC info
-                if (cand->getGeantPID()==14){
-                    protons_fw.push_back(cand);
-                    Double_t mom = cand->P();
-                    double errors[] = {momErrP_fw->Eval(mom), thtErrP_fw->Eval(mom), phiErrP_fw->Eval(mom),
-                                    RErrP_fw->Eval(mom), ZErrP_fw->Eval(mom)};
-                    FillDataFw(cand, candidate, errors, 938.272);
-                    fCandsFit[it that is 14].push_back(candidate);
-                }
-                else continue;
-            }
-        } // end fwTrack loop
-}
-
-void HDSTFitter::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzVector lv = (0,0,0,0)){
-
-    fCandsFit.Clear();
-    selectCandidates();
-
-    //initialize DecayBuilder
+        //Get output particles
+    }// end of event loop
 
     //Write output category
-
-    } //end of the event loop
-}
-
-void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv = (0,0,0,0), Double_t mm=0){
-    
-    fCandsFit.Clear();
-    selectCandidates();
-
-    //initialize DecayBuilder
-    HDecayBuilder builder(fCandsFit, task, pids, lv, mm);
-    builder.buildDecay();
-
-        //Write output category
 }
 
 

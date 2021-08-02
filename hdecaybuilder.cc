@@ -366,3 +366,9 @@ void HDecayBuilder::createOutputCategory()
     HCategoryManager catManager;
     HCategory *cat = catManager.addCategory(1, "HParticleCandSimAfterFit");
 }
+
+HEnergyLossCorrPar enLossCorr;
+enLossCorr.setDefaultPar("mar19");
+Double_t corrP = enLossCorr.getDeltaMom(14, cand->getMomentumPID(14), cand->getTheta());
+cand->setMomentum(corrP+mom);
+cand->calc4vectorProperties(mass);
