@@ -27,18 +27,18 @@ private:
     bool fIncludeFw = false;
     std::vector< std::vector<HRefitCand> > fCandsFit;
     std:vector<Int_t> fPids;
-
     // Variables used for setting the covariance matrix
-    bool fFixedErrors = true;
     bool fMomDepErrors = false;
+
+    Int_t fVerbose = -1;
 
     // Method to fill the data from a HRefitCand for simulations
     void FillData(HParticleCandSim *cand, HRefitCand *outcand, double arr[], double mass);
     void FillDataFW(HFwDetCandSim *cand, HRefitCand *outcand, double arr[], double mass); //adjust to HForwardCand for newer Hydra
-    Int_t getErrors(Int_t pid,, Double_t mom, vector<double*>& v);
+    void estimateCov(Int_t pid, Double_t mom, double& cov[]); //double (&cov)[5]?
 
 public:
-    HDSTFitter(TString infilelist, bool includeFw, bool momDepErrors);
+    HDSTFitter(TString infilelist, bool includeFw, bool momDepErrors, Int_t nEvents);
     ~HDSTFitter(){};
 
     //User functions
@@ -48,6 +48,8 @@ public:
     void setIncludeFw(bool val){ fIncludeFw = val; }
     void setErrors();
     void setPids(std:vector<Int_t> val){ fPids = val; }
+    void setVerbosity(Int_t val){ fVerbose = val; }
+
     std:vector<Int_t> getPids(){ return fPids; }
 
 

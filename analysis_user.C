@@ -27,7 +27,6 @@
 
 #include "hfwdetcandsim.h"
 
-
 #include "hparticlegeant.h"
 #include "hparticlegeantdecay.h"
 #include "hparticlegeantevent.h"
@@ -41,14 +40,21 @@
 #include <iostream>
 #include <iomanip>
 #include <math.h>
-
+/*
 #include "hkinfitter.h"
 #include "hvertexfinder.h"
 #include "hneutralcandfinder.h"
+*/
+#include "hdstfitter.h"
 
 using namespace std;
 using namespace Particle;
 
-Int_t analysis_user(TString infileList="/lustre/hades/user/rlalik/hades/pp45/sim/simdst/out/pluto_chan_060_events_50000_seed_00*_1_dst_p4500p.root", Int_t nEvents=-1, Int_t verb=-1){
-    
+Int_t analysis_user(TString infileList="/lustre/hades/user/rlalik/hades/pp45/sim/simdst/out/pluto_chan_060_events_50000_seed_00*_1_dst_p4500p.root", Int_t nEvents=-1){
+
+    HDSTFiiter DSTFitter(infilelist, false, false, nEvents);
+    std::vector<Int_t> pids{ 14, 11, 14, 9 };
+    TLorentzVector lv = ();
+
+    DSTFitter.addFitterTask("4c", pids, lv);
 }
