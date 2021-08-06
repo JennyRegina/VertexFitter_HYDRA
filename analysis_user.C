@@ -50,11 +50,11 @@
 using namespace std;
 using namespace Particle;
 
-Int_t analysis_user(TString infileList="/lustre/hades/user/rlalik/hades/pp45/sim/simdst/out/pluto_chan_060_events_50000_seed_00*_1_dst_p4500p.root", Int_t nEvents=-1){
+Int_t analysis_user(TString infileList="/lustre/hades/user/jrieger/pp_pKLambda/sim/pp_pKlambda_100000evts1_dst_apr12.root", Int_t nEvents=-1){
 
     HDSTFiiter DSTFitter(infilelist, false, false, nEvents);
     std::vector<Int_t> pids{ 14, 11, 14, 9 };
-    TLorentzVector lv = ();
+    TLorentzVector ppSystem(0,0,4337.96,2*938.272+3500);
 
-    DSTFitter.addFitterTask("4c", pids, lv);
+    DSTFitter.addFitterTask("4c", pids, ppSystem);
 }

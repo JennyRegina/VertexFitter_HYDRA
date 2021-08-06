@@ -1,84 +1,10 @@
 #include "hdstfitter.h"
+#include "hphysicsconstants.h"  //knows conversion from id to mass
 
 HDSTFitter::HDSTFitter(TString infileList, bool includeFw = false, bool momDepErrors=false, Int_t nEvents=-1) : fInfilelist(infileList),
                                                                             fIncludeFw(includeFw),
                                                                             fMomDepErrors(momDepErrors)
 {
-}
-
-void HDSTFitter::estimateCov(Int_t pid, Double_t mom=0, double& cov[])
-{
-    if (fVerbose > 0)
-    {
-        std::cout << " ----------- HDecayBuildeer::estimateCovarianceMatrix() -----------" << std::endl;
-        std::cout << "" << std::endl;
-    }
-
-    if (fMomDepErrors == true)
-    {
-        //Momentum dependent uncertainty estimation input for HADES particle candidates
-        TFile *momErr = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepMomErrors_allParticles_recoMom_errFunc.root", "read");
-        TF1 *momErrP = (TF1 *)momErr->Get("f_pP");
-        TF1 *momErrPi = (TF1 *)momErr->Get("f_pPi");
-        TF1 *momErrK = (TF1 *)momErr->Get("f_pK");
-        TF1 *momErrEm = (TF1 *)momErr->Get("f_pEm");
-
-        TFile *thtErr = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepThtErrors_recoMom_errFunc.root", "read");
-        TF1 *thtErrP = (TF1 *)thtErr->Get("f_thtP");
-        TF1 *thtErrPi = (TF1 *)thtErr->Get("f_thtPi");
-        TF1 *thtErrK = (TF1 *)thtErr->Get("f_thtK");
-        TF1 *thtErrEm = (TF1 *)thtErr->Get("f_thtEm");
-
-        TFile *phiErr = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepPhiErrors_recoMom_errFunc.root", "read");
-        TF1 *phiErrP = (TF1 *)phiErr->Get("f_phiP");
-        TF1 *phiErrPi = (TF1 *)phiErr->Get("f_phiPi");
-        TF1 *phiErrK = (TF1 *)phiErr->Get("f_phiK");
-        TF1 *phiErrEm = (TF1 *)phiErr->Get("f_phiEm");
-
-        TFile *RZErr_PPi = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepRZErrors_PPi_errFunc.root", "read");
-        TFile *RZErr_PK = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepRZErrors_PK_errFunc.root", "read");
-        TFile *RZErr_PEm = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepRZErrors_recoMom_PEm_errFunc.root", "read");
-        TF1 *RErrP = (TF1 *)RZErr_PEm->Get("f_RP");
-        TF1 *RErrPi = (TF1 *)RZErr_PPi->Get("f_RPi");
-        TF1 *RErrK = (TF1 *)RZErr_PK->Get("f_RK");
-        TF1 *RErrEm = (TF1 *)RZErr_PEm->Get("f_REm");
-        TF1 *ZErrP = (TF1 *)RZErr_PEm->Get("f_ZP");
-        TF1 *ZErrPi = (TF1 *)RZErr_PPi->Get("f_ZPi");
-        TF1 *ZErrK = (TF1 *)RZErr_PK->Get("f_ZK");
-        TF1 *ZErrEm = (TF1 *)RZErr_PEm->Get("f_ZEm");
-
-        // FwDet protons
-        TFile *momErr_fw = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepMomErrors_fw_recoMom_errFunc.root", "read");
-        TF1 *momErrP_fw = (TF1 *)momErr_fw->Get("f_pP");
-        TFile *thtErr_fw = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepThtErrors_fw_recoMom_errFunc.root", "read");
-        TF1 *thtErrP_fw = (TF1 *)thtErr_fw->Get("f_thtP");
-        TFile *phiErr_fw = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepPhiErrors_fw_recoMom_errFunc.root", "read");
-        TF1 *phiErrP_fw = (TF1 *)phiErr_fw->Get("f_phiP");
-        TFile *RZErr_fw = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepRZErrors_fw_recoMom_errFunc.root", "read");
-        TF1 *RErrP_fw = (TF1 *)RZErr_fw->Get("f_RP");
-        TF1 *ZErrP_fw = (TF1 *)RZErr_fw->Get("f_ZP");
-
-        if (pid == 14) cov[] = {momErrP->Eval(mom), thtErrP->Eval(mom), phiErrP->Eval(mom),
-                               RErrP->Eval(mom), ZErrP->Eval(mom)};
-        else if (pid == 9) cov[] = {momErrPi->Eval(mom), thtErrPi->Eval(mom), phiErrPi->Eval(mom),
-                               RErrPi->Eval(mom), ZErrPi->Eval(mom)};
-        else if (pid == 11) cov[] = {momErrK->Eval(mom), thtErrK->Eval(mom), phiErrK->Eval(mom),
-                               RErrK->Eval(mom), ZErrK->Eval(mom)};
-        else if (pid == 3) cov[] = {momErrEm->Eval(mom), thtErrEm->Eval(mom), phiErrEm->Eval(mom),
-                               RErrEm->Eval(mom), ZErrEm->Eval(mom)};
-        else cout<<"No momentum dependent error estimate available for this pid"<<endl;
-    }
-
-    if (fFixedErrors == true) //which momentum/setup is this for?
-    {
-        if (pid == 14) cov[] = {1.469 * 1e-5, 2.410 * 1e-3, 5.895 * 1e-3,
-                               1.188, 2.652};
-        else if (pid == 9) cov[] = {5.959 * 1e-5, 9.316 * 1e-3, 1.991 * 1e-2,
-                               4.006, 7.629};
-        else if (pid == 11) cov[] = {1.947 * 1e-5, 2.296 * 1e-3, 6.312 * 1e-3,
-                               1.404, 2.723};
-        else cout<<"No error estimate available for this pid"<<endl;
-    }
 }
 
 void HDSTFitter::selectCandidates()
@@ -88,6 +14,10 @@ void HDSTFitter::selectCandidates()
     if(fIncludeFw) Int_t nFwTracks = catFwParticle->getEntries();
 
     std::vector<HRefitCand> cands_fit[];
+
+    //Object for covariance matrix estimation
+    HCovarianceKinFit cov;
+    cov.setSetup("pp35");
     
     for (Int_t j = 0; j < ntracks; j++)
     {
@@ -105,8 +35,9 @@ void HDSTFitter::selectCandidates()
                 //vector<double> errors;
                 //getErrors(fPids[it], mom, errors);
                 Double_t errors[];
-                etstimateCov(fPid[it], mom, errors);
-                FillData(cand, candidate, errors, cand->getMass());
+                cov.etstimateCov(fPid[it], mom, errors);
+                Double_t mCand = HPhysicsConstants::mass(fPid[it]);
+                FillData(cand, candidate, errors, mCand);
                 fCandsFit[it].push_back(candidate);
             } 
         }
@@ -122,8 +53,10 @@ void HDSTFitter::selectCandidates()
             // select particles based on MC info
             if (cand->getGeantPID()==14){
                 Double_t mom = cand->P();
-                double errors[] = {momErrP_fw->Eval(mom), thtErrP_fw->Eval(mom), phiErrP_fw->Eval(mom),
-                                RErrP_fw->Eval(mom), ZErrP_fw->Eval(mom)};
+                Double_t errors[];
+                cov.setSetup("FwDet");
+                cov.setMomDepErrors(true);
+                cov.etstimateCov(fPid[it], mom, errors);
                 FillDataFw(cand, candidate, errors, 938.272);
                 fCandsFit[it that is 14].push_back(candidate);
             }
