@@ -863,8 +863,8 @@ bool HKinFitter::fit()
     if (f3Constraint)
         updateMother();
 
-    // return fConverged; // for number of iterations greater than 1
-    return true; // for number of iterations equal to 1
+    return fConverged; // for number of iterations greater than 1
+    //return true; // for number of iterations equal to 1
 }
 
 HRefitCand HKinFitter::getDaughter(int val)

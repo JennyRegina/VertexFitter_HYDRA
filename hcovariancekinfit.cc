@@ -9,7 +9,7 @@
 
 using namespace TMath;
 
-HCovarianceKinFit* HCovarianceKinFit::gEnergyLossCorrPar = NULL;
+HCovarianceKinFit* HCovarianceKinFit::gCovariance = NULL;
 
 ClassImp(HCovarianceKinFit) //?
 

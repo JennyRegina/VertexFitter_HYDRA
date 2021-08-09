@@ -16,6 +16,7 @@
 #include "TLorentzVector.h"
 
 #include "hdecaybuilder.h"
+#include "hcovariancekinfit.h"
 
 using std::cout;
 using std::endl;
@@ -35,7 +36,7 @@ private:
     // Method to fill the data from a HRefitCand for simulations
     void FillData(HParticleCandSim *cand, HRefitCand *outcand, double arr[], double mass);
     void FillDataFW(HFwDetCandSim *cand, HRefitCand *outcand, double arr[], double mass); //adjust to HForwardCand for newer Hydra
-    void estimateCov(Int_t pid, Double_t mom, double& cov[]); //double (&cov)[5]?
+    //void estimateCov(Int_t pid, Double_t mom, double& cov[]); //double (&cov)[5]?
 
 public:
     HDSTFitter(TString infilelist, bool includeFw, bool momDepErrors, Int_t nEvents);

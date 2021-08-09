@@ -51,7 +51,7 @@ private:
   Double_t getDeltaMomT1419(Int_t pId, Double_t mom, Double_t theta) const;
   Double_t binInter(Double_t b,Double_t rs, const Double_t *par) const;
   */  
-  ClassDef(HCovarianceKinFit,1) // Parameter container for energy loss correction
+  ClassDef(HCovarianceKinFit,1) // Parameter container for energy loss correction. Wozu?
 };
 
 #endif  /*!HCOVARIANCEKINFIT_H */

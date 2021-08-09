@@ -184,22 +184,28 @@ void HDecayBuilder::createNeutralCandidate()
 void HDecayBuilder::do4cFit()
 {
     HKinFitter Fitter(fCandsFit);
-    HKinFitter.add4Constraint();
-    HKinFitter.fit();
+    Fitter.add4Constraint();
+    if(Fitter.fit()){
+        fOutputCands.clear();
+        for(auto it = std::begin(fPids); it != std::end(fPids); ++it){
+            fOutputCands.push_back(Fitter.getDaughter(it));
+        }
+        fillHistograms();
+    }
 }
 
 void HDecayBuilder::do3cFit()
 {
     HKinFitter Fitter(fCandsFit, fMotherFit);
-    HKinFitter.add3Constraint();
-    HKinFitter.fit();
+    Fitter.add3Constraint();
+    Fitter.fit();
 }
 
 void HDecayBuilder::doMissMomFit()
 {
     HKinFitter Fitter(fCandsFit, fIniSystem, fMass);
-    HKinFitter.addMomConstraint();
-    HKinFitter.fit();
+    Fitter.addMomConstraint();
+    Fitter.fit();
 }
 
 void HDecayBuilder::fillFitCands()
@@ -216,9 +222,8 @@ void HDecayBuilder::fillFitCands()
             if(i<0) combicounter[0]=-1;
         }
     }
-    
 }
-
+/*
 void HDecayBuilder::estimateCovarianceMatrix(HParticleCandSim * cand, HRefitCand *refitCand)
 {
     if (fVerbose > 0)
@@ -338,7 +343,7 @@ void HDecayBuilder::estimateCovarianceMatrix(HParticleCandSim * cand, HRefitCand
             fKaons.push_back(refitCand);
         }
     }
-}
+}*/
 
 void HDecayBuilder::createOutputParticle(HRefitCand refitCand)
 {
@@ -367,8 +372,13 @@ void HDecayBuilder::createOutputCategory()
     HCategory *cat = catManager.addCategory(1, "HParticleCandSimAfterFit");
 }
 
-HEnergyLossCorrPar enLossCorr;
-enLossCorr.setDefaultPar("mar19");
-Double_t corrP = enLossCorr.getDeltaMom(14, cand->getMomentumPID(14), cand->getTheta());
-cand->setMomentum(corrP+mom);
-cand->calc4vectorProperties(mass);
+void HDecayBuilder::fillHistograms()
+{
+    if (fVerbose > 0)
+    {
+        std::cout << "--------------- HDecayBuilder::writeHistograms() -----------------" << std::endl;
+    }
+
+    hmLam_prefit->Fill((fCandsFit[2]+fCandsFit[3]).M());
+    hmLam_post4C->Fill((fOutputCands[2]+fOutputCands[3]).M());
+}

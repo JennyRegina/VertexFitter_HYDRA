@@ -22,6 +22,8 @@
 #include "hparticletool.h"
 #include "hgeomvertexfit.h"
 
+#include "TH1F.h"
+
 #include "hkinfitter.h"
 #include "hvertexfinder.h"
 #include "hneutralcandfinder.h"
@@ -37,7 +39,8 @@ private:
     // Working Particles
     std::vector< std::vector<HRefitCand> > fCands;
     // Output particles after fitting
-    std::vector<HFitParticleCand *> fOutputCands;
+    //std::vector<HFitParticleCand *> fOutputCands;
+    std::vector<HRefitCand> fOutputCands;
     int fVerbose;
 
     //Fitter input variables
@@ -75,6 +78,8 @@ public:
     std::vector<HParticleCandSim> getOutput();
 
     void createOutputCategory();
+
+    void fillHistograms();
 };
 
 #endif /* HDECAYBUILDER_H */
