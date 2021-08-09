@@ -1,31 +1,34 @@
 #include "hdecaybuilder.h"
 
-HDecayBuilder::HDecayBuilder(std::vector<HRefitCand[]> fitCands, TString task, std::vector<Int_t> pids, TLorentzVector lv = (0,0,0,0), HRefitCand mother, Double_t mass=0) : fCands(fitCands), 
+HDecayBuilder::HDecayBuilder(std::vector< std::vector<HRefitCand> > &cands, TString &task, std::vector<Int_t> &pids, TLorentzVector lv = TLorentzVector(), HRefitCand mother = HRefitCand(), Double_t mass=0.) : fCands(cands), 
+                                                                                                                                                            fTask(task),
                                                                                                                                                             fPids(pids),
-                                                                                                                                                            fIniSys(lv),
-                                                                                                                                                            fMother(mother),
-                                                                                                                                                            fMass(mass),
-                                                                                                                                                            fVerbose(0),
+                                                                                                                                                            fVerbose(0)
 
 {
     if (fVerbose > 0)
     {
         std::cout << "--------------- HDecayBuilder() -----------------" << std::endl;
     }
+    
+    setIniSys(lv);
+    setMother(mother);
+    setMass(mass);
 }
 
-void HDecaBuilder::buildDecay(){
+void HDecayBuilder::buildDecay(){
     
+    fProb = 0.;
     while(combicounter[0]>0){
         fillFitCands();
-        if(task = "createNeutral"){
+        if(fTask = "createNeutral"){
             createNeutralCandidate();
-        }else if(task = "3C"){
+        }else if(fTask = "3C"){
             do3cFit();
-        }else if(task = "4C"){
+        }else if(fTask = "4C"){
             do4cFit();
-        }else if(task = "missMom"){
-            doMissMomentumFit();
+        }else if(fTask = "missMom"){
+            doMissMomFit();
         }else{
             cout<<"Task not available"<<endl;
         }
@@ -35,7 +38,8 @@ void HDecaBuilder::buildDecay(){
 }
 
 void HDecayBuilder::createNeutralCandidate()
-{    
+{  }
+/*  
     
     if (fVerbose > 0)
     {
@@ -179,44 +183,46 @@ void HDecayBuilder::createNeutralCandidate()
 
         }
     }
-}
+}*/
 
 void HDecayBuilder::do4cFit()
 {
-    HKinFitter Fitter(fCandsFit);
+    HKinFitter Fitter(fFitCands, fIniSys);
     Fitter.add4Constraint();
-    if(Fitter.fit()){
+    if(Fitter.fit() && Fitter.getProb()>fProb){
         fOutputCands.clear();
-        for(auto it = std::begin(fPids); it != std::end(fPids); ++it){
+        Fitter.getDaughters(fOutputCands);
+        /*
+        for(iterator it = fPids.begin(); it != fPids.end(); ++it){
             fOutputCands.push_back(Fitter.getDaughter(it));
-        }
-        fillHistograms();
+        }*/
+        //fillHistograms();
     }
 }
 
 void HDecayBuilder::do3cFit()
 {
-    HKinFitter Fitter(fCandsFit, fMotherFit);
+    HKinFitter Fitter(fFitCands, fMother);
     Fitter.add3Constraint();
     Fitter.fit();
 }
 
 void HDecayBuilder::doMissMomFit()
 {
-    HKinFitter Fitter(fCandsFit, fIniSystem, fMass);
+    HKinFitter Fitter(fFitCands, fIniSys, fMass);
     Fitter.addMomConstraint();
     Fitter.fit();
 }
 
 void HDecayBuilder::fillFitCands()
 {
-    fCandsFit.clear();
-    for (size_t i=0; i<pids.size(); i++){
-        fCandsFit.push_back(cands_fit[i][combicounter[i]]);
-        if(i+1 == pids.size()){
+    fFitCands.clear();
+    for (size_t i=0; i<fPids.size(); i++){
+        fFitCands.push_back(fCands[i][combicounter[i]]);
+        if(i+1 == fPids.size()){
             bool counted = false;
             while(i>=0 && !counted){
-                if(combicounter[i]<cands:fit[i].size()) combicounter[i]++;
+                if(combicounter[i]<fCands[i].size()) combicounter[i]++;
                 else combicounter[i]=0; i--;
             }
             if(i<0) combicounter[0]=-1;
@@ -353,7 +359,7 @@ void HDecayBuilder::createOutputParticle(HRefitCand refitCand)
     }
     HParticleCand *newParticle;
 
-    newParticle->setPhi(refitCand.Theta());
+    newParticle->setPhi(refitCand.Theta()); //!
     newParticle->setR(refitCand.getR());
     newParticle->setZ(refitCand.getZ());
     newParticle->setMomentum(refitCand.P());
@@ -371,7 +377,7 @@ void HDecayBuilder::createOutputCategory()
     HCategoryManager catManager;
     HCategory *cat = catManager.addCategory(1, "HParticleCandSimAfterFit");
 }
-
+/*
 void HDecayBuilder::fillHistograms()
 {
     if (fVerbose > 0)
@@ -379,6 +385,6 @@ void HDecayBuilder::fillHistograms()
         std::cout << "--------------- HDecayBuilder::writeHistograms() -----------------" << std::endl;
     }
 
-    hmLam_prefit->Fill((fCandsFit[2]+fCandsFit[3]).M());
+    hmLam_prefit->Fill((fFitCands[2]+fFitCands[3]).M());
     hmLam_post4C->Fill((fOutputCands[2]+fOutputCands[3]).M());
-}
+}*/

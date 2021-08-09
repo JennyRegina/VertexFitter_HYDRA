@@ -79,6 +79,20 @@ void HDSTFitter::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzVe
 
 void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv = (0,0,0,0), Double_t mm=0){
     
+    
+    TFile *outfile = new TFile("/lustre/hades/user/jrieger/pp_pKLambda/sim/ana/test_userfit.root","recreate");
+
+    TH1F* hmLam_prefit = new TH1F("hLambdaMassPreFit", "", 100, 1070, 1170);
+    hmLam_prefit->SetXTitle(" M_{p#pi^{-}} [MeV/c^{2}]");
+    hmLam_prefit->SetYTitle(" events ");
+    hmLam_prefit->GetXaxis()->SetTitleSize(0.05);
+    hmLam_prefit->GetXaxis()->SetLabelSize(0.05);
+    hmLam_prefit->GetYaxis()->SetTitleSize(0.05);
+    hmLam_prefit->GetYaxis()->SetLabelSize(0.05);
+    hmLam_prefit->SetLineColor(kBlack);
+    TH1F *hmLam_post4C = (TH1F*)hmLam_prefit->Clone("hmLam_post4C");
+    hmLam_post4C->SetLineColor(kBlue);
+    
     setPids(pids);
     
     TStopwatch timer;
@@ -132,9 +146,19 @@ void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVe
         //initialize DecayBuilder
         HDecayBuilder builder(fCandsFit, task, fPids, lv, mm);
         builder.buildDecay();
+        std::vector<HRefitCand> result;
+        builder.getFitCands(result);
+        
+		hmLam_prefit->Fill((result[2]+result[3]).M());
+		hmLam_post4C->Fill((result[2]+result[3]).M());
 
         //Get output particles
     }// end of event loop
+
+    outfile.cd();
+    hmLam_prefit->Write();
+    hmLam_post4C->Write();
+    outfile->Close();
 
     //Write output category
 }

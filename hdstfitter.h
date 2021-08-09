@@ -57,4 +57,6 @@ public:
     void selectCandidates();
 }
 
+#endif /* HDSTFITTER_H */
+
 // How to handle several tasks???

@@ -37,6 +37,7 @@ class HDecayBuilder
 {
 private:
     // Working Particles
+    std::vector<HRefitCand> fFitCands;
     std::vector< std::vector<HRefitCand> > fCands;
     // Output particles after fitting
     //std::vector<HFitParticleCand *> fOutputCands;
@@ -44,14 +45,19 @@ private:
     int fVerbose;
 
     //Fitter input variables
+    TString fTask;
     std::vector<Int_t> fPids;
     TLorentzVector fIniSys;
     HRefitCand fMother;
     Double_t fMass;
+    
+    Int_t combicounter[10] = {0};
+    Double_t fProb;
 
 
 public:
-    HDecayBuilder(std::vector<HRefitCand[]> fitCands, TString task, std::vector<Int_t> pids, TLorentzVector lv = (0,0,0,0), HRefitCand mother, Double_t mass=0);
+    //HDecayBuilder(std::vector<HRefitCand[]> fitCands, TString task, std::vector<Int_t> pids, TLorentzVector lv(0,0,0,0), HRefitCand mother=HRefitCand(), Double_t mass=0);
+    HDecayBuilder(std::vector< std::vector<HRefitCand> > &cands, TString &task, std::vector<Int_t> &pids, TLorentzVector lv, HRefitCand mother, Double_t mass);
     ~HDecayBuilder(){};
 
     void setVerbosity(int val) { fVerbose = val; }
@@ -59,6 +65,11 @@ public:
 
     // Method to fill the data from a KParticleCand from old data
     //void FillData(KParticleCand * cand, HRefitCand & outcand, double arr[], double mass);
+    
+    //setters
+    void setIniSys(TLorentzVector val) {fIniSys = val;}
+    void setMother(HRefitCand val) {fMother = val;}
+    void setMass(Double_t val) {fMass = val;}
 
     void estimateCovarianceMatrix(HParticleCandSim *cand, HRefitCand *refitCand);
 
@@ -66,7 +77,7 @@ public:
 
     void do4cFit();
     void do3cFit();
-    void doMissMomentumFit();
+    void doMissMomFit();
 
     void fillFitCands();
 
@@ -75,11 +86,12 @@ public:
     // Functions for getting the pulls
 
     void createOutputParticle(HRefitCand);
+    HRefitCand getFitCands(std::vector<HRefitCand> &cands) { cands = fOutputCands; }
     std::vector<HParticleCandSim> getOutput();
 
     void createOutputCategory();
 
-    void fillHistograms();
+    //void fillHistograms();
 };
 
 #endif /* HDECAYBUILDER_H */

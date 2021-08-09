@@ -109,6 +109,7 @@ public:
     void setVerbosity(int val) { fVerbose = val; }
 
     HRefitCand getDaughter(int val);
+    HRefitCand getDaughters(std::vector<HRefitCand> &daughters) { daughters = fCands; }
     HRefitCand getMother();
     TLorentzVector getMissingDaughter();
 
