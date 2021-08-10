@@ -1,7 +1,7 @@
 #include "hdstfitter.h"
 #include "hphysicsconstants.h"  //knows conversion from id to mass
 
-HDSTFitter::HDSTFitter(TString infileList, bool includeFw = false, bool momDepErrors=false, Int_t nEvents=-1) : fInfilelist(infileList),
+HDSTFitter::HDSTFitter(TString infileList, bool includeFw = false, bool momDepErrors=false, Int_t nEvents=-1) : fInfileList(infileList),
                                                                             fIncludeFw(includeFw),
                                                                             fMomDepErrors(momDepErrors)
 {
@@ -10,10 +10,8 @@ HDSTFitter::HDSTFitter(TString infileList, bool includeFw = false, bool momDepEr
 void HDSTFitter::selectCandidates()
 {
     // for each event there are a number of tracks
-    Int_t ntracks = catParticle->getEntries();
-    if(fIncludeFw) Int_t nFwTracks = catFwParticle->getEntries();
-
-    std::vector<HRefitCand> cands_fit[];
+    Int_t ntracks = fcatParticle->getEntries();
+    if(fIncludeFw) Int_t nFwTracks = fcatFwParticle->getEntries();
 
     //Object for covariance matrix estimation
     HCovarianceKinFit cov;
@@ -21,7 +19,8 @@ void HDSTFitter::selectCandidates()
     
     for (Int_t j = 0; j < ntracks; j++)
     {
-        HParticleCand* cand = HCategoryManager::getObject(cand, catParticle, j);
+        //HParticleCand* cand = HCategoryManager::getObject(cand, catParticle, j);
+        HParticleCandSim* cand = HCategoryManager::getObject(cand, catParticle, j);
         // skip ghost tracks (only avalible for MC events)
         if (cand->isGhostTrack()) continue;
         // select "good" tracks
@@ -29,20 +28,21 @@ void HDSTFitter::selectCandidates()
 
         HRefitCand candidate(cand);
 
-        for(auto it = std::begin(fPids); it != std::end(fPids); ++it) {
+        for(int it=0; it < fPids.size(); it++){
+        //for(auto it = std::begin(fPids); it != std::end(fPids); ++it) {
             if (cand->getGeantPID()==fPids[it]){
                 Double_t mom = cand->P();
                 //vector<double> errors;
                 //getErrors(fPids[it], mom, errors);
-                Double_t errors[];
-                cov.etstimateCov(fPid[it], mom, errors);
+                Double_t errors[5];
+                cov.estimateCov(fPid[it], mom, errors);
                 Double_t mCand = HPhysicsConstants::mass(fPid[it]);
                 FillData(cand, candidate, errors, mCand);
                 fCandsFit[it].push_back(candidate);
             } 
         }
     }   // end of HADES track loop
-
+/*
     if(fIncludeFw){ //find correct index of proton HRefitCand vector
         for(Int_t j=0; j<nFwTracks; j++){
             HFwDetCandSim *cand = HCategoryManager::getObject(cand,catFwParticle,j);
@@ -63,9 +63,9 @@ void HDSTFitter::selectCandidates()
             else continue;
         }
     } // end fwTrack loop
-}
+}*/
 
-void HDSTFitter::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzVector lv = (0,0,0,0)){
+void HDSTFitter::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzVector lv = TLorentzVector()){
 
     fCandsFit.Clear();
     selectCandidates();
@@ -74,10 +74,10 @@ void HDSTFitter::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzVe
 
     //Write output category
 
-    } //end of the event loop
+     //end of the event loop
 }
 
-void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv = (0,0,0,0), Double_t mm=0){
+void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv = TLorentzVector(), Double_t mm=0.){
     
     
     TFile *outfile = new TFile("/lustre/hades/user/jrieger/pp_pKLambda/sim/ana/test_userfit.root","recreate");
@@ -114,8 +114,8 @@ void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVe
             exit(1);
         } // read all categories
 
-        HCategory *catFwParticle = loop.getCategory("HFwDetCandSim"); 
-        if (!catFwParticle) { std::cout<<"No FWparticleCat in input!"<<std::endl; exit(1);}
+        fcatFwParticle = loop.getCategory("HFwDetCandSim"); 
+        if (!fcatFwParticle) { std::cout<<"No FWparticleCat in input!"<<std::endl; exit(1);}
     } else {
         if(!loop.setInput("-*,+HParticleCandSim")) {
             cout<<"READBACK: ERROR : cannot read input !"<<endl;
@@ -126,8 +126,8 @@ void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVe
     loop.printCategories();
     loop.printChain();
 
-    HCategory *catParticle = loop.getCategory("HParticleCandSim"); 
-    if (!catParticle) { std::cout<<"No particleCat in input!"<<std::endl; exit(1);}
+    fcatParticle = loop.getCategory("HParticleCandSim"); 
+    if (!fcatParticle) { std::cout<<"No particleCat in input!"<<std::endl; exit(1);}
 
     Int_t entries = loop.getEntries();
     if(nEvents > entries || nEvents <= 0 ) nEvents = entries;

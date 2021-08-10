@@ -359,7 +359,11 @@ void HDecayBuilder::createOutputParticle(HRefitCand refitCand)
     }
     HParticleCand *newParticle;
 
+<<<<<<< Updated upstream
     newParticle->setPhi(refitCand.Theta()); //!
+=======
+    newParticle->setPhi(refitCand.Theta());//!!!
+>>>>>>> Stashed changes
     newParticle->setR(refitCand.getR());
     newParticle->setZ(refitCand.getZ());
     newParticle->setMomentum(refitCand.P());

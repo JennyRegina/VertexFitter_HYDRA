@@ -3,7 +3,8 @@
 
 //#include "hparcond.h"    is this useful here?
 
-class HCovarianceKinFit : public HParCond {
+//class HCovarianceKinFit : public HParCond {
+class HCovarianceKinFit {
 protected:
 TString fSetup;
 bool fMomDepErrors = false;
@@ -31,9 +32,9 @@ public:
   ~HCovarianceKinFit(void) {}
   static HCovarianceKinFit* getObject(void) {return gCovariance;}
   
-  void estimateCov(Int_t pid, Double_t mom, double& cov[]);
-  void setSetup(TString run){ fSetup=run };
-  void setMomDepErrors(bool val){ fMomDepErrors=val };
+  void estimateCov(Int_t pid, Double_t mom, double (&cov)[5]);
+  void setSetup(TString run){ fSetup=run; }
+  void setMomDepErrors(bool val){ fMomDepErrors=val; }
   /*
   void     clear(void);
   void     putParams(HParamList*);

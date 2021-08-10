@@ -86,7 +86,7 @@ public:
     // Functions for getting the pulls
 
     void createOutputParticle(HRefitCand);
-    HRefitCand getFitCands(std::vector<HRefitCand> &cands) { cands = fOutputCands; }
+    void getFitCands(std::vector<HRefitCand> &cands) { cands = fOutputCands; }
     std::vector<HParticleCandSim> getOutput();
 
     void createOutputCategory();

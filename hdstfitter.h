@@ -14,6 +14,7 @@
 
 // framework includes
 #include "TLorentzVector.h"
+#include "hcategory.h"
 
 #include "hdecaybuilder.h"
 #include "hcovariancekinfit.h"
@@ -27,11 +28,15 @@ private:
     TString fInfileList;
     bool fIncludeFw = false;
     std::vector< std::vector<HRefitCand> > fCandsFit;
-    std:vector<Int_t> fPids;
+    std::vector<Int_t> fPids;
     // Variables used for setting the covariance matrix
     bool fMomDepErrors = false;
 
     Int_t fVerbose = -1;
+
+    //Read in data
+    HCategory *fcatParticle;
+    HCategory *fcatFwParticle;
 
     // Method to fill the data from a HRefitCand for simulations
     void FillData(HParticleCandSim *cand, HRefitCand *outcand, double arr[], double mass);
@@ -43,19 +48,19 @@ public:
     ~HDSTFitter(){};
 
     //User functions
-    void addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv = (0,0,0,0), Double_t mm = 0);
+    void addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv, Double_t mm);
     void addBuilderTask(TString task, std::vector<Int_t> pids);
 
     void setIncludeFw(bool val){ fIncludeFw = val; }
     void setErrors();
-    void setPids(std:vector<Int_t> val){ fPids = val; }
+    void setPids(std::vector<Int_t> val){ fPids = val; }
     void setVerbosity(Int_t val){ fVerbose = val; }
 
-    std:vector<Int_t> getPids(){ return fPids; }
+    std::vector<Int_t> getPids(){ return fPids; }
 
 
     void selectCandidates();
-}
+};
 
 #endif /* HDSTFITTER_H */
 
