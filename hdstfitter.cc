@@ -3,7 +3,8 @@
 
 HDSTFitter::HDSTFitter(TString infileList, bool includeFw = false, bool momDepErrors=false, Int_t nEvents=-1) : fInfileList(infileList),
                                                                             fIncludeFw(includeFw),
-                                                                            fMomDepErrors(momDepErrors)
+                                                                            fMomDepErrors(momDepErrors),
+                                                                            fEvents(nEvents)
 {
 }
 
@@ -35,8 +36,8 @@ void HDSTFitter::selectCandidates()
                 //vector<double> errors;
                 //getErrors(fPids[it], mom, errors);
                 Double_t errors[5];
-                cov.estimateCov(fPid[it], mom, errors);
-                Double_t mCand = HPhysicsConstants::mass(fPid[it]);
+                cov.estimateCov(fPids[it], mom, errors);
+                Double_t mCand = HPhysicsConstants::mass(fPids[it]);
                 FillData(cand, candidate, errors, mCand);
                 fCandsFit[it].push_back(candidate);
             } 
@@ -62,12 +63,12 @@ void HDSTFitter::selectCandidates()
             }
             else continue;
         }
-    } // end fwTrack loop
-}*/
+    } // end fwTrack loop*/
+}
 
 void HDSTFitter::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzVector lv = TLorentzVector()){
 
-    fCandsFit.Clear();
+    //fCandsFit.Clear();
     selectCandidates();
 
     //initialize DecayBuilder
@@ -77,7 +78,8 @@ void HDSTFitter::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzVe
      //end of the event loop
 }
 
-void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv = TLorentzVector(), Double_t mm=0.){
+//return bool?
+void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv = TLorentzVector(), HRefitCand mother = HRefitCand(), Double_t mm=0.){
     
     
     TFile *outfile = new TFile("/lustre/hades/user/jrieger/pp_pKLambda/sim/ana/test_userfit.root","recreate");
@@ -98,13 +100,13 @@ void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVe
     TStopwatch timer;
     timer.Start();
 
-    HLoop loop(kTrue);
-    Bool:t ret = loop.addFiles(fInfileList);
+    HLoop loop(kTRUE);
+    Bool_t ret = loop.addFiles(fInfileList);
     if (ret == 0)
     {
         cout << "READBACK: ERROR : cannot find inputfiles : "
-             << infileList.Data() << endl;
-        return 1;
+             << fInfileList.Data() << endl;
+        //return 1;
     }
 
     // select categories here
@@ -130,21 +132,22 @@ void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVe
     if (!fcatParticle) { std::cout<<"No particleCat in input!"<<std::endl; exit(1);}
 
     Int_t entries = loop.getEntries();
-    if(nEvents > entries || nEvents <= 0 ) nEvents = entries;
+    if(fEvents > entries || fEvents <= 0 ) fEvents = entries;
 
-    cout<<"events: "<<nEvents<<endl;
+    cout<<"events: "<<fEvents<<endl;
 
     // start of the event loop
-    for(Int_t i=1; i<nEvents; i++){
+    for(Int_t i=1; i<fEvents; i++){
         //----------break if last event is reached-------------
         if(loop.nextEvent(i) <= 0) { cout<<" end recieved "<<endl; break; } // last event reached
-        HTool::printProgress(i,nEvents,1,"Analysing evt# :");
+        HTool::printProgress(i,fEvents,1,"Analysing evt# :");
 
-        fCandsFit.Clear();
+        //fCandsFit.Clear();
+        fCandsFit = {};
         selectCandidates();
 
         //initialize DecayBuilder
-        HDecayBuilder builder(fCandsFit, task, fPids, lv, mm);
+        HDecayBuilder builder(fCandsFit, task, fPids, lv, mother, mm);
         builder.buildDecay();
         std::vector<HRefitCand> result;
         builder.getFitCands(result);
@@ -155,7 +158,7 @@ void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVe
         //Get output particles
     }// end of event loop
 
-    outfile.cd();
+    outfile->cd();
     hmLam_prefit->Write();
     hmLam_post4C->Write();
     outfile->Close();
@@ -165,7 +168,7 @@ void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVe
 
 
 
-void HDSTFitter::FillData(HParticleCand* cand, HRefitCand *outcand, double arr[], double mass)
+void HDSTFitter::FillData(HParticleCandSim* cand, HRefitCand &outcand, double arr[5], double mass)
 {
 
     if (fVerbose > 0)
@@ -183,20 +186,20 @@ void HDSTFitter::FillData(HParticleCand* cand, HRefitCand *outcand, double arr[]
     cov(3, 3) = std::pow(arr[3], 2);
     cov(4, 4) = std::pow(arr[4], 2);
 
-    outcand->SetXYZM(cand->getMomentum() * std::sin(cand->getTheta() * deg2rad) *
+    outcand.SetXYZM(cand->getMomentum() * std::sin(cand->getTheta() * deg2rad) *
                         std::cos(cand->getPhi() * deg2rad),
                     cand->getMomentum() * std::sin(cand->getTheta() * deg2rad) *
                         std::sin(cand->getPhi() * deg2rad),
                     cand->getMomentum() * std::cos(cand->getTheta() * deg2rad),
                     mass);
-    outcand->setR(cand->getR());
-    outcand->setZ(cand->getZ());
-    outcand->setCovariance(cov);   
+    outcand.setR(cand->getR());
+    outcand.setZ(cand->getZ());
+    outcand.setCovariance(cov);   
 }
-
+/*
 void HDSTFitter::FillDataFw(HFwDetCandSim* cand, HRefitCand& outcand, double arr[], double mass)
 {
-    double deg2rad = TMath::DegToRad();
+    //double deg2rad = TMath::DegToRad();
 
     TMatrixD cov(5, 5);
     cov(0, 0) = std::pow(arr[0], 2);
@@ -217,4 +220,4 @@ void HDSTFitter::FillDataFw(HFwDetCandSim* cand, HRefitCand& outcand, double arr
     outcand.setZ(cand->getZ());
     outcand.setIsForward(true);
     outcand.setCovariance( cov );
-}
+}*/

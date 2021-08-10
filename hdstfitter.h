@@ -14,7 +14,10 @@
 
 // framework includes
 #include "TLorentzVector.h"
+
 #include "hcategory.h"
+#include "hloop.h"
+#include "htool.h"
 
 #include "hdecaybuilder.h"
 #include "hcovariancekinfit.h"
@@ -31,6 +34,7 @@ private:
     std::vector<Int_t> fPids;
     // Variables used for setting the covariance matrix
     bool fMomDepErrors = false;
+    Int_t fEvents;
 
     Int_t fVerbose = -1;
 
@@ -39,17 +43,16 @@ private:
     HCategory *fcatFwParticle;
 
     // Method to fill the data from a HRefitCand for simulations
-    void FillData(HParticleCandSim *cand, HRefitCand *outcand, double arr[], double mass);
-    void FillDataFW(HFwDetCandSim *cand, HRefitCand *outcand, double arr[], double mass); //adjust to HForwardCand for newer Hydra
-    //void estimateCov(Int_t pid, Double_t mom, double& cov[]); //double (&cov)[5]?
-
+    void FillData(HParticleCandSim *cand, HRefitCand &outcand, double arr[5], double mass);
+    //void FillDataFW(HFwDetCandSim *cand, HRefitCand *outcand, double arr[], double mass); //adjust to HForwardCand for newer Hydra
+    
 public:
     HDSTFitter(TString infilelist, bool includeFw, bool momDepErrors, Int_t nEvents);
     ~HDSTFitter(){};
 
     //User functions
-    void addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv, Double_t mm);
-    void addBuilderTask(TString task, std::vector<Int_t> pids);
+    void addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv, HRefitCand mother, Double_t mm);
+    void addBuilderTask(TString task, std::vector<Int_t> pids, TLorentzVector lv);
 
     void setIncludeFw(bool val){ fIncludeFw = val; }
     void setErrors();

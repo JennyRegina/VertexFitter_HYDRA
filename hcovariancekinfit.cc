@@ -3,6 +3,8 @@
 #include "hcovariancekinfit.h"
 #include "hphysicsconstants.h"  //knows conversion from id to mass
 //#include "hparamlist.h"
+#include "TF1.h"
+#include "TFile.h"
 
 #include <stdlib.h>
 #include <cmath>
@@ -15,7 +17,7 @@ ClassImp(HCovarianceKinFit) //?
 
 
 
-void HDSTFitter::estimateCov(Int_t pid, Double_t mom=0, double& cov[])
+void HCovarianceKinFit::estimateCov(Int_t pid, Double_t mom, double (&covariance)[5])
 {
     if (fVerbose > 0)
     {
@@ -57,18 +59,26 @@ void HDSTFitter::estimateCov(Int_t pid, Double_t mom=0, double& cov[])
         TF1 *ZErrEm = (TF1 *)RZErr_PEm->Get("f_ZEm");
 
 
-        if (pid == 14) cov[] = {momErrP->Eval(mom), thtErrP->Eval(mom), phiErrP->Eval(mom),
-                               RErrP->Eval(mom), ZErrP->Eval(mom)};
-        else if (pid == 9) cov[] = {momErrPi->Eval(mom), thtErrPi->Eval(mom), phiErrPi->Eval(mom),
-                               RErrPi->Eval(mom), ZErrPi->Eval(mom)};
-        else if (pid == 11) cov[] = {momErrK->Eval(mom), thtErrK->Eval(mom), phiErrK->Eval(mom),
-                               RErrK->Eval(mom), ZErrK->Eval(mom)};
-        else if (pid == 3) cov[] = {momErrEm->Eval(mom), thtErrEm->Eval(mom), phiErrEm->Eval(mom),
+        if (pid == 14) {
+			double cov[] = {momErrP->Eval(mom), thtErrP->Eval(mom), phiErrP->Eval(mom),
+                               RErrP->Eval(mom), ZErrP->Eval(mom)}; 
+            std::copy(cov, cov+5, covariance);
+		} else if (pid == 9) {
+			double cov[] = {momErrPi->Eval(mom), thtErrPi->Eval(mom), phiErrPi->Eval(mom),
+                               RErrPi->Eval(mom), ZErrPi->Eval(mom)}; 
+            std::copy(cov, cov+5, covariance);
+        } else if (pid == 11) {
+			double cov[] = {momErrK->Eval(mom), thtErrK->Eval(mom), phiErrK->Eval(mom),
+                               RErrK->Eval(mom), ZErrK->Eval(mom)}; 
+            std::copy(cov, cov+5, covariance);
+        } else if (pid == 3) {
+			double cov[] = {momErrEm->Eval(mom), thtErrEm->Eval(mom), phiErrEm->Eval(mom),
                                RErrEm->Eval(mom), ZErrEm->Eval(mom)};
-        else cout<<"No momentum dependent error estimate available for this pid"<<endl;
+            std::copy(cov, cov+5, covariance);
+        } else cout<<"No momentum dependent error estimate available for this pid"<<endl;
     }
 
-    if(fMomDepErrors == true && fSetup=="FwDet")
+    else if(fMomDepErrors == true && fSetup=="FwDet")
     {
         // FwDet protons
         TFile *momErr_fw = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepMomErrors_fw_recoMom_errFunc.root", "read");
@@ -81,18 +91,30 @@ void HDSTFitter::estimateCov(Int_t pid, Double_t mom=0, double& cov[])
         TF1 *RErrP_fw = (TF1 *)RZErr_fw->Get("f_RP");
         TF1 *ZErrP_fw = (TF1 *)RZErr_fw->Get("f_ZP");
 
-        cov[] = {momErrP_fw->Eval(mom), thtErrP_fw->Eval(mom), phiErrP_fw->Eval(mom),
+        double cov[] = {momErrP_fw->Eval(mom), thtErrP_fw->Eval(mom), phiErrP_fw->Eval(mom),
                                 RErrP_fw->Eval(mom), ZErrP_fw->Eval(mom)};
+        std::copy(cov, cov+5, covariance);
     }
 
-    if (fMomDepErrors == false && fSetup == "pp35") //which momentum/setup is this for?
+    else if (fMomDepErrors == false && fSetup == "pp35") //which momentum/setup is this for?
     {
-        if (pid == 14) cov[] = {1.469 * 1e-5, 2.410 * 1e-3, 5.895 * 1e-3,
+        if (pid == 14) {
+			double cov[] = {1.469 * 1e-5, 2.410 * 1e-3, 5.895 * 1e-3,
                                1.188, 2.652};
-        else if (pid == 9) cov[] = {5.959 * 1e-5, 9.316 * 1e-3, 1.991 * 1e-2,
+            std::copy(cov, cov+5, covariance);
+        } else if (pid == 9) {
+			double cov[] = {5.959 * 1e-5, 9.316 * 1e-3, 1.991 * 1e-2,
                                4.006, 7.629};
-        else if (pid == 11) cov[] = {1.947 * 1e-5, 2.296 * 1e-3, 6.312 * 1e-3,
+            std::copy(cov, cov+5, covariance);
+        } else if (pid == 11) {
+			double cov[] = {1.947 * 1e-5, 2.296 * 1e-3, 6.312 * 1e-3,
                                1.404, 2.723};
-        else cout<<"No error estimate available for this pid"<<endl;
+            std::copy(cov, cov+5, covariance);
+        } else cout<<"No error estimate available for this pid"<<endl;
     }
+    else {
+		cout<<"No suitable covariance estimate found"<<endl;
+		double cov[] = {0,0,0,0,0};
+        std::copy(cov, cov+5, covariance);
+	}
 }

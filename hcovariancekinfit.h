@@ -6,8 +6,9 @@
 //class HCovarianceKinFit : public HParCond {
 class HCovarianceKinFit {
 protected:
-TString fSetup;
-bool fMomDepErrors = false;
+	TString fSetup;
+	bool fMomDepErrors = false;
+	Int_t fVerbose = 0;
 /*
 // for protons
   Int_t    nThetaReg;            // number of theta regions 
@@ -32,7 +33,7 @@ public:
   ~HCovarianceKinFit(void) {}
   static HCovarianceKinFit* getObject(void) {return gCovariance;}
   
-  void estimateCov(Int_t pid, Double_t mom, double (&cov)[5]);
+  void estimateCov(Int_t pid, Double_t mom, double (&covariance)[5]);
   void setSetup(TString run){ fSetup=run; }
   void setMomDepErrors(bool val){ fMomDepErrors=val; }
   /*

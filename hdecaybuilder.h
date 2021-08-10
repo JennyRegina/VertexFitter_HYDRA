@@ -31,7 +31,7 @@
 using std::cout;
 using std::endl;
 
-double deg2rad = TMath::DegToRad();
+//double deg2rad = TMath::DegToRad();
 
 class HDecayBuilder
 {
