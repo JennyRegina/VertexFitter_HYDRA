@@ -57,4 +57,6 @@ Int_t analysis_user(TString infileList="/lustre/hades/user/jrieger/pp_pKLambda/s
     TLorentzVector ppSystem(0,0,4337.96,2*938.272+3500);
 
     DSTFitter.addFitterTask("4c", pids, ppSystem);
+    
+    return 0;
 }

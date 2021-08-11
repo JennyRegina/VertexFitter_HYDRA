@@ -47,11 +47,11 @@ private:
     //void FillDataFW(HFwDetCandSim *cand, HRefitCand *outcand, double arr[], double mass); //adjust to HForwardCand for newer Hydra
     
 public:
-    HDSTFitter(TString infilelist, bool includeFw, bool momDepErrors, Int_t nEvents);
+    HDSTFitter(TString infileList, bool includeFw = false, bool momDepErrors=false, Int_t nEvents=-1);
     ~HDSTFitter(){};
 
     //User functions
-    void addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv, HRefitCand mother, Double_t mm);
+    void addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv = TLorentzVector(), HRefitCand mother = HRefitCand(), Double_t mm=0.);
     void addBuilderTask(TString task, std::vector<Int_t> pids, TLorentzVector lv);
 
     void setIncludeFw(bool val){ fIncludeFw = val; }

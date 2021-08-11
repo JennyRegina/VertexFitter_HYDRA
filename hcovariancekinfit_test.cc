@@ -1,9 +1,8 @@
 
 #include "hcovariancekinfit.h"
 
-//HCovarianceKinFit* HCovarianceKinFit::gCovariance = NULL;
-
-//ClassImp(HCovarianceKinFit) //?
+HCovarianceKinFit* HCovarianceKinFit::gCovariance = NULL;
+ClassImp(HCovarianceKinFit) //?
 
 
 

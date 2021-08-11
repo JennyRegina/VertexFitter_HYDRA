@@ -22,7 +22,8 @@ private:
 	bool fMomDepErrors = false;
 	Int_t fVerbose = 0;
 
-  //static   HCovarianceKinFit* gCovariance;
+  static   HCovarianceKinFit* gCovariance;
+  ClassDef(HCovarianceKinFit,1) // Parameter container for energy loss correction. Wozu?
   
 public:
   /*HCovarianceKinFit(const Char_t* name    = "CovarianceKinFit",
@@ -31,15 +32,11 @@ public:
   */
   HCovarianceKinFit();
   ~HCovarianceKinFit(void) {}
-  //static HCovarianceKinFit* getObject(void) {return gCovariance;}
+  static HCovarianceKinFit* getObject(void) {return gCovariance;}
   
   void estimateCov(Int_t pid, Double_t mom, double (&covariance)[5]);
   void setSetup(TString run){ fSetup=run; }
   void setMomDepErrors(bool val){ fMomDepErrors=val; }
-/*
-private:
-  ClassDef(HCovarianceKinFit,1) // Parameter container for energy loss correction. Wozu?
-*/
 };
 
 #endif  /*HCOVARIANCEKINFIT_H */

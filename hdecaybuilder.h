@@ -57,7 +57,7 @@ private:
 
 public:
     //HDecayBuilder(std::vector<HRefitCand[]> fitCands, TString task, std::vector<Int_t> pids, TLorentzVector lv(0,0,0,0), HRefitCand mother=HRefitCand(), Double_t mass=0);
-    HDecayBuilder(std::vector< std::vector<HRefitCand> > &cands, TString &task, std::vector<Int_t> &pids, TLorentzVector lv, HRefitCand mother, Double_t mass);
+    HDecayBuilder(std::vector< std::vector<HRefitCand> > &cands, TString &task, std::vector<Int_t> &pids, TLorentzVector lv = TLorentzVector(), HRefitCand mother = HRefitCand(), Double_t mass=0.);
     ~HDecayBuilder(){};
 
     void setVerbosity(int val) { fVerbose = val; }

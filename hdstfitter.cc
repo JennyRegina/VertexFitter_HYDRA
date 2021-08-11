@@ -1,7 +1,7 @@
 #include "hdstfitter.h"
 #include "hphysicsconstants.h"  //knows conversion from id to mass
 
-HDSTFitter::HDSTFitter(TString infileList, bool includeFw = false, bool momDepErrors=false, Int_t nEvents=-1) : fInfileList(infileList),
+HDSTFitter::HDSTFitter(TString infileList, bool includeFw, bool momDepErrors, Int_t nEvents) : fInfileList(infileList),
                                                                             fIncludeFw(includeFw),
                                                                             fMomDepErrors(momDepErrors),
                                                                             fEvents(nEvents)
@@ -79,7 +79,7 @@ void HDSTFitter::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzVe
 }
 
 //return bool?
-void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv = TLorentzVector(), HRefitCand mother = HRefitCand(), Double_t mm=0.){
+void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv, HRefitCand mother, Double_t mm){
     
     
     TFile *outfile = new TFile("/lustre/hades/user/jrieger/pp_pKLambda/sim/ana/test_userfit.root","recreate");

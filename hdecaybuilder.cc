@@ -1,6 +1,6 @@
 #include "hdecaybuilder.h"
 
-HDecayBuilder::HDecayBuilder(std::vector< std::vector<HRefitCand> > &cands, TString &task, std::vector<Int_t> &pids, TLorentzVector lv = TLorentzVector(), HRefitCand mother = HRefitCand(), Double_t mass=0.) : fCands(cands), 
+HDecayBuilder::HDecayBuilder(std::vector< std::vector<HRefitCand> > &cands, TString &task, std::vector<Int_t> &pids, TLorentzVector lv, HRefitCand mother, Double_t mass) : fCands(cands), 
                                                                                                                                                             fTask(task),
                                                                                                                                                             fPids(pids),
                                                                                                                                                             fVerbose(0)
