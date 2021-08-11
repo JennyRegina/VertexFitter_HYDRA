@@ -3,6 +3,8 @@
 HDecayBuilder::HDecayBuilder(std::vector< std::vector<HRefitCand> > &cands, TString &task, std::vector<Int_t> &pids, TLorentzVector lv, HRefitCand mother, Double_t mass) : fCands(cands), 
                                                                                                                                                             fTask(task),
                                                                                                                                                             fPids(pids),
+                                                                                                                                                            combicounter({0}),
+                                                                                                                                                            fProb(0),
                                                                                                                                                             fVerbose(0)
 
 {
@@ -217,7 +219,8 @@ void HDecayBuilder::doMissMomFit()
 void HDecayBuilder::fillFitCands()
 {
     fFitCands.clear();
-    for (size_t i=0; i<fPids.size(); i++){
+    //for (size_t i=0; i<fPids.size(); i++){
+    for (Int_t i=0; i<fPids.size(); i++){
         fFitCands.push_back(fCands[i][combicounter[i]]);
         if(i+1 == fPids.size()){
             bool counted = false;

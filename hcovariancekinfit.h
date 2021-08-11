@@ -19,8 +19,8 @@ using namespace TMath;
 class HCovarianceKinFit {
 private:
 	TString fSetup;
-	bool fMomDepErrors = false;
-	Int_t fVerbose = 0;
+	bool fMomDepErrors;
+	Int_t fVerbose;
 
   //static   HCovarianceKinFit* gCovariance;
   

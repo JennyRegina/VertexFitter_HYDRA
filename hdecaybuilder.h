@@ -42,7 +42,6 @@ private:
     // Output particles after fitting
     //std::vector<HFitParticleCand *> fOutputCands;
     std::vector<HRefitCand> fOutputCands;
-    int fVerbose;
 
     //Fitter input variables
     TString fTask;
@@ -51,9 +50,10 @@ private:
     HRefitCand fMother;
     Double_t fMass;
     
-    Int_t combicounter[10] = {0};
+    Int_t combicounter[10];
     Double_t fProb;
 
+    int fVerbose;
 
 public:
     //HDecayBuilder(std::vector<HRefitCand[]> fitCands, TString task, std::vector<Int_t> pids, TLorentzVector lv(0,0,0,0), HRefitCand mother=HRefitCand(), Double_t mass=0);

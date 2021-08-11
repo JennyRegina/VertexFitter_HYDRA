@@ -29,14 +29,14 @@ class HDSTFitter
 {
 private:
     TString fInfileList;
-    bool fIncludeFw = false;
+    bool fIncludeFw;
     std::vector< std::vector<HRefitCand> > fCandsFit;
     std::vector<Int_t> fPids;
     // Variables used for setting the covariance matrix
-    bool fMomDepErrors = false;
+    bool fMomDepErrors;
     Int_t fEvents;
 
-    Int_t fVerbose = -1;
+    Int_t fVerbose;
 
     //Read in data
     HCategory *fcatParticle;

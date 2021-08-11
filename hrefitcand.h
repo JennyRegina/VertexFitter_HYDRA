@@ -12,7 +12,7 @@ class HRefitCand : public TLorentzVector {
 private:
     HVirtualCand * cand;
     Double_t fR, fZ; //fTheta, fPhi;
-    Bool_t fIsForward = false;
+    Bool_t fIsForward;
     TMatrixD fCov;
 
 public:

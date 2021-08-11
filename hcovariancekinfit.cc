@@ -4,7 +4,15 @@
 //HCovarianceKinFit* HCovarianceKinFit::gCovariance = NULL;
 
 //ClassImp(HCovarianceKinFit) //?
+HCovarianceKinFit::HCovarianceKinFit() : fMomDepErrors(false), 
+                                         fVerbose(0)
 
+{
+    if (fVerbose > 0)
+    {
+        std::cout << "--------------- HCovarianceKinFit() -----------------" << std::endl;
+    }
+}
 
 
 void HCovarianceKinFit::estimateCov(Int_t pid, Double_t mom, double (&covariance)[5])

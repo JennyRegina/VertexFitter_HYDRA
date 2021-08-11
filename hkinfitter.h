@@ -55,8 +55,7 @@ private:
     TMatrixD y, x, V, Vx, fPull;
     double fChi2, fProb;
     bool fConverged;
-    int fIteration, fN, fyDim;    
-    double fConvergenceCriteria;
+    int fIteration, fN, fyDim;   
     std::vector<HRefitCand> fCands;
     HRefitCand fMother;
     TLorentzVector fMissDaughter;
@@ -71,7 +70,8 @@ private:
     int fVerbose;
 
     double fLearningRate;
-    int fNumIterations;
+    int fNumIterations; 
+    double fConvergenceCriteria;
 
 public:
     HKinFitter(const std::vector<HRefitCand> &cands);

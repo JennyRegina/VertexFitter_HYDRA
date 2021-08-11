@@ -2,9 +2,10 @@
 #include "hphysicsconstants.h"  //knows conversion from id to mass
 
 HDSTFitter::HDSTFitter(TString infileList, bool includeFw, bool momDepErrors, Int_t nEvents) : fInfileList(infileList),
-                                                                            fIncludeFw(includeFw),
-                                                                            fMomDepErrors(momDepErrors),
-                                                                            fEvents(nEvents)
+																								fIncludeFw(includeFw),
+																								fMomDepErrors(momDepErrors),
+																								fEvents(nEvents),
+																								fVerbose(0)
 {
 }
 
