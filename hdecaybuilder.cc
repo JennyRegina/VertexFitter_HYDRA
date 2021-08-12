@@ -22,12 +22,14 @@ void HDecayBuilder::buildDecay(){
     
     fProb = 0.;
     while(combicounter[0]>0){
+        cout<<"fill fit cands"<<endl;
         fillFitCands();
         if(fTask = "createNeutral"){
             createNeutralCandidate();
         }else if(fTask = "3C"){
             do3cFit();
         }else if(fTask = "4C"){
+			cout<<"4C task received"<<endl;
             do4cFit();
         }else if(fTask = "missMom"){
             doMissMomFit();
@@ -191,7 +193,9 @@ void HDecayBuilder::do4cFit()
 {
     HKinFitter Fitter(fFitCands, fIniSys);
     Fitter.add4Constraint();
+    cout<<"constraint added"<<endl;
     if(Fitter.fit() && Fitter.getProb()>fProb){
+		cout<<"fit successful"<<endl;
         fOutputCands.clear();
         Fitter.getDaughters(fOutputCands);
         /*
@@ -221,6 +225,23 @@ void HDecayBuilder::fillFitCands()
     fFitCands.clear();
     //for (size_t i=0; i<fPids.size(); i++){
     for (Int_t i=0; i<fPids.size(); i++){
+        fFitCands.push_back(fCands[i][combicounter[fPids[i]]]);
+        combicounter[fPids[i]]++;
+        if(combicounter[fPids[i]]+1 == fCands[i].size()){
+            bool counted = true;
+            while(i>=0 && !counted){
+                if(combicounter[i]<fCands[i].size()) combicounter[i]++;
+                else combicounter[i]=0; i--;
+            }
+            if(i<0) combicounter[0]=-1;
+        }
+    }
+}
+/*
+void HDecayBuilder::fillFitCands()
+{
+    fFitCands.clear();
+    for (size_t i=0; i<fPids.size(); i++){
         fFitCands.push_back(fCands[i][combicounter[i]]);
         if(i+1 == fPids.size()){
             bool counted = false;
@@ -231,7 +252,8 @@ void HDecayBuilder::fillFitCands()
             if(i<0) combicounter[0]=-1;
         }
     }
-}
+}*/
+
 /*
 void HDecayBuilder::estimateCovarianceMatrix(HParticleCandSim * cand, HRefitCand *refitCand)
 {

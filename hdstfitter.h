@@ -13,11 +13,20 @@
 #include <cmath>
 
 // framework includes
-#include "TLorentzVector.h"
+//#include "TLorentzVector.h"
 
-#include "hcategory.h"
+#include "hades.h"
+#include "hcategorymanager.h"
 #include "hloop.h"
 #include "htool.h"
+
+#include "hcategory.h"
+#include "hparticlecandsim.h"
+
+#include "hgeantkine.h"
+#include "hparticlegeant.h"
+#include "hparticlegeantdecay.h"
+#include "hparticlegeantevent.h"
 
 #include "hdecaybuilder.h"
 #include "hcovariancekinfit.h"

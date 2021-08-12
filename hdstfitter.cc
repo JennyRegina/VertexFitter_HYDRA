@@ -82,7 +82,7 @@ void HDSTFitter::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzVe
 //return bool?
 void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv, HRefitCand mother, Double_t mm){
     
-    
+    cout<<"Task added"<<endl;
     TFile *outfile = new TFile("/lustre/hades/user/jrieger/pp_pKLambda/sim/ana/test_userfit.root","recreate");
 
     TH1F* hmLam_prefit = new TH1F("hLambdaMassPreFit", "", 100, 1070, 1170);
@@ -148,17 +148,20 @@ void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVe
         selectCandidates();
 
         //initialize DecayBuilder
+        cout<<"ini Decay Builder"<<endl;
         HDecayBuilder builder(fCandsFit, task, fPids, lv, mother, mm);
         builder.buildDecay();
         std::vector<HRefitCand> result;
         builder.getFitCands(result);
         
+        cout<<"fill histos"<<endl;
 		hmLam_prefit->Fill((result[2]+result[3]).M());
 		hmLam_post4C->Fill((result[2]+result[3]).M());
 
         //Get output particles
     }// end of event loop
 
+    cout<<"write output file"<<endl;
     outfile->cd();
     hmLam_prefit->Write();
     hmLam_post4C->Write();
