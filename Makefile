@@ -12,10 +12,29 @@ LIB_NAME := KinFit
 
 USES_ORACLE= : no
 
+ifeq ($(HADDIR), /lustre/nyx/hades/user/kempter/svn/hydra_BT)
+    $(info Running with Data)
+    $(info $(HADDIR))
 SOURCE_FILES := hrefitcand.cc \
 		hkinfitter.cc \
 		hvertexfinder.cc \
-        hneutralcandfinder.cc   
+        hneutralcandfinder.cc 
+    #export DATA_SYS_KINFIT=1
+    #$(info $(DATA_SYS_KINFIT))
+else
+    $(info Running with simulations)
+    $(info $(HADDIR))
+SOURCE_FILES := hrefitcand.cc \
+		hkinfitter.cc \
+		hvertexfinder.cc \
+        hneutralcandfinder.cc 
+    #export SIM_SYS_KINFIT=$(HADDIR)
+endif
+
+#SOURCE_FILES := hrefitcand.cc \
+#		hkinfitter.cc \
+#		hvertexfinder.cc \
+#        hneutralcandfinder.cc   
 
 include $(HADDIR)/hades.def.mk
 

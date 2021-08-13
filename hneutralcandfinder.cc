@@ -1,6 +1,6 @@
 #include "hneutralcandfinder.h"
 
-HNeutralCandFinder::HNeutralCandFinder(const std::vector<HRefitCand> &cands) : fCands(cands),  fVerbose(0), fMomentumAfterDecay(-1.), fNeutralCandMass(1115.683), fPrimaryVertexFound(false), fUsePrimaryVertexInNeutralCandidateCalculation(false)
+HNeutralCandFinder::HNeutralCandFinder(const std::vector<HRefitCand> &cands) : fCands(cands),  fVerbose(0), fMomentumAfterDecay(-1.), fNeutralCandMass(1115.683), fPrimaryVertexFound(false)
 {
     if(fVerbose>0){
     std::cout << "--------------- HNeutralCandFinder -----------------" << std::endl;
@@ -24,81 +24,12 @@ HNeutralCandFinder::HNeutralCandFinder(const std::vector<HRefitCand> &cands) : f
     
 }
 
-void HNeutralCandFinder::setNeutralMotherCand(double valMomentum, double valTheta, double valPhi, double valR, double valZ, TVector3 decayVertex)
+void HNeutralCandFinder::setNeutralMotherCand(TVector3 primaryVertex, TVector3 decayVertex)
 {
 
     if (fVerbose > 0)
     {
-        std::cout << " ----------- HNeutralCandFinder::setNeutralMotherCandidate() -----------" << std::endl;
-        std::cout << "" << std::endl;
-    }
-
-
-    //fNeutralMotherCandidate.setMomentum(TMath::RadToDeg() * valMomentum);
-    //fNeutralMotherCandidate.setTheta(TMath::RadToDeg() * valTheta);
-    //fNeutralMotherCandidate.SetPhi(valPhi); 
-    //fNeutralMotherCandidate.SetTheta(valTheta); 
-    //fNeutralMotherCandidate.SetPhi(valPhi);
-    //fNeutralMotherCandidate.setR(valR);
-    //fNeutralMotherCandidate.setZ(valZ);
-
-    if (fVerbose > 0)
-    {
-        std::cout << "setNeutralMotherCandidate, fNeutralMotherCandidate: theta= " << fNeutralMotherCandidate.Theta() << " and phi = " << fNeutralMotherCandidate.Phi() << std::endl;
-    }
-
-    // Calculate the covariance matrix for the Lambda Candidate
-
-    double x_vertex = decayVertex.X();
-    double y_vertex = decayVertex.Y();
-    double z_vertex = decayVertex.Z();
-
-    // the errors below are estimated from difference distributions between reconstructed - MC truth for the vertex
-
-    double sigma_x = 1.349; //old value: 33.39; // In mm
-    double sigma_y = 1.322; //old value: 26.70; // In mm
-    double sigma_z = 3.22; //old value: 44.92; // In mm
-
-    // Use coordinate transformation cartesian->polar to estimate error in theta and phi
-
-    // Calculate the error in theta
-    double r = sqrt(x_vertex * x_vertex + y_vertex * y_vertex + z_vertex * z_vertex);
-
-    double dtheta_dx = x_vertex * z_vertex / (r * r * r * sqrt(1 - z_vertex / (r * r)));
-    double dtheta_dy = y_vertex * z_vertex / (r * r * r * sqrt(1 - z_vertex / (r * r)));
-    double dtheta_dz = (1 / r - z_vertex * z_vertex / (r * r * r)) / sqrt(1 - z_vertex * z_vertex / (r * r));
-
-    double sigma_theta = sqrt(dtheta_dx * dtheta_dx * sigma_x * sigma_x + dtheta_dy * dtheta_dy * sigma_y * sigma_y + dtheta_dz * dtheta_dz * sigma_z * sigma_z);
-
-    // Calculate the error in phi
-    double r_2D = sqrt(x_vertex * x_vertex + y_vertex * y_vertex);
-
-    double dphi_dx = -x_vertex * y_vertex / (sqrt(x_vertex * x_vertex / (r_2D * r_2D)) * r_2D * r_2D * r_2D);
-    double dphi_dy = sqrt(x_vertex * x_vertex / (r_2D * r_2D)) / r_2D;
-    // dphi_dz=0;
-
-    double sigma_phi = sqrt(dphi_dx * dphi_dx * sigma_x * sigma_x + dphi_dy * dphi_dy * sigma_y * sigma_y);
-
-    // Calculate the error in R
-    double dR_dx = x_vertex / r_2D;
-    double dR_dy = y_vertex / r_2D;
-
-    double sigma_R = sqrt(dR_dx * dR_dx * sigma_x * sigma_x + dR_dy * dR_dy * sigma_y * sigma_y);
-
-    fCovarianceNeutralMother.ResizeTo(5, 5);
-    fCovarianceNeutralMother(0, 0) = 9999999;
-    fCovarianceNeutralMother(1, 1) = sigma_theta * sigma_theta;
-    fCovarianceNeutralMother(2, 2) = sigma_phi * sigma_phi;
-    fCovarianceNeutralMother(3, 3) = sigma_R * sigma_R;
-    fCovarianceNeutralMother(4, 4) = sigma_z * sigma_z;
-}
-
-void HNeutralCandFinder::setNeutralMotherCandFromPrimaryVtxInfo(TVector3 primaryVertex, TVector3 decayVertex)
-{
-
-    if (fVerbose > 0)
-    {
-        std::cout << " ----------- HNeutralCandFinder::setNeutralMotherCandFromPrimaryVtxInfo() -----------" << std::endl;
+        std::cout << " ----------- HNeutralCandFinder::setNeutralMotherCand() -----------" << std::endl;
         std::cout << "" << std::endl;
     }
 
@@ -134,6 +65,10 @@ void HNeutralCandFinder::setNeutralMotherCandFromPrimaryVtxInfo(TVector3 primary
     double valZ = geom_base_Z.getZ() + geom_dir_Z.getZ()*u1;
 
     Double_t valR = HParticleTool::calculateMinimumDistance(vtx_geom_base,vtx_geom_dir,geom_base_Z,geom_dir_Z);
+    
+    if(primaryVertex.Y()<0){
+        valR = -1 * valR;
+    }
 
     double thetaPrimaryToSecondaryVertex, phiPrimaryToSecondaryVertex;
 
@@ -204,7 +139,7 @@ void HNeutralCandFinder::setNeutralMotherCandFromPrimaryVtxInfo(TVector3 primary
     double dtheta_dy = y_vertex * z_vertex / (r * r * r * sqrt(1 - z_vertex / (r * r)));
     double dtheta_dz = (1 / r - z_vertex * z_vertex / (r * r * r)) / sqrt(1 - z_vertex * z_vertex / (r * r));
 
-    double sigma_theta = sqrt(dtheta_dx * dtheta_dx * sigma_x * sigma_x + dtheta_dy * dtheta_dy * sigma_y * sigma_y + dtheta_dz * dtheta_dz * sigma_z * sigma_z);
+    //double sigma_theta = sqrt(dtheta_dx * dtheta_dx * sigma_x * sigma_x + dtheta_dy * dtheta_dy * sigma_y * sigma_y + dtheta_dz * dtheta_dz * sigma_z * sigma_z);
 
     // Calculate the error in phi
     double r_2D = sqrt(x_vertex * x_vertex + y_vertex * y_vertex);
@@ -214,7 +149,7 @@ void HNeutralCandFinder::setNeutralMotherCandFromPrimaryVtxInfo(TVector3 primary
 
     double dphi_dz=0;
 
-    double sigma_phi = sqrt(dphi_dx * dphi_dx * sigma_x * sigma_x + dphi_dy * dphi_dy * sigma_y * sigma_y);
+    //double sigma_phi = sqrt(dphi_dx * dphi_dx * sigma_x * sigma_x + dphi_dy * dphi_dy * sigma_y * sigma_y);
 
     // Calculate the error in R
     double dR_dx = x_vertex / r_2D;

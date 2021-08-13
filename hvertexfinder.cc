@@ -59,7 +59,7 @@ TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
                      std::cos(param_theta2));
 
     // Calculate the distance between the two tracks
-    double distance = std::fabs((vtx_dir_1.Cross(vtx_dir_2)).Dot((vtx_base_1 - vtx_base_2)))/(vtx_dir_1.Cross(vtx_dir_2).Mag());
+    //double distance = std::fabs((vtx_dir_1.Cross(vtx_dir_2)).Dot((vtx_base_1 - vtx_base_2)))/(vtx_dir_1.Cross(vtx_dir_2).Mag());
 
     HGeomVector vtx_geom_dir_1, vtx_geom_dir_2, vtx_geom_base_1, vtx_geom_base_2;
 
@@ -183,17 +183,6 @@ TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
     {
         calculateVertexProperties(fPrimaryVertex, fVertex);
     }
-
-/*     // If the primary vertex was found, the neutral mother candidate is created from the primary and decay vertex info
-
-    if (fPrimaryVertexFound == false || fUsePrimaryVertexInNeutralCandidateCalculation == false)
-    {
-        setNeutralMotherCand(momentumAfterDecay, fVertex.Theta(), fVertex.Phi(), 0.0, 0.0, fVertex);
-    }
-    if (fPrimaryVertexFound == true && fUsePrimaryVertexInNeutralCandidateCalculation == true)
-    {
-        setNeutralMotherCandFromPrimaryVtxInfo(momentumAfterDecay, fPrimaryVertex, fVertex);
-    } */
 
     return fVertex;
 }
