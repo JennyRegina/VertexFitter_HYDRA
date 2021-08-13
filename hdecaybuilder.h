@@ -50,7 +50,8 @@ private:
     HRefitCand fMother;
     Double_t fMass;
     
-    Int_t combicounter[10];
+    Int_t fTotalCombos;
+    Int_t fCombiCounter;
     Double_t fProb;
 
     int fVerbose;
@@ -71,6 +72,8 @@ public:
     void setMother(HRefitCand val) {fMother = val;}
     void setMass(Double_t val) {fMass = val;}
 
+    void buildDecay();
+    
     void estimateCovarianceMatrix(HParticleCandSim *cand, HRefitCand *refitCand);
 
     void createNeutralCandidate();
@@ -80,12 +83,11 @@ public:
     void doMissMomFit();
 
     void fillFitCands();
-
-    void buildDecay();
+    bool checkDoubleParticle(uint i);
 
     // Functions for getting the pulls
 
-    void createOutputParticle(HRefitCand);
+    void createOutputParticle(HRefitCand FittedCand);
     void getFitCands(std::vector<HRefitCand> &cands) { cands = fOutputCands; }
     std::vector<HParticleCandSim> getOutput();
 

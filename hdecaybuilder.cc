@@ -3,7 +3,7 @@
 HDecayBuilder::HDecayBuilder(std::vector< std::vector<HRefitCand> > &cands, TString &task, std::vector<Int_t> &pids, TLorentzVector lv, HRefitCand mother, Double_t mass) : fCands(cands), 
                                                                                                                                                             fTask(task),
                                                                                                                                                             fPids(pids),
-                                                                                                                                                            combicounter({0}),
+                                                                                                                                                            fCombiCounter(0),
                                                                                                                                                             fProb(0),
                                                                                                                                                             fVerbose(0)
 
@@ -16,12 +16,17 @@ HDecayBuilder::HDecayBuilder(std::vector< std::vector<HRefitCand> > &cands, TStr
     setIniSys(lv);
     setMother(mother);
     setMass(mass);
+    
+    fTotalCombos = 1;
+    for (size_t i=0; i<fPids.size(); i++){
+		fTotalCombos *= fCands[i].size();
+	}
+	Int_t particleCounter[fPids.size()] = {0};
 }
 
 void HDecayBuilder::buildDecay(){
     
-    fProb = 0.;
-    while(combicounter[0]>0){
+    while(fCombiCounter<fTotalCombos){
         cout<<"fill fit cands"<<endl;
         fillFitCands();
         if(fTask = "createNeutral"){
@@ -223,6 +228,38 @@ void HDecayBuilder::doMissMomFit()
 void HDecayBuilder::fillFitCands()
 {
     fFitCands.clear();
+    bool doubleParticle = false;
+    for (size_t i=0; i<fPids.size(); i++){
+    //for (Int_t i=0; i<fPids.size(); i++){
+		doubleParticle = checkDoubleParticle(i);
+        fFitCands.push_back(fCands[i][particleCounter[i]]);
+	}
+	Int_a = fPids.size();
+	while(particleCounter[a]=fCands[a].size(){ 
+		particleCounter[a] = 0;
+		a--;
+		if(a<0){
+			if(!(fCombiCounter==fTotalCombos)) cout<<"counted wrong: "<<fCobiCounter<<" != "<<fTotalCombos<<endl;
+			break;
+		}
+	}
+	particleCounter[a]++;
+	fCombiCounter++;
+	
+    if(doubleParticle) fillFitCands();	//If some particle has been filled more than once into fFitCands, repeat the procedure with the next combination
+}
+
+bool checkDoubleParticle(uint i)
+{
+	for (uint j=0; j<i; i++){
+		if(fPids[j]==fPids[i] && particleCounter[j]==particleCounter[i]) return true;
+	}
+	return false;
+}
+
+void HDecayBuilder::fillFitCands()
+{
+    fFitCands.clear();
     //for (size_t i=0; i<fPids.size(); i++){
     for (Int_t i=0; i<fPids.size(); i++){
         fFitCands.push_back(fCands[i][combicounter[fPids[i]]]);
@@ -237,6 +274,25 @@ void HDecayBuilder::fillFitCands()
         }
     }
 }
+
+void HDecayBuilder::fillFitCands()
+{
+    fFitCands.clear();
+    //for (size_t i=0; i<fPids.size(); i++){
+    for (Int_t i=0; i<fPids.size(); i++){
+        fFitCands.push_back(fCands[i][combicounter[fPids[i]]]);
+        combicounter[fPids[i]]++;
+        if(combicounter[fPids[i]]+1 == fCands[i].size()){
+            bool counted = true;
+            while(i>=0 && !counted){
+                if(combicounter[i]<fCands[i].size()) combicounter[i]++;
+                else combicounter[i]=0; i--;
+            }
+            if(i<0) combicounter[0]=-1;
+        }
+    }
+}
+
 /*
 void HDecayBuilder::fillFitCands()
 {
