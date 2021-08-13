@@ -52,6 +52,8 @@ private:
     
     Int_t fTotalCombos;
     Int_t fCombiCounter;
+    std::vector<Int_t> particleCounter;
+    
     Double_t fProb;
 
     int fVerbose;

@@ -18,10 +18,11 @@ HDecayBuilder::HDecayBuilder(std::vector< std::vector<HRefitCand> > &cands, TStr
     setMass(mass);
     
     fTotalCombos = 1;
+    particleCounter.clear();
     for (size_t i=0; i<fPids.size(); i++){
 		fTotalCombos *= fCands[i].size();
+		particleCounter.push_back(0);
 	}
-	Int_t particleCounter[fPids.size()] = {0};
 }
 
 void HDecayBuilder::buildDecay(){
@@ -230,16 +231,15 @@ void HDecayBuilder::fillFitCands()
     fFitCands.clear();
     bool doubleParticle = false;
     for (size_t i=0; i<fPids.size(); i++){
-    //for (Int_t i=0; i<fPids.size(); i++){
 		doubleParticle = checkDoubleParticle(i);
         fFitCands.push_back(fCands[i][particleCounter[i]]);
 	}
-	Int_a = fPids.size();
-	while(particleCounter[a]=fCands[a].size(){ 
+	Int_t a = fPids.size();
+	while( particleCounter[a]==fCands[a].size() ){ 
 		particleCounter[a] = 0;
 		a--;
 		if(a<0){
-			if(!(fCombiCounter==fTotalCombos)) cout<<"counted wrong: "<<fCobiCounter<<" != "<<fTotalCombos<<endl;
+			if(!(fCombiCounter==fTotalCombos)) cout<<"counted wrong: "<<fCombiCounter<<" != "<<fTotalCombos<<endl;
 			break;
 		}
 	}
@@ -252,11 +252,11 @@ void HDecayBuilder::fillFitCands()
 bool checkDoubleParticle(uint i)
 {
 	for (uint j=0; j<i; i++){
-		if(fPids[j]==fPids[i] && particleCounter[j]==particleCounter[i]) return true;
+		if((fPids[j]==fPids[i]) && (particleCounter[j]==particleCounter[i])) return true;
 	}
 	return false;
 }
-
+/*
 void HDecayBuilder::fillFitCands()
 {
     fFitCands.clear();
@@ -291,7 +291,7 @@ void HDecayBuilder::fillFitCands()
             if(i<0) combicounter[0]=-1;
         }
     }
-}
+}*/
 
 /*
 void HDecayBuilder::fillFitCands()
