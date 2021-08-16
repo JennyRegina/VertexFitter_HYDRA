@@ -249,9 +249,9 @@ void HDecayBuilder::fillFitCands()
     if(doubleParticle) fillFitCands();	//If some particle has been filled more than once into fFitCands, repeat the procedure with the next combination
 }
 
-bool checkDoubleParticle(uint i)
+bool HDecayBuilder::checkDoubleParticle(size_t i)
 {
-	for (uint j=0; j<i; i++){
+	for (size_t j=0; j<i; i++){
 		if((fPids[j]==fPids[i]) && (particleCounter[j]==particleCounter[i])) return true;
 	}
 	return false;

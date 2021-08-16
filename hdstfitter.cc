@@ -22,7 +22,7 @@ void HDSTFitter::selectCandidates()
     for (Int_t j = 0; j < ntracks; j++)
     {
         //HParticleCand* cand = HCategoryManager::getObject(cand, catParticle, j);
-        HParticleCandSim* cand = HCategoryManager::getObject(cand, catParticle, j);
+        HParticleCandSim* cand = HCategoryManager::getObject(cand, fcatParticle, j);
         // skip ghost tracks (only avalible for MC events)
         if (cand->isGhostTrack()) continue;
         // select "good" tracks
@@ -30,7 +30,7 @@ void HDSTFitter::selectCandidates()
 
         HRefitCand candidate(cand);
 
-        for(int it=0; it < fPids.size(); it++){
+        for(size_t it=0; it < fPids.size(); it++){
         //for(auto it = std::begin(fPids); it != std::end(fPids); ++it) {
             if (cand->getGeantPID()==fPids[it]){
                 Double_t mom = cand->P();

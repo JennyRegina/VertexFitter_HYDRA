@@ -85,7 +85,7 @@ public:
     void doMissMomFit();
 
     void fillFitCands();
-    bool checkDoubleParticle(uint i);
+    bool checkDoubleParticle(size_t i);
 
     // Functions for getting the pulls
 
