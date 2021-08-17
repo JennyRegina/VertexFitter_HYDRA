@@ -18,33 +18,47 @@ void HDSTFitter::selectCandidates()
     //Object for covariance matrix estimation
     HCovarianceKinFit cov;
     cov.setSetup("pp35");
-    
-    for (Int_t j = 0; j < ntracks; j++)
+
+    fCandsFit.clear();
+
+    for (size_t it = 0; it < fPids.size(); it++)
     {
-        //HParticleCand* cand = HCategoryManager::getObject(cand, catParticle, j);
-        HParticleCandSim* cand = HCategoryManager::getObject(cand, fcatParticle, j);
-        // skip ghost tracks (only avalible for MC events)
-        if (cand->isGhostTrack()) continue;
-        // select "good" tracks
-        if (!cand->isFlagBit(Particle::kIsUsed)) continue;
+        std::vector<HRefitCand> tempVec;
 
-        HRefitCand candidate(cand);
+        for (Int_t j = 0; j < ntracks; j++)
+        {
+            //HParticleCand* cand = HCategoryManager::getObject(cand, catParticle, j);
+            HParticleCandSim *cand = HCategoryManager::getObject(cand, fcatParticle, j);
+            // skip ghost tracks (only avalible for MC events)
+            if (cand->isGhostTrack())
+                continue;
+            // select "good" tracks
+            if (!cand->isFlagBit(Particle::kIsUsed))
+                continue;
 
-        for(size_t it=0; it < fPids.size(); it++){
-        //for(auto it = std::begin(fPids); it != std::end(fPids); ++it) {
-            if (cand->getGeantPID()==fPids[it]){
+            HRefitCand candidate(cand);
+
+            //for(auto it = std::begin(fPids); it != std::end(fPids); ++it) {
+            if (cand->getGeantPID() == fPids[it])
+            {
                 Double_t mom = cand->P();
                 //vector<double> errors;
                 //getErrors(fPids[it], mom, errors);
                 Double_t errors[5];
                 cov.estimateCov(fPids[it], mom, errors);
                 Double_t mCand = HPhysicsConstants::mass(fPids[it]);
+                //std::cout <<  << std::endl;
                 FillData(cand, candidate, errors, mCand);
-                fCandsFit[it].push_back(candidate);
-            } 
+                tempVec.push_back(candidate);
+            }
         }
-    }   // end of HADES track loop
-/*
+        cout << "Iter: " << it << endl;
+        cout << "tempvec size " << tempVec.size() << endl; 
+        fCandsFit.push_back(tempVec);
+        cout << "fCandsFit size " << fCandsFit[it].size() << endl; 
+
+    } // end of HADES track loop
+    /*
     if(fIncludeFw){ //find correct index of proton HRefitCand vector
         for(Int_t j=0; j<nFwTracks; j++){
             HFwDetCandSim *cand = HCategoryManager::getObject(cand,catFwParticle,j);
@@ -80,12 +94,13 @@ void HDSTFitter::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzVe
 }
 
 //return bool?
-void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv, HRefitCand mother, Double_t mm){
-    
-    cout<<"Task added"<<endl;
-    TFile *outfile = new TFile("/lustre/hades/user/jrieger/pp_pKLambda/sim/ana/test_userfit.root","recreate");
+void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv, HRefitCand mother, Double_t mm)
+{
 
-    TH1F* hmLam_prefit = new TH1F("hLambdaMassPreFit", "", 100, 1070, 1170);
+    cout << "Task added" << endl;
+    TFile *outfile = new TFile("test_userfit.root", "recreate");
+
+    TH1F *hmLam_prefit = new TH1F("hLambdaMassPreFit", "", 100, 1070, 1170);
     hmLam_prefit->SetXTitle(" M_{p#pi^{-}} [MeV/c^{2}]");
     hmLam_prefit->SetYTitle(" events ");
     hmLam_prefit->GetXaxis()->SetTitleSize(0.05);
@@ -93,11 +108,11 @@ void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVe
     hmLam_prefit->GetYaxis()->SetTitleSize(0.05);
     hmLam_prefit->GetYaxis()->SetLabelSize(0.05);
     hmLam_prefit->SetLineColor(kBlack);
-    TH1F *hmLam_post4C = (TH1F*)hmLam_prefit->Clone("hmLam_post4C");
+    TH1F *hmLam_post4C = (TH1F *)hmLam_prefit->Clone("hmLam_post4C");
     hmLam_post4C->SetLineColor(kBlue);
-    
+
     setPids(pids);
-    
+
     TStopwatch timer;
     timer.Start();
 
@@ -111,17 +126,26 @@ void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVe
     }
 
     // select categories here
-    if(fIncludeFw) {
-        if(!loop.setInput("-*,+HParticleCandSim,+HFwDetCandSim")) {
-            cout<<"READBACK: ERROR : cannot read input !"<<endl;
+    if (fIncludeFw)
+    {
+        if (!loop.setInput("-*,+HParticleCandSim,+HFwDetCandSim"))
+        {
+            cout << "READBACK: ERROR : cannot read input !" << endl;
             exit(1);
         } // read all categories
 
-        fcatFwParticle = loop.getCategory("HFwDetCandSim"); 
-        if (!fcatFwParticle) { std::cout<<"No FWparticleCat in input!"<<std::endl; exit(1);}
-    } else {
-        if(!loop.setInput("-*,+HParticleCandSim")) {
-            cout<<"READBACK: ERROR : cannot read input !"<<endl;
+        fcatFwParticle = loop.getCategory("HFwDetCandSim");
+        if (!fcatFwParticle)
+        {
+            std::cout << "No FWparticleCat in input!" << std::endl;
+            exit(1);
+        }
+    }
+    else
+    {
+        if (!loop.setInput("-*,+HParticleCandSim"))
+        {
+            cout << "READBACK: ERROR : cannot read input !" << endl;
             exit(1);
         } // read all categories
     }
@@ -129,39 +153,56 @@ void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVe
     loop.printCategories();
     loop.printChain();
 
-    fcatParticle = loop.getCategory("HParticleCandSim"); 
-    if (!fcatParticle) { std::cout<<"No particleCat in input!"<<std::endl; exit(1);}
+    fcatParticle = loop.getCategory("HParticleCandSim");
+    if (!fcatParticle)
+    {
+        std::cout << "No particleCat in input!" << std::endl;
+        exit(1);
+    }
 
     Int_t entries = loop.getEntries();
-    if(fEvents > entries || fEvents <= 0 ) fEvents = entries;
+    if (fEvents > entries || fEvents <= 0)
+        fEvents = entries;
 
-    cout<<"events: "<<fEvents<<endl;
+    cout << "events: " << fEvents << endl;
 
     // start of the event loop
-    for(Int_t i=1; i<fEvents; i++){
+    for (Int_t i = 1; i < fEvents; i++)
+    {
         //----------break if last event is reached-------------
-        if(loop.nextEvent(i) <= 0) { cout<<" end recieved "<<endl; break; } // last event reached
-        HTool::printProgress(i,fEvents,1,"Analysing evt# :");
+        if (loop.nextEvent(i) <= 0)
+        {
+            cout << " end recieved " << endl;
+            break;
+        } // last event reached
+        HTool::printProgress(i, fEvents, 1, "Analysing evt# :");
 
         //fCandsFit.Clear();
-        fCandsFit = {};
+        //fCandsFit = {};
         selectCandidates();
 
         //initialize DecayBuilder
-        cout<<"ini Decay Builder"<<endl;
+        cout << "ini Decay Builder" << endl;
+        for (size_t it = 0; it < fPids.size(); it++)
+        {
+            cout << "fCandsFit size " << fCandsFit[it].size() << endl;
+        }
         HDecayBuilder builder(fCandsFit, task, fPids, lv, mother, mm);
         builder.buildDecay();
         std::vector<HRefitCand> result;
         builder.getFitCands(result);
-        
-        cout<<"fill histos"<<endl;
-		hmLam_prefit->Fill((result[2]+result[3]).M());
-		hmLam_post4C->Fill((result[2]+result[3]).M());
+        cout << result.size() << endl;
+        cout << "fill histos" << endl;
+        if (result.size() > 2)
+        {
+            hmLam_prefit->Fill((result[2] + result[3]).M());
+            hmLam_post4C->Fill((result[2] + result[3]).M());
+        }
 
         //Get output particles
-    }// end of event loop
+    } // end of event loop
 
-    cout<<"write output file"<<endl;
+    cout << "write output file" << endl;
     outfile->cd();
     hmLam_prefit->Write();
     hmLam_post4C->Write();
@@ -169,8 +210,6 @@ void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVe
 
     //Write output category
 }
-
-
 
 void HDSTFitter::FillData(HParticleCandSim* cand, HRefitCand &outcand, double arr[5], double mass)
 {
