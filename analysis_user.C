@@ -1,3 +1,4 @@
+/*
 #include "hades.h"
 #include "hloop.h"
 #include "htool.h"
@@ -25,14 +26,15 @@
 #include "hstartdef.h"
 #include "richdef.h"
 
-#include "hfwdetcandsim.h"
-
 #include "hparticlegeant.h"
 #include "hparticlegeantdecay.h"
 #include "hparticlegeantevent.h"
 #include "hparticlecutrange.h"
 
 #include "TTree.h"
+*/
+
+//#include "TLorentzVector.h"
 
 #include <vector>
 #include <algorithm>
@@ -40,6 +42,7 @@
 #include <iostream>
 #include <iomanip>
 #include <math.h>
+
 /*
 #include "hkinfitter.h"
 #include "hvertexfinder.h"
@@ -50,10 +53,14 @@
 using namespace std;
 using namespace Particle;
 
-Int_t analysis_user(TString infileList="/lustre/hades/user/jrieger/pp_pKLambda/sim/pp_pKlambda_100000evts1_dst_apr12.root", Int_t nEvents=-1){
+Int_t analysis_user(TString infileList="/lustre/hades/user/jrieger/pp_pKLambda/sim/pp_pKlambda_100000evts1_dst_apr12.root", Int_t nEvents=1000){
 
-    HDSTFiiter DSTFitter(infilelist, false, false, nEvents);
-    std::vector<Int_t> pids{ 14, 11, 14, 9 };
+    HDSTFitter DSTFitter(infileList, false, false, nEvents);
+    //HDSTFitter DSTFitter(infileList);
+    //std::vector<Int_t> pids{ 14, 11, 14, 9 };
+    std::vector<int> pids;
+    pids.clear();
+    pids.push_back(14); pids.push_back(11); pids.push_back(14); pids.push_back(9);
     TLorentzVector ppSystem(0,0,4337.96,2*938.272+3500);
 
     DSTFitter.addFitterTask("4c", pids, ppSystem);
