@@ -23,25 +23,31 @@ HDecayBuilder::HDecayBuilder(std::vector< std::vector<HRefitCand> > &cands, TStr
 		fTotalCombos *= fCands[i].size();
 		particleCounter.push_back(0);
 	}
+	for (size_t i=0; i<particleCounter.size(); i++){
+		cout<< "particle counter "<<i<<" = "<<particleCounter[i]<<endl;
+	}
 }
 
 void HDecayBuilder::buildDecay(){
     
+    cout<<"Combi counter: " << fCombiCounter << " total Combos: " << fTotalCombos <<endl;
     while(fCombiCounter<fTotalCombos){
         cout<<"fill fit cands"<<endl;
         fillFitCands();
-        if(fTask = "createNeutral"){
+        if(fFitCands.size()==0) cout<< "not enough particles" << endl;
+        else if(fTask = "createNeutral"){
             createNeutralCandidate();
         }else if(fTask = "3C"){
-            do3cFit();
+            if(do3cFit()) cout<<"3C task successful"<<endl;
         }else if(fTask = "4C"){
 			cout<<"4C task received"<<endl;
-            do4cFit();
+            if(do4cFit()) cout<<"4C task successful"<<endl;
         }else if(fTask = "missMom"){
-            doMissMomFit();
+            if(doMissMomFit()) cout<<"miss mom task successful"<<endl;
         }else{
             cout<<"Task not available"<<endl;
         }
+        cout<<"Combi counter: " << fCombiCounter << " total Combos: " << fTotalCombos <<endl;
     }
     
 
@@ -195,7 +201,7 @@ void HDecayBuilder::createNeutralCandidate()
     }
 }*/
 
-void HDecayBuilder::do4cFit()
+bool HDecayBuilder::do4cFit()
 {
     HKinFitter Fitter(fFitCands, fIniSys);
     Fitter.add4Constraint();
@@ -204,22 +210,25 @@ void HDecayBuilder::do4cFit()
 		cout<<"fit successful"<<endl;
         fOutputCands.clear();
         Fitter.getDaughters(fOutputCands);
+        return true;
         /*
         for(iterator it = fPids.begin(); it != fPids.end(); ++it){
             fOutputCands.push_back(Fitter.getDaughter(it));
         }*/
         //fillHistograms();
-    }
+    } else {
+		return false;
+	}
 }
 
-void HDecayBuilder::do3cFit()
+bool HDecayBuilder::do3cFit()
 {
     HKinFitter Fitter(fFitCands, fMother);
     Fitter.add3Constraint();
     Fitter.fit();
 }
 
-void HDecayBuilder::doMissMomFit()
+bool HDecayBuilder::doMissMomFit()
 {
     HKinFitter Fitter(fFitCands, fIniSys, fMass);
     Fitter.addMomConstraint();
@@ -233,10 +242,13 @@ void HDecayBuilder::fillFitCands()
     for (size_t i=0; i<fPids.size(); i++){
 		doubleParticle = checkDoubleParticle(i);
         fFitCands.push_back(fCands[i][particleCounter[i]]);
+        cout<<"fill in pid "<<fPids[i]<<endl;
 	}
 	Int_t a = fPids.size();
+	cout<<"particle counter "<<a<< " is "<< particleCounter[a] << " now"<<endl;
 	while( particleCounter[a]==fCands[a].size() ){ 
 		particleCounter[a] = 0;
+		cout<<"particle counter "<<a<< " is "<< particleCounter[a] << " now"<<endl;
 		a--;
 		if(a<0){
 			if(!(fCombiCounter==fTotalCombos)) cout<<"counted wrong: "<<fCombiCounter<<" != "<<fTotalCombos<<endl;
@@ -244,16 +256,22 @@ void HDecayBuilder::fillFitCands()
 		}
 	}
 	particleCounter[a]++;
+	cout<<"particle counter "<<a<< " is "<< particleCounter[a] << " now"<<endl;
 	fCombiCounter++;
 	
-    if(doubleParticle) fillFitCands();	//If some particle has been filled more than once into fFitCands, repeat the procedure with the next combination
+    if(doubleParticle && (fCombiCounter<fTotalCombos)) fillFitCands();	//If some particle has been filled more than once into fFitCands, repeat the procedure with the next combination
 }
 
 bool HDecayBuilder::checkDoubleParticle(size_t i)
 {
-	for (size_t j=0; j<i; i++){
-		if((fPids[j]==fPids[i]) && (particleCounter[j]==particleCounter[i])) return true;
+	for (size_t j=0; j<i; j++){
+		if((fPids[j]==fPids[i]) && (particleCounter[j]==particleCounter[i])) 
+		{
+			cout<< "double particle" << endl;
+			return true;
+		}
 	}
+	cout<< "no double particle" << endl;
 	return false;
 }
 /*

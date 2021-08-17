@@ -181,11 +181,16 @@ void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVe
         //fCandsFit = {};
         selectCandidates();
 
+        //if not all particles are found, skip event
+        cout << "Total fCandsFit.size() after candidate selection: " << fCandsFit.size() << endl;
+        if (fPids.size()>fCandsFit.size()) continue; //is always true, not useful
+        
         //initialize DecayBuilder
         cout << "ini Decay Builder" << endl;
         for (size_t it = 0; it < fPids.size(); it++)
         {
             cout << "fCandsFit size " << fCandsFit[it].size() << endl;
+            if(fCandsFit[it].size()==0) continue;
         }
         HDecayBuilder builder(fCandsFit, task, fPids, lv, mother, mm);
         builder.buildDecay();

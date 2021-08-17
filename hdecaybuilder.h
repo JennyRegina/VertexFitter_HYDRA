@@ -80,9 +80,9 @@ public:
 
     void createNeutralCandidate();
 
-    void do4cFit();
-    void do3cFit();
-    void doMissMomFit();
+    bool do4cFit();
+    bool do3cFit();
+    bool doMissMomFit();
 
     void fillFitCands();
     bool checkDoubleParticle(size_t i);
