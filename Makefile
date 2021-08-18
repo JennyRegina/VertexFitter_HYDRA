@@ -16,22 +16,22 @@ ifeq ($(HADDIR), /lustre/nyx/hades/user/kempter/svn/hydra_BT)
     $(info Running with Data)
     $(info $(HADDIR))
 SOURCE_FILES := hdstfitter.cc \
-        hdecaybuilder.cc \		
-		hcovariancekinfit.cc \
-        hrefitcand.cc \
-		hkinfitter.cc \
-		hvertexfinder.cc \
-        hneutralcandfinder.cc 
+hdecaybuilder.cc \
+hcovariancekinfit.cc \
+hrefitcand.cc \
+hkinfitter.cc \
+hvertexfinder.cc \
+hneutralcandfinder.cc
 else
     $(info Running with simulations)
     $(info $(HADDIR))
 SOURCE_FILES := hdstfitter.cc \
-        hdecaybuilder.cc \		
-		hcovariancekinfit.cc \
-        hrefitcand.cc \
-		hkinfitter.cc \
-		hvertexfinder.cc \
-        hneutralcandfinder.cc 
+hdecaybuilder.cc \
+hcovariancekinfit.cc \
+hrefitcand.cc \
+hkinfitter.cc \
+hvertexfinder.cc \
+hneutralcandfinder.cc 
 endif
 
 include $(HADDIR)/hades.def.mk
