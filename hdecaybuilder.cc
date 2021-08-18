@@ -23,26 +23,34 @@ HDecayBuilder::HDecayBuilder(std::vector< std::vector<HRefitCand> > &cands, TStr
 		fTotalCombos *= fCands[i].size();
 		particleCounter.push_back(0);
 	}
-	for (size_t i=0; i<particleCounter.size(); i++){
-		cout<< "particle counter "<<i<<" = "<<particleCounter[i]<<endl;
-	}
 }
 
 void HDecayBuilder::buildDecay(){
     
     cout<<"Combi counter: " << fCombiCounter << " total Combos: " << fTotalCombos <<endl;
-    while(fCombiCounter<fTotalCombos){
+    cout<<"Task is "<< fTask << endl;
+	for (size_t i=0; i<particleCounter.size(); i++){
+		cout<< "particle counter "<<i<<" = "<<particleCounter[i]<<endl;
+	}
+    while(fCombiCounter<(fTotalCombos-1)){	//double check this
         cout<<"fill fit cands"<<endl;
         fillFitCands();
-        if(fFitCands.size()==0) cout<< "not enough particles" << endl;
-        else if(fTask = "createNeutral"){
+        if (fFitCands.size()!=fPids.size()){
+			cout<<"wrong number of particles"<<endl;
+			continue;
+		}
+		if (doubleParticle){
+			cout<<"particle used twice"<<endl;
+			continue;
+		}
+        if(fTask == "createNeutral"){
             createNeutralCandidate();
-        }else if(fTask = "3C"){
+        }else if(fTask == "3C"){
             if(do3cFit()) cout<<"3C task successful"<<endl;
         }else if(fTask = "4C"){
 			cout<<"4C task received"<<endl;
             if(do4cFit()) cout<<"4C task successful"<<endl;
-        }else if(fTask = "missMom"){
+        }else if(fTask == "missMom"){
             if(doMissMomFit()) cout<<"miss mom task successful"<<endl;
         }else{
             cout<<"Task not available"<<endl;
@@ -238,15 +246,16 @@ bool HDecayBuilder::doMissMomFit()
 void HDecayBuilder::fillFitCands()
 {
     fFitCands.clear();
-    bool doubleParticle = false;
+    doubleParticle = false;
     for (size_t i=0; i<fPids.size(); i++){
-		doubleParticle = checkDoubleParticle(i);
+		checkDoubleParticle(i);
+		cout<<"particle counter "<<i<< " is "<< particleCounter[i] << " now"<<endl;
         fFitCands.push_back(fCands[i][particleCounter[i]]);
         cout<<"fill in pid "<<fPids[i]<<endl;
 	}
-	Int_t a = fPids.size();
+	Int_t a = fPids.size()-1;
 	cout<<"particle counter "<<a<< " is "<< particleCounter[a] << " now"<<endl;
-	while( particleCounter[a]==fCands[a].size() ){ 
+	while( particleCounter[a]==(fCands[a].size()-1) ){ 
 		particleCounter[a] = 0;
 		cout<<"particle counter "<<a<< " is "<< particleCounter[a] << " now"<<endl;
 		a--;
@@ -262,193 +271,17 @@ void HDecayBuilder::fillFitCands()
     if(doubleParticle && (fCombiCounter<fTotalCombos)) fillFitCands();	//If some particle has been filled more than once into fFitCands, repeat the procedure with the next combination
 }
 
-bool HDecayBuilder::checkDoubleParticle(size_t i)
+void HDecayBuilder::checkDoubleParticle(size_t i)
 {
 	for (size_t j=0; j<i; j++){
 		if((fPids[j]==fPids[i]) && (particleCounter[j]==particleCounter[i])) 
 		{
 			cout<< "double particle" << endl;
-			return true;
+			doubleParticle = true;
 		}
 	}
 	cout<< "no double particle" << endl;
-	return false;
 }
-/*
-void HDecayBuilder::fillFitCands()
-{
-    fFitCands.clear();
-    //for (size_t i=0; i<fPids.size(); i++){
-    for (Int_t i=0; i<fPids.size(); i++){
-        fFitCands.push_back(fCands[i][combicounter[fPids[i]]]);
-        combicounter[fPids[i]]++;
-        if(combicounter[fPids[i]]+1 == fCands[i].size()){
-            bool counted = true;
-            while(i>=0 && !counted){
-                if(combicounter[i]<fCands[i].size()) combicounter[i]++;
-                else combicounter[i]=0; i--;
-            }
-            if(i<0) combicounter[0]=-1;
-        }
-    }
-}
-
-void HDecayBuilder::fillFitCands()
-{
-    fFitCands.clear();
-    //for (size_t i=0; i<fPids.size(); i++){
-    for (Int_t i=0; i<fPids.size(); i++){
-        fFitCands.push_back(fCands[i][combicounter[fPids[i]]]);
-        combicounter[fPids[i]]++;
-        if(combicounter[fPids[i]]+1 == fCands[i].size()){
-            bool counted = true;
-            while(i>=0 && !counted){
-                if(combicounter[i]<fCands[i].size()) combicounter[i]++;
-                else combicounter[i]=0; i--;
-            }
-            if(i<0) combicounter[0]=-1;
-        }
-    }
-}*/
-
-/*
-void HDecayBuilder::fillFitCands()
-{
-    fFitCands.clear();
-    for (size_t i=0; i<fPids.size(); i++){
-        fFitCands.push_back(fCands[i][combicounter[i]]);
-        if(i+1 == fPids.size()){
-            bool counted = false;
-            while(i>=0 && !counted){
-                if(combicounter[i]<fCands[i].size()) combicounter[i]++;
-                else combicounter[i]=0; i--;
-            }
-            if(i<0) combicounter[0]=-1;
-        }
-    }
-}*/
-
-/*
-void HDecayBuilder::estimateCovarianceMatrix(HParticleCandSim * cand, HRefitCand *refitCand)
-{
-    if (fVerbose > 0)
-    {
-        std::cout << " ----------- HDecayBuildeer::estimateCovarianceMatrix() -----------" << std::endl;
-        std::cout << "" << std::endl;
-    }
-
-    // If both the momentum dependent and fixed errors have been chosen
-    // the momentum dependent errors are used since this is more general
-    // and needs to be used for the electron fitting 
-    
-    if(fMomDepErrors == true && fFixedErrors == true){
-
-        fFixedErrors = false;
-    }
-
-    if (fMomDepErrors == true)
-    {
-        //Momentum dependent uncertainty estimation input for HADES particle candidates
-        TFile *momErr = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepMomErrors_allParticles_recoMom_errFunc.root", "read");
-        TF1 *momErrP = (TF1 *)momErr->Get("f_pP");
-        TF1 *momErrPi = (TF1 *)momErr->Get("f_pPi");
-        TF1 *momErrK = (TF1 *)momErr->Get("f_pK");
-        TF1 *momErrEm = (TF1 *)momErr->Get("f_pEm");
-
-        TFile *thtErr = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepThtErrors_recoMom_errFunc.root", "read");
-        TF1 *thtErrP = (TF1 *)thtErr->Get("f_thtP");
-        TF1 *thtErrPi = (TF1 *)thtErr->Get("f_thtPi");
-        TF1 *thtErrK = (TF1 *)thtErr->Get("f_thtK");
-        TF1 *thtErrEm = (TF1 *)thtErr->Get("f_thtEm");
-
-        TFile *phiErr = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepPhiErrors_recoMom_errFunc.root", "read");
-        TF1 *phiErrP = (TF1 *)phiErr->Get("f_phiP");
-        TF1 *phiErrPi = (TF1 *)phiErr->Get("f_phiPi");
-        TF1 *phiErrK = (TF1 *)phiErr->Get("f_phiK");
-        TF1 *phiErrEm = (TF1 *)phiErr->Get("f_phiEm");
-
-        TFile *RZErr_PPi = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepRZErrors_PPi_errFunc.root", "read");
-        TFile *RZErr_PK = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepRZErrors_PK_errFunc.root", "read");
-        TFile *RZErr_PEm = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepRZErrors_recoMom_PEm_errFunc.root", "read");
-        TF1 *RErrP = (TF1 *)RZErr_PEm->Get("f_RP");
-        TF1 *RErrPi = (TF1 *)RZErr_PPi->Get("f_RPi");
-        TF1 *RErrK = (TF1 *)RZErr_PK->Get("f_RK");
-        TF1 *RErrEm = (TF1 *)RZErr_PEm->Get("f_REm");
-        TF1 *ZErrP = (TF1 *)RZErr_PEm->Get("f_ZP");
-        TF1 *ZErrPi = (TF1 *)RZErr_PPi->Get("f_ZPi");
-        TF1 *ZErrK = (TF1 *)RZErr_PK->Get("f_ZK");
-        TF1 *ZErrEm = (TF1 *)RZErr_PEm->Get("f_ZEm");
-
-        // FwDet protons
-        TFile *momErr_fw = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepMomErrors_fw_recoMom_errFunc.root", "read");
-        TF1 *momErrP_fw = (TF1 *)momErr_fw->Get("f_pP");
-        TFile *thtErr_fw = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepThtErrors_fw_recoMom_errFunc.root", "read");
-        TF1 *thtErrP_fw = (TF1 *)thtErr_fw->Get("f_thtP");
-        TFile *phiErr_fw = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepPhiErrors_fw_recoMom_errFunc.root", "read");
-        TF1 *phiErrP_fw = (TF1 *)phiErr_fw->Get("f_phiP");
-        TFile *RZErr_fw = new TFile("/lustre/hades/user/jrieger/pp_pKSigma0_dalitz/sim/ana/pp_pKSigma0_dalitz_p4500p_momDepRZErrors_fw_recoMom_errFunc.root", "read");
-        TF1 *RErrP_fw = (TF1 *)RZErr_fw->Get("f_RP");
-        TF1 *ZErrP_fw = (TF1 *)RZErr_fw->Get("f_ZP");
-
-        if (cand->getGeantPID() == 14) //Proton found
-        {
-            Double_t mom = cand->getGeantTotalMom();
-            double errors[] = {momErrP->Eval(mom), thtErrP->Eval(mom), phiErrP->Eval(mom),
-                               RErrP->Eval(mom), ZErrP->Eval(mom)}; //momentum dependent error estimates
-            FillData(cand, refitCand, errors, 938.272);
-            fProtons.push_back(refitCand);
-        }
-        else if (cand->getGeantPID() == 9) // Pion found
-        {
-            Double_t mom = cand->getGeantTotalMom();
-            double errors[] = {momErrPi->Eval(mom), thtErrPi->Eval(mom), phiErrPi->Eval(mom),
-                               RErrPi->Eval(mom), ZErrPi->Eval(mom)}; //momentum dependent error estimates
-            FillData(cand, refitCand, errors, 139.570);
-            fPions.push_back(refitCand);
-        }
-        else if (cand->getGeantPID() == 11) // Kaon found
-        {
-            Double_t mom = cand->getGeantTotalMom();
-            double errors[] = {momErrK->Eval(mom), thtErrK->Eval(mom), phiErrK->Eval(mom),
-                               RErrK->Eval(mom), ZErrK->Eval(mom)}; //momentum dependent error estimates
-            FillData(cand, refitCand, errors, 493.7);
-            fKaons.push_back(refitCand);
-        }
-        else if (cand->getGeantPID() == 3)
-        {
-            Double_t mom = cand->P();
-            double errors[] = {momErrEm->Eval(mom), thtErrEm->Eval(mom), phiErrEm->Eval(mom),
-                               RErrEm->Eval(mom), ZErrEm->Eval(mom)};
-            FillData(cand, refitCand, errors, 0.51099892);
-            fElectrons.push_back(refitCand);
-        }
-    }
-
-    if (fFixedErrors == true)
-    {
-        if (cand->getGeantPID() == 14) //Proton found
-        {
-            double errors[] = {1.469 * 1e-5, 2.410 * 1e-3, 5.895 * 1e-3,
-                               1.188, 2.652};
-            FillData(cand, refitCand, errors, 938.272);
-            fProtons.push_back(refitCand);
-        }
-        else if (cand->getGeantPID() == 9) // Pion found
-        {
-            double errors[] = {5.959 * 1e-5, 9.316 * 1e-3, 1.991 * 1e-2,
-                               4.006, 7.629};
-            FillData(cand, refitCand, errors, 139.570);
-            fPions.push_back(refitCand);
-        }
-        else if (cand->getGeantPID() == 11) // Kaon found
-        {
-            double errors[] = {1.947 * 1e-5, 2.296 * 1e-3, 6.312 * 1e-3,
-                               1.404, 2.723};
-            FillData(cand, refitCand, errors, 493.7);
-            fKaons.push_back(refitCand);
-        }
-    }
-}*/
 
 void HDecayBuilder::createOutputParticle(HRefitCand refitCand)
 {

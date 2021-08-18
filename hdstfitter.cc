@@ -52,10 +52,10 @@ void HDSTFitter::selectCandidates()
                 tempVec.push_back(candidate);
             }
         }
-        cout << "Iter: " << it << endl;
-        cout << "tempvec size " << tempVec.size() << endl; 
+        //cout << "Iter: " << it << endl;
+        //cout << "tempvec size " << tempVec.size() << endl; 
         fCandsFit.push_back(tempVec);
-        cout << "fCandsFit size " << fCandsFit[it].size() << endl; 
+        //cout << "fCandsFit size " << fCandsFit[it].size() << endl; 
 
     } // end of HADES track loop
     /*
@@ -182,19 +182,24 @@ void HDSTFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVe
         selectCandidates();
 
         //if not all particles are found, skip event
-        cout << "Total fCandsFit.size() after candidate selection: " << fCandsFit.size() << endl;
-        if (fPids.size()>fCandsFit.size()) continue; //is always true, not useful
-        
-        //initialize DecayBuilder
-        cout << "ini Decay Builder" << endl;
+        bool isIncomplete = false;
         for (size_t it = 0; it < fPids.size(); it++)
         {
             cout << "fCandsFit size " << fCandsFit[it].size() << endl;
-            if(fCandsFit[it].size()==0) continue;
+            if(fCandsFit[it].size()==0){ 
+				isIncomplete = true;
+				break;
+			}
         }
+        if (isIncomplete) continue;
+        
+        //initialize DecayBuilder
+        cout << "ini Decay Builder" << endl;
         HDecayBuilder builder(fCandsFit, task, fPids, lv, mother, mm);
+        cout << "build decay" << endl;
         builder.buildDecay();
         std::vector<HRefitCand> result;
+        cout << "get result" << endl;
         builder.getFitCands(result);
         cout << result.size() << endl;
         cout << "fill histos" << endl;

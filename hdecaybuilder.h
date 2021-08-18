@@ -53,6 +53,7 @@ private:
     Int_t fTotalCombos;
     Int_t fCombiCounter;
     std::vector<Int_t> particleCounter;
+    bool doubleParticle;
     
     Double_t fProb;
 
@@ -85,7 +86,7 @@ public:
     bool doMissMomFit();
 
     void fillFitCands();
-    bool checkDoubleParticle(size_t i);
+    void checkDoubleParticle(size_t i);
 
     // Functions for getting the pulls
 
