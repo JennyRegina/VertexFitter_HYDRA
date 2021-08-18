@@ -23,6 +23,8 @@ using std::cout;
 using std::endl;
 
 class HVertexFinder
+
+ 
 {
 private:
     std::vector<HRefitCand> fCands;
@@ -78,6 +80,7 @@ public:
     bool isPrimVertexInsideDecayVertex() { return fPrimaryVertexIsInsideDecayVertex; }
 
     TVector3 getPrimaryVertex() { return fPrimaryVertex; }
+    
 };
 
 #endif /* HVERTEXFINDER_H */
