@@ -289,12 +289,12 @@ void HDecayBuilder::createOutputParticle(HRefitCand refitCand)
     {
         std::cout << "--------------- HDecayBuilder::createOutputParticle() -----------------" << std::endl;
     }
-    HRefitCand *newParticle;
+    HRefitCand newParticle;
 
-    newParticle->setPhi(refitCand.Theta());//!!!
-    newParticle->setR(refitCand.getR());
-    newParticle->setZ(refitCand.getZ());
-    newParticle->setMomentum(refitCand.P());
+    newParticle.setPhi(refitCand.Theta());//!!!
+    newParticle.setR(refitCand.getR());
+    newParticle.setZ(refitCand.getZ());
+    newParticle.setMomentum(refitCand.P());
 
     fOutputCands.push_back(newParticle);
 }

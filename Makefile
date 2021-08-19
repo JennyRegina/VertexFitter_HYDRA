@@ -15,6 +15,7 @@ USES_ORACLE= : no
 ifeq ($(HADDIR), /lustre/nyx/hades/user/kempter/svn/hydra_BT)
     $(info Running with Data)
     $(info $(HADDIR))
+CPPFLAGS := -DHYDRA_DATA=1
 SOURCE_FILES := hdstfitter.cc \
 hdecaybuilder.cc \
 hcovariancekinfit.cc \
@@ -25,6 +26,9 @@ hneutralcandfinder.cc
 else
     $(info Running with simulations)
     $(info $(HADDIR))
+HYDRA_SIM:=yes
+export HYDRA_SIM
+$(info $(HYDRA_SIM))
 SOURCE_FILES := hdstfitter.cc \
 hdecaybuilder.cc \
 hcovariancekinfit.cc \

@@ -5,7 +5,9 @@
 #include <TMath.h>
 #include <TMatrixD.h>
 #include <TLorentzVector.h>
+#ifdef HYDRA_SIM
 #include <hvirtualcand.h>
+#endif
 
 class HRefitCand : public TLorentzVector
 {
@@ -32,7 +34,7 @@ public:
     Double_t getZ() const { return fZ; }
     Double_t getTheta() const { return fTheta; }
     Double_t getPhi() const { return fPhi; }
-    DOuble_t getMomentum() const { return fMomentum; }
+    Double_t getMomentum() const { return fMomentum; }
     Bool_t getIsForward() const { return fIsForward; }
     Bool_t getIsUsed() const { return fIsUsed; };
     TMatrixD getCovariance() const { return fCov; }
