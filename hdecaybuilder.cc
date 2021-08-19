@@ -289,7 +289,7 @@ void HDecayBuilder::createOutputParticle(HRefitCand refitCand)
     {
         std::cout << "--------------- HDecayBuilder::createOutputParticle() -----------------" << std::endl;
     }
-    HParticleCand *newParticle;
+    HRefitCand *newParticle;
 
     newParticle->setPhi(refitCand.Theta());//!!!
     newParticle->setR(refitCand.getR());

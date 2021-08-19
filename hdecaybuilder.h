@@ -15,8 +15,6 @@
 
 // framework includes
 #include "hcategorymanager.h"
-#include "hparticlecand.h"
-#include "hparticlecandsim.h"
 #include "hrefitcand.h"
 #include "hgeomvector.h"
 #include "hparticletool.h"
@@ -77,7 +75,7 @@ public:
 
     void buildDecay();
     
-    void estimateCovarianceMatrix(HParticleCandSim *cand, HRefitCand *refitCand);
+    //void estimateCovarianceMatrix(HParticleCandSim *cand, HRefitCand *refitCand);
 
     void createNeutralCandidate();
 
@@ -92,7 +90,7 @@ public:
 
     void createOutputParticle(HRefitCand FittedCand);
     void getFitCands(std::vector<HRefitCand> &cands) { cands = fOutputCands; }
-    std::vector<HParticleCandSim> getOutput();
+    //std::vector<HParticleCandSim> getOutput();
 
     void createOutputCategory();
 

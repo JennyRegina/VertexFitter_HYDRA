@@ -11,7 +11,7 @@ class HRefitCand : public TLorentzVector
 {
 private:
     HVirtualCand *cand;
-    Double_t fR, fZ, fTheta, fPhi;
+    Double_t fMomentum, fR, fZ, fTheta, fPhi;
     Bool_t fIsForward, fIsUsed;
     TMatrixD fCov;
 
@@ -25,12 +25,14 @@ public:
     void setIsForward(Bool_t val) { fIsForward = val; }
     void setTheta(Double_t val) { fTheta = val; }
     void setPhi(Double_t val) { fPhi = val; }
+    void setMomentum(Double_t val){ fMomentum = val; }
 
     void setCovariance(const TMatrixD &cov);
     Double_t getR() const { return fR; }
     Double_t getZ() const { return fZ; }
     Double_t getTheta() const { return fTheta; }
     Double_t getPhi() const { return fPhi; }
+    DOuble_t getMomentum() const { return fMomentum; }
     Bool_t getIsForward() const { return fIsForward; }
     Bool_t getIsUsed() const { return fIsUsed; };
     TMatrixD getCovariance() const { return fCov; }
