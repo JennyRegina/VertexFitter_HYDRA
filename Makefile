@@ -12,6 +12,8 @@ LIB_NAME := KinFit
 
 USES_ORACLE= : no
 
+CPPFLAGS := -DHYDRA_SIM="hello"
+
 ifeq ($(HADDIR), /lustre/nyx/hades/user/kempter/svn/hydra_BT)
     $(info Running with Data)
     $(info $(HADDIR))
@@ -26,8 +28,8 @@ hneutralcandfinder.cc
 else
     $(info Running with simulations)
     $(info $(HADDIR))
-HYDRA_SIM:=yes
-export HYDRA_SIM
+#export HYDRA_SIM
+$(info Hydra sim set to)
 $(info $(HYDRA_SIM))
 SOURCE_FILES := hdstfitter.cc \
 hdecaybuilder.cc \
