@@ -59,7 +59,8 @@ Int_t analysis_user(TString infileList="/lustre/hades/user/jrieger/pp_pKLambda/s
     //HDSTFitter DSTFitter(infileList);
     //std::vector<Int_t> pids{ 14, 11, 14, 9 };
     std::vector<int> pids;
-    pids.clear();
+    std::vector<int> pidsPrimVertex; // Jenny: User must set this for 3C fit
+    stc::vector<int> pidsDecayVertex; // Jenny: User must set this for 3C fit
     pids.push_back(14); pids.push_back(11); pids.push_back(14); pids.push_back(9);
     TLorentzVector ppSystem(0,0,4337.96,2*938.272+3500);
 

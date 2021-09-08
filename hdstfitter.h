@@ -61,6 +61,8 @@ public:
 
     //User functions
     void addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv = TLorentzVector(), HRefitCand mother = HRefitCand(), Double_t mm=0.);
+    void addFitterTask(TString task, std::vector<Int_t> primPids, std::vector<Int_t> decayPids); // Jenny, for 3C fit
+
     void addBuilderTask(TString task, std::vector<Int_t> pids, TLorentzVector lv);
 
     void setIncludeFw(bool val){ fIncludeFw = val; }

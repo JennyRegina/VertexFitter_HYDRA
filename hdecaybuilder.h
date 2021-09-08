@@ -26,6 +26,9 @@
 #include "hvertexfinder.h"
 #include "hneutralcandfinder.h"
 
+#include <algorithm>
+#include <iterator>
+
 using std::cout;
 using std::endl;
 
@@ -40,6 +43,9 @@ private:
     // Output particles after fitting
     //std::vector<HFitParticleCand *> fOutputCands;
     std::vector<HRefitCand> fOutputCands;
+
+    std::vector<int> fPidsPrim;
+    std::vector<int> fPidsDecay;
 
     //Fitter input variables
     TString fTask;
@@ -72,6 +78,11 @@ public:
     void setIniSys(TLorentzVector val) {fIniSys = val;}
     void setMother(HRefitCand val) {fMother = val;}
     void setMass(Double_t val) {fMass = val;}
+
+    void setPidsInVertices(std::vector<int> val1, std::vector<int> val2){
+        fPidsPrim=val1;
+        fPidsDecay=val2;
+    }
 
     void buildDecay();
     

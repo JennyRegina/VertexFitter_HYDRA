@@ -62,13 +62,66 @@ void HDecayBuilder::buildDecay(){
 }
 
 void HDecayBuilder::createNeutralCandidate()
-{  }
-/*  
-    
+{
     if (fVerbose > 0)
     {
         std::cout << "--------------- HDecayBuilder::createNeutralCandidate() -----------------" << std::endl;
     }
+
+    std::vector<HRefitCand> candsPrim;
+    std::vector<HRefitCand> candsDecay;
+    int tempPid;
+
+    for (int i_pids = 0; i_pids = (int)fPids.size(); i_pids++)
+    {
+
+        tempPid=fPids[i_pids];
+
+        for (int i_cand = 0; i_cand < (int)fCands[i_pids].size(); i_cand++)
+        {
+
+            std::vector<int>::iterator it_prim = std::find(fPidsPrim.begin(), fPidsPrim.end(), tempPid);
+
+            if (it_prim != fPidsPrim.end())
+            {
+                candsPrim.push_back(fCands[i_pids][i_cand]);
+            }
+
+            std::vector<int>::iterator it_decay = std::find(fPidsDecay.begin(), fPidsDecay.end(), tempPid);
+
+            if (it_decay != fPidsDecay.end())
+            {
+                candsDecay.push_back(fCands[i_pids][i_cand]);
+            }
+        }
+    }
+
+    TVector3 primVertex;
+    TVector3 decayVertex;
+    
+    // Find first vertex from all particle combinations if user set PIDs
+
+    HVertexFinder *vtxFinderPrim = new HVertexFinder();
+    primVertex = vtxFinderPrim->findVertex(candsPrim);
+
+    // Find second vertex from all particle combinations of user set PIDs
+
+    HVertexFinder *vtxFinderSec = new HVertexFinder();
+    decayVertex = vtxFinderSec->findVertex(candsDecay);
+
+    HNeutralCandFinder candFinder(candsDecay);
+    candFinder.setNeutralMotherCand(primVertex, decayVertex);
+
+    fFitCands=candsDecay;
+    fMother=candFinder.getNeutralMotherCandidate();
+
+    do3cFit();
+
+}
+
+/*  
+    
+
 
     bool bestPrimVertexFound=false;
     bool bestDecayVertexFound=false;
@@ -231,6 +284,7 @@ bool HDecayBuilder::do4cFit()
 
 bool HDecayBuilder::do3cFit()
 {
+    createNeutralCandidate();
     HKinFitter Fitter(fFitCands, fMother);
     Fitter.add3Constraint();
     Fitter.fit();

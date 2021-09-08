@@ -5,12 +5,7 @@
 #include <TMath.h>
 #include <TMatrixD.h>
 #include <TLorentzVector.h>
-#ifdef HYDRA_SIM
 #include <hvirtualcand.h>
-#endif
-#ifndef HYDRA_SIM
-#error "HYDRA_SIM hasn't been defined"
-#endif
 
 class HRefitCand : public TLorentzVector
 {

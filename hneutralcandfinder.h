@@ -28,7 +28,7 @@ private:
 
     TVector3 fVertex;
     TVector3 fPrimaryVertex;
-    int fVerbose;
+    int fVerbose=0;
 
     double fMomentumAfterDecay;
     double fNeutralCandMass;
