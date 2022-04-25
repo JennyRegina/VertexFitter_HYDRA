@@ -5,21 +5,42 @@ Workspace for the development of the vertex fitter
 
 Description how to run the external library:
 
-Enviornment Variables:
-export MYHADDIR=/lustre/hades/user/YOUR_USER_FOLDER/YOUR_EXTERNAL_LIB_FOLDER
+git clone https://github.com/JennyRegina/VertexFitter_HYDRA.git YOUR_EXTERNAL_LIB_FOLDER
+(where YOUR_EXTERNAL_LIB_FOLDER is the name of the folder where you want to install your library)
+
+cd YOUR_EXTERNAL_LIB_FOLDER
+
+git checkout decaybuilder_jana
+
+Open singularity container
+
+(this gives you the correct version of the code)
+
+export MYHADDIR=/lustre/hades/user/YOUR_USER_FOLDER/YOUR_EXTERNAL_LIB_FOLDER 
+
 . /cvmfs/hades.gsi.de/install/5.34.34/hydra2-5.3/defall.sh
-Those can be set by executing profile.sh
 
-(it should work to run the external library with HYDRA versions around 5.3)
+(here you can use your preferred hydra version)
 
-To run the Vertex fit:
+mkdir bin build include install lib macros
 
-Place it in $MYHADDIR/lib
+(this creates the structure you want for your external library)
 
-run make 
-and make install
+Copy all the files you downloaded from git into the folder lib
 
-add the library libVertexFit.so to the rootlogon.C macro:
+cd $MYHADDIR/lib
+
+make 
+
+make install
+
+copy rootlogon.C that I forward here into $MYHADDIR/macros
+
+(you might need to run: export ROOTLOGON=/PATH_TO_YOUR_ROOTLOGON/rootlogon.C depending on how your .rootrc looks)
+
+root -b
+
+add the library libVertexFit.so to the rootlogon.C macro if it is not present:
 
 common_libs +="VertexFit";
 
