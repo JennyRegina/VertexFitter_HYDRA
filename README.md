@@ -14,13 +14,13 @@ git checkout decaybuilder_jana
 
 Open singularity container
 
-(this gives you the correct version of the code)
+(this gives you the correct version of the HYDRA code)
 
 export MYHADDIR=/lustre/hades/user/YOUR_USER_FOLDER/YOUR_EXTERNAL_LIB_FOLDER 
 
 . /cvmfs/hades.gsi.de/install/5.34.34/hydra2-5.3/defall.sh
 
-(here you can use your preferred hydra version)
+(here you can use your preferred HYDRA version)
 
 mkdir bin build include install lib macros
 
@@ -34,15 +34,15 @@ make
 
 make install
 
-copy rootlogon.C that I forward here into $MYHADDIR/macros
+copy rootlogon.C into $MYHADDIR/macros
 
 (you might need to run: export ROOTLOGON=/PATH_TO_YOUR_ROOTLOGON/rootlogon.C depending on how your .rootrc looks)
 
 root -b
 
-add the library libVertexFit.so to the rootlogon.C macro if it is not present:
+add the library libKinFit.so to the rootlogon.C macro if it is not present:
 
-common_libs +="VertexFit";
+common_libs +="KinFit";
 
 You might need to remove other external libraries from your rootlogon.C.
 Alternatively you can use the rootlogon provided here.
