@@ -1,6 +1,6 @@
 #include "hneutralcandfinder.h"
 
-HNeutralCandFinder::HNeutralCandFinder(const std::vector<HRefitCand> &cands) : fCands(cands),  fVerbose(0), fMomentumAfterDecay(-1.), fNeutralCandMass(1115.683), fPrimaryVertexFound(false)
+HNeutralCandFinder::HNeutralCandFinder(const std::vector<HRefitCand> &cands, double fNeutralCandMass) : fCands(cands),  fVerbose(0), fMomentumAfterDecay(-1.), fPrimaryVertexFound(false)
 {
     if(fVerbose>0){
     std::cout << "--------------- HNeutralCandFinder -----------------" << std::endl;
