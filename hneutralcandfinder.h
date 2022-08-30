@@ -25,13 +25,13 @@ class HNeutralCandFinder
 {
 private:
     std::vector<HRefitCand> fCands;
+    double fNeutralCandMass;
 
     TVector3 fVertex;
     TVector3 fPrimaryVertex;
     int fVerbose=0;
 
     double fMomentumAfterDecay;
-    double fNeutralCandMass;
 
     HRefitCand fNeutralMotherCandidate;
 
@@ -44,7 +44,7 @@ private:
     bool fPrimaryVertexFound;
 
 public:
-    HNeutralCandFinder(const std::vector<HRefitCand> &cands);
+    HNeutralCandFinder(const std::vector<HRefitCand> &cands, double fNeutralCandMass);
     ~HNeutralCandFinder(){};
 
     void setVerbosity(int val) { fVerbose = val; }
