@@ -1,6 +1,6 @@
 #include "hneutralcandfinder.h"
 
-HNeutralCandFinder::HNeutralCandFinder(const std::vector<HRefitCand> &cands, double fNeutralCandMass) : fCands(cands),  fVerbose(0), fMomentumAfterDecay(-1.), fPrimaryVertexFound(false)
+HNeutralCandFinder::HNeutralCandFinder(const std::vector<HRefitCand> &cands, double fNeutralCandMass) : fCands(cands),  fVerbose(0), fMomentumAfterDecay(-1.), fPrimaryVertexFound(false), fPrimVtxResX(1.78590), fPrimVtxResY(1.75516), fPrimVtxResZ(3.00431), fDecVtxResX(5.75369), fDecVtxResY(5.57198), fDecVtxResZ(10.2602)
 {
     if(fVerbose>0){
     std::cout << "--------------- HNeutralCandFinder -----------------" << std::endl;
@@ -122,9 +122,9 @@ void HNeutralCandFinder::setNeutralMotherCand(TVector3 primaryVertex, TVector3 d
 
     // the errors below are estimated from difference distributions between reconstructed - MC truth for the vertex
     // The errors are estimated from the histograms where both vertices were found in an event
-    double sigma_x = sqrt(1.78590*1.78590+5.75369*5.75369); // when fwhm were used: sqrt(16.97*16.97+14.56*14.56);  // In mm
-    double sigma_y = sqrt(1.75516*1.75516+5.57198*5.57198); // when fwhm were used: sqrt(16.80*16.80+14.59*14.59);  // In mm
-    double sigma_z = sqrt(3.00431*3.00431+10.2602*10.2602); // when fwhm were used: sqrt(25.81*25.81+19.84*19.84);  // In mm
+    double sigma_x = sqrt(fPrimVtxResX*fPrimVtxResX+fDecVtxResX*fDecVtxResX); // when fwhm were used: sqrt(16.97*16.97+14.56*14.56);  // In mm
+    double sigma_y = sqrt(fPrimVtxResY*fPrimVtxResY+fDecVtxResY*fDecVtxResY); // when fwhm were used: sqrt(16.80*16.80+14.59*14.59);  // In mm
+    double sigma_z = sqrt(fPrimVtxResZ*fPrimVtxResZ+fDecVtxResZ*fDecVtxResZ); // when fwhm were used: sqrt(25.81*25.81+19.84*19.84);  // In mm
 
     // Use coordinate transformation cartesian->polar to estimate error in theta and phi
 

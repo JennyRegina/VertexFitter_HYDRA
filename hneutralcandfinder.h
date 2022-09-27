@@ -43,6 +43,14 @@ private:
     TMatrixD fCovarianceNeutralMother;
     bool fPrimaryVertexFound;
 
+    double fPrimVtxResX;
+    double fPrimVtxResY;
+    double fPrimVtxResZ;
+
+    double fDecVtxResX;
+    double fDecVtxResY;
+    double fDecVtxResZ;
+
 public:
     HNeutralCandFinder(const std::vector<HRefitCand> &cands, double fNeutralCandMass);
     ~HNeutralCandFinder(){};
@@ -54,6 +62,10 @@ public:
     void setNeutralMotherCand(double valMomentum, double valTheta, double valPhi, double valR, double ValZ, TVector3 decayVertex);
     void setNeutralMotherCand(TVector3 primVtx, TVector3 decayVtx);
     void setMassNutralCand(double val) { fNeutralCandMass = val; }
+
+    void stetPrimaryVertexResolution(double valX, double valY, double valZ){ fPrimVtxResX=valX; fPrimVtxResY=valY; fPrimVtxResZ=valZ;}
+    void stetDecayVertexResolution(double valX, double valY, double valZ){ fDecVtxResX=valX; fDecVtxResY=valY; fDecVtxResZ=valZ;}
+
 
     HRefitCand getNeutralMotherCandidate() { return fNeutralMotherCandidate; }
 
