@@ -13,10 +13,7 @@ LIB_NAME := KinFit
 
 USES_ORACLE= : no
 
-SOURCE_FILES := hdstfitter.cc \
-hdecaybuilder.cc \
-hcovariancekinfit.cc \
-hrefitcand.cc \
+SOURCE_FILES := hrefitcand.cc \
 hkinfitter.cc \
 hvertexfinder.cc \
 hneutralcandfinder.cc  
