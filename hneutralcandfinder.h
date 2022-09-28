@@ -63,8 +63,8 @@ public:
     void setNeutralMotherCand(TVector3 primVtx, TVector3 decayVtx);
     void setMassNutralCand(double val) { fNeutralCandMass = val; }
 
-    void stetPrimaryVertexResolution(double valX, double valY, double valZ){ fPrimVtxResX=valX; fPrimVtxResY=valY; fPrimVtxResZ=valZ;}
-    void stetDecayVertexResolution(double valX, double valY, double valZ){ fDecVtxResX=valX; fDecVtxResY=valY; fDecVtxResZ=valZ;}
+    void setPrimaryVertexResolution(double valX, double valY, double valZ){ fPrimVtxResX=valX; fPrimVtxResY=valY; fPrimVtxResZ=valZ;}
+    void setDecayVertexResolution(double valX, double valY, double valZ){ fDecVtxResX=valX; fDecVtxResY=valY; fDecVtxResZ=valZ;}
 
 
     HRefitCand getNeutralMotherCandidate() { return fNeutralMotherCandidate; }
