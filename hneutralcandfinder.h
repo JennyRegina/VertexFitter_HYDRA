@@ -57,15 +57,11 @@ public:
 
     void setVerbosity(int val) { fVerbose = val; }
 
-    // The first function is for creating a neutral mother candidate if only information of the decay vertex is available
-    // The second function is for creating the neutral candidate if information about the primary vertex is also available
-    void setNeutralMotherCand(double valMomentum, double valTheta, double valPhi, double valR, double ValZ, TVector3 decayVertex);
     void setNeutralMotherCand(TVector3 primVtx, TVector3 decayVtx);
-    void setMassNutralCand(double val) { fNeutralCandMass = val; }
+    void setMassNeutralCand(double val) { fNeutralCandMass = val; }
 
     void setPrimaryVertexResolution(double valX, double valY, double valZ){ fPrimVtxResX=valX; fPrimVtxResY=valY; fPrimVtxResZ=valZ;}
     void setDecayVertexResolution(double valX, double valY, double valZ){ fDecVtxResX=valX; fDecVtxResY=valY; fDecVtxResZ=valZ;}
-
 
     HRefitCand getNeutralMotherCandidate() { return fNeutralMotherCandidate; }
 
