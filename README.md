@@ -10,8 +10,6 @@ git clone https://github.com/JennyRegina/VertexFitter_HYDRA.git YOUR_EXTERNAL_L
 
 cd YOUR_EXTERNAL_LIB_FOLDER
 
-git checkout decaybuilder_jana
-
 Open singularity container
 
 (this gives you the correct version of the HYDRA code)
